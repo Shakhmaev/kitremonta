@@ -1,0 +1,103 @@
+﻿@model Store.Domain.Entities.Item
+@using Store.WebUI.Models;
+
+
+    @if (Model.IsHot)
+    {
+        <div class="hot"></div>
+    }
+    @{
+        ViewBag.lastItems = false;
+        ViewBag.allItems = false;
+        ViewBag.discountItems = false;
+        
+        if (this.ViewData["summaryfor"] == "lastItems")
+        {
+            ViewBag.lastItems = true;
+        }
+        else if (this.ViewData["summaryfor"] == "allItems")
+        {
+            ViewBag.allItems = true;
+        }
+        if (Model.DiscountPercent>0)
+        {
+            ViewBag.discountItems = true;
+        }
+    }
+    
+    @if (ViewBag.lastItems)
+    {
+        <text>
+            <div class="well item-sum-block" id="@Model.Id">
+        </text>
+    }
+    else
+    {
+        <text>
+            <div class="well item-sum-block" id="@Model.Id">
+        </text>
+    }
+
+
+            <div class="row">
+                <div class="col-xs-12 item-sum-img">
+                    <a href="@Url.Action("ItemDetails", "Item", new { id = Model.Id })" class="itemLink">
+                        <img class="img-thumbnail" src="@Html.Action("GetMiniImage","Item",new {Model.Id})" />
+                    </a>
+                </div>
+
+                <div class="col-xs-12 item-sum-name">
+                    <a href="@Url.Action("ItemDetails", "Item", new { id = Model.Id })" class="itemLink">
+                        <h4>
+                            <strong>@Model.Name</strong>
+                        </h4>
+                    </a>
+                </div>
+
+                <div class="col-xs-12 item-info">
+                    <a href="@Url.Action("ItemDetails", "Item", new { id = Model.Id })" class="itemLink">
+
+                        @if (Model.DiscountPercent > 0)
+                        {
+                            <div class="row label-row">
+                                <span class="label label-danger">Скидка</span>
+                            </div>
+                            <div class="row label-row">
+                                <span class="label label-primary">
+                                    <del>@Model.Price.ToString("# руб")</del>
+                                    <i class="fa fa-arrow-right"></i>
+                                    @Model.CurrentPrice
+                                </span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row label-row">
+                                <span class="label label-primary">@Model.Price.ToString("# руб/"+Model.PriceUnit)</span>
+                            </div>
+                        }
+                    </a>
+                </div>
+
+
+
+                @using (Ajax.BeginForm(Model.ItemType=="keram"?"AddToCart":"AddToCartQuantity", "Cart", new AjaxOptions
+                    {
+                        HttpMethod = "POST",
+                        OnBegin = "AddedItemPopUp('/Content/Styles/Img/load.gif')",
+                        OnComplete = Model.ItemType=="keram"==true?"AddItemToCart":null,
+                        UpdateTargetId = "PopupWrapper",
+                        OnSuccess = Model.ItemType=="keram"==true?"SetPicId(" + Model.Id + ",'" + Html.Action("GetImage", "Item", new { Model.Id }) + "','.well')":null,
+                    }))
+                {
+                @Html.Action("Calculator", new { itemId = Model.Id })
+                    
+                <div class="pull-right">
+                    @Html.HiddenFor(x => x.Id)
+                    <button type="submit" class="btn btn-success" value="В корзину">
+                        <i class="fa fa-cart-plus fa-lg"></i> В корзину
+                    </button>
+                </div>
+                }
+            </div>
+            </div>

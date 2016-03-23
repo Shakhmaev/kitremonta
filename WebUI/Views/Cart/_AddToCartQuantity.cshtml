@@ -1,0 +1,39 @@
+﻿@model Store.Domain.Entities.Item
+
+<div>
+    <span class="pull-right">
+        <img class="img-thumbnail" src="@Html.Action("GetImage","Item",new {Model.Id})" />
+    </span>
+    @using (Ajax.BeginForm("AddToCart", "Cart", new AjaxOptions
+                {
+                    HttpMethod = "POST",
+                    OnBegin = "AddedItemPopUp('/Content/Styles/Img/load.gif')",
+                    OnComplete = "AddItemToCart",
+                    UpdateTargetId = "PopupWrapper",
+                    OnSuccess = "SetPicId(" + Model.Id + ",'" + Html.Action("GetImage", "Item", new { Model.Id }) + "','.well')"
+                }))
+    {
+        <div class="fuelux">
+            @Html.HiddenFor(x => x.Id)
+            <span class="h4">Введите пожалуйста количество товара: </span> 
+            <div class="spinbox" data-initialize="spinbox" id="mySpinbox">
+                <input type="text" class="form-control input-mini spinbox-input" min="1" value="1" name="Quantity">
+                <div class="spinbox-buttons btn-group btn-group-vertical">
+                    <button type="button" class="btn btn-default spinbox-up btn-xs">
+                        <span class="glyphicon glyphicon-chevron-up"></span><span class="sr-only">Increase</span>
+                    </button>
+                    <button type="button" class="btn btn-default spinbox-down btn-xs">
+                        <span class="glyphicon glyphicon-chevron-down"></span><span class="sr-only">Decrease</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success" value="Добавить">Добавить</button>
+    }
+</div>
+
+<script>
+    $("#mySpinbox").spinbox({
+        'min': 1
+    });
+</script>

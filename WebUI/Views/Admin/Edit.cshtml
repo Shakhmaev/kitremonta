@@ -1,0 +1,158 @@
+﻿@model Store.Domain.Entities.Item
+
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section HScripts {
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
+    <link rel="stylesheet" href="~/Infrastructure/bootstrap-image-gallery/css/bootstrap-image-gallery.min.css">
+}
+
+<div class="container">
+    <div class="panel">
+        <div class="panel-heading">
+            <h3>Редактирование "@Model.Name"</h3>
+        </div>
+
+        @using (Html.BeginForm("Edit", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            <div class="panel-body">
+                @Html.HiddenFor(m => m.Id)
+                @foreach (var prop in ViewData.ModelMetadata.Properties)
+                {
+                    switch (prop.PropertyName)
+                    {
+                        case "Id":
+                        case "Photos":
+                        case "ImageData":
+                        case "SubCategoryID":
+                        case "SubCategory":
+                        case "CurrentPrice":
+                        case "ImageMimeType":
+                            // Ничего не делать
+                            break;
+
+                        case "IsHot":
+                            {
+                                <div class="form-group">
+                                <label>@(prop.DisplayName ?? prop.PropertyName)</label>
+                                @Html.DropDownListFor(
+                                x => x.IsHot,
+                                new SelectList(new List<SelectListItem>(){ new SelectListItem(){ Text="Да", Value=true.ToString()},
+                                               new SelectListItem(){ Text="Нет", Value=false.ToString()}}, "Value", "Text", Model.IsHot))
+                                    </div>
+                                break;
+                            }
+                        default:
+                        <div class="form-group">
+                            <label>@(prop.DisplayName ?? prop.PropertyName)</label>
+                            @if (prop.PropertyName == "Description")
+                            {
+                                @Html.TextArea(prop.PropertyName, null, new { @class = "form-control", rows = 5 })
+                            }
+                            else
+                            {
+                                @Html.TextArea(prop.PropertyName, null, new { @class = "form-control" })
+                            }
+                            @Html.ValidationMessage(prop.PropertyName)
+                        </div>
+                            break;
+                    }
+                }
+
+
+                @{
+                if (ViewBag.CategoriesList != null)
+                {
+                    @Html.DropDownListFor(model => model.SubCategory.ParentID, new SelectList(ViewBag.CategoriesList, "Key", "Value"), new { style="display:none;" });
+                }
+                }
+
+
+
+                @Html.DropDownListFor(model=>model.SubCategory.CategoryId,new SelectList(new List<SelectListItem>()
+                {
+                    new SelectListItem() { Text=Model.SubCategory.Name, Value=Convert.ToString(Model.SubCategory.CategoryId) }
+                }, "Value", "Text", Model.SubCategory.CategoryId), new { style = "display:none;" })
+
+                <div class="form-group">
+                    <div style="position:relative; display:none;">
+                        <label>Главное фото</label>
+                        <a class="btn btn-default" href='javascript:;'>
+                            Выберите файл...
+                            <input type="file" id="ImgMainFile" accept="image/*" name="Image" size="40" style="position:absolute;z-index:2;top:0;
+                            left:0;filter: alpha(opacity=0); opacity:0;
+                            background-color:transparent;color:transparent;"
+                                   onchange='$("#upload-file-info").html($(this).val().toString());'>
+                        </a>
+                        <span class="label label-info" id="upload-file-info">Файл не выбран</span>
+                        <input type="button" id="upload" value="Загрузить" />
+                    </div>
+                        <img id="mainimg" class="img-thumbnail" width="150" height="150"
+                                src="@Html.Action("GetImage", "Item", new { Model.Id })" />
+                </div>
+
+
+                <div class="form-group">
+                    <div style="position:relative; display:none;">
+                        <label>Дополнительные фото</label>
+                        <a class="btn btn-default" href='javascript:;'>
+                            Выберите файл...
+                            <input type="file" id="ImgExtraFiles" multiple="true" accept="image/*" name="Image" size="40" style="position:absolute;z-index:2;top:0;
+                            left:0;filter: alpha(opacity=0); opacity:0;
+                            background-color:transparent;color:transparent;"
+                                   onchange='$("#upload-file-info2").html($(this).val().toString());'>
+                        </a>
+                        <span class="label label-info" id="upload-file-info2">Файл не выбран</span>
+                        <input type="button" id="uploadExtra" value="Загрузить" />
+                    </div>
+                </div>
+
+                <div id="links">
+                    
+                </div>
+
+            </div>
+            <div class="panel-footer">
+                <input type="submit" value="Сохранить" class="btn btn-primary" />
+                @Html.ActionLink("Вернуться к списку", "Items", null, new { @class = "btn-default" })
+            </div>
+        }
+    </div>
+</div>
+
+@Html.Partial("_bluegallery");
+
+
+@section BScripts {
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="//blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
+    <script src="~/Infrastructure/bootstrap-image-gallery/js/bootstrap-image-gallery.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            var args = {
+                id: '@Model.Id',
+                url1: '@Url.Action("GetExtraImages","ImageView")',
+                name: JSON.stringify('@Model.Name'),
+                GetImagesUrlWithStamp: "@Url.Action("GetImage", "Item", new { Model.Id})+&amp;timestamp=",
+                UrlUploadMainPhoto: '@Url.Action("UploadMainPhoto")',
+                UrlUploadExtraPhoto: '@Url.Action("UploadExtraPhoto")',
+                UrlDeletePhoto:'@Url.Action("DeletePhoto")',
+            };
+            js(args);
+            js.ReloadExtraImages();
+
+            var conf = {
+                loadsubs: '@Url.Action("GetSubCategories","Admin")',
+                currentcategory: '@Model.SubCategory.CategoryId'
+            };
+            initDropDownChange(conf);
+
+        });
+    </script>
+
+}

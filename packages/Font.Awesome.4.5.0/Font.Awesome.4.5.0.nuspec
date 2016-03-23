@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Font.Awesome</id>
+    <version>4.5.0</version>
+    <title>Font Awesome</title>
+    <authors>Dave Gandy, Tieson Trowbridge (NuGet package only)</authors>
+    <owners>Dave Gandy, Tieson Trowbridge (NuGet package only)</owners>
+    <licenseUrl>http://fontawesome.io/license/</licenseUrl>
+    <projectUrl>http://fontawesome.io/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Font Awesome gives you scalable vector icons that can instantly be customized — size, color, drop shadow, and anything that can be done with the power of CSS.</description>
+    <summary>Font Awesome, the iconic font and CSS toolkit.</summary>
+    <releaseNotes>Please note that this package is not currently maintained by the Font Awesome project.</releaseNotes>
+    <copyright>2015 Dave Gandy</copyright>
+    <tags>font awesome FontAwesome</tags>
+  </metadata>
+</package>

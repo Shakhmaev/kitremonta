@@ -1,0 +1,87 @@
+﻿@model Store.Domain.Entities.Cart
+
+<li class="dropdown">
+    <a href="/Cart/Index"  role="button" aria-expanded="false" id="cartlink">
+        <span class="img-cart"></span> Корзина<br>Товаров: <span class="badge">@Model.Lines.Sum(x => x.Quantity)</span> 
+    </a>
+    <a href="#" class="visible-xs hidden-sm" data-toggle="dropdown" data-target="menu">
+        <span class="btn btn-default btn-sm">показать</span>
+    </a>
+    <ul class="dropdown-menu dropdown-cart" role="menu">
+        <div class="over">
+            @foreach (var c in Model.Lines)
+            {
+                <li>
+                    <span class="item">
+                        <span class="row">
+                            <span class="col-xs-6 item-left">
+                                <img class="img-thumbnail" width="70" height="70" src="@Html.Action("GetMiniImage","Item",new {c.Item.Id})" />
+                            </span>
+                            <span class="col-xs-6">
+                                @using (Ajax.BeginForm("RemoveFromCart", "Cart", new AjaxOptions()
+                                {
+                                    OnSuccess = "RefreshCartInfo",
+                                }))
+                                {
+                                    @Html.Hidden("Id", c.Item.Id);
+                                    <input class="btn btn-xs btn-danger pull-right" type="submit" value="x" />
+                                }
+                            </span>
+                        </span>
+                        <span class="row">
+                            <span class="item-info">
+                                <span>@Html.ActionLink(c.Item.Name, "ItemDetails", "Item", new { id = c.Item.Id }, null)</span><br />
+                                <span>Кол-во: <strong>@c.Quantity</strong></span><br />
+                                <span><strong>@c.Item.Price.ToString("# руб")/@c.Item.PriceUnit</strong></span>
+                            </span>
+                        </span>
+                    </span>
+                </li>
+                <li class="divider"></li>
+            }
+            <li>
+                @{if (Model.Lines.Count() != 0)
+                {
+                    
+                }
+                else
+                {
+                    <text>Вы ещё не добавили ничего в корзину</text>
+                }
+                }
+            </li>
+        </div>
+        @if (Model.Lines.Count() != 0)
+        {
+            <div>
+                <br />
+                <text>Всего</text>
+                @{
+                decimal Val = Model.ComputeTotalValue();
+                if (Val != 0.0M)
+                {
+                <strong>@Val.ToString("# руб")</strong>
+                }
+                else
+                {
+                @Html.Raw("0 руб")}
+                }
+            </div>
+            <div>
+                <a href=@Url.Action("Index", "Cart") class="btn btn-tocart btn-success">К корзине</a>
+            </div>
+            <div>
+                <a href="#" class="btn btn-danger" id="clearcart" style="margin-top:10px;">Очистить корзину</a> 
+            </div>
+        }
+    </ul>
+</li>
+<script>
+        $("#clearcart").on('click', function (e) {
+            $.ajax({
+                url: '@Url.Action("Clear", "Cart")',
+                success: function () { RefreshCartInfo(); }
+            });
+            e.preventDefault();
+        });
+</script>

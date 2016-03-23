@@ -1,0 +1,26 @@
+﻿@model Store.Domain.Entities.Item
+
+<div>
+    @if (ViewBag.quantity == 0)
+    {
+        <span class="h3"><strong>Не было добавлено в корзину, пожалуйста, укажите количество!</strong></span><br />
+        <script>
+            if ($(".modal-title").length > 0) {
+                $(".modal-title").text("Не было добавлено в корзину");
+                $("#picid").remove();
+            }
+        </script>
+    }
+    else {
+        <script>
+            if ($(".modal-title").length > 0) {
+                $(".modal-title").text("Добавлено в корзину");
+            }
+        </script>
+        <span class="pull-right">
+        <img class="img-thumbnail" src="@Html.Action("GetImage","Item",new {Model.Id})" />
+    </span>
+    <span class="h4">Вы добавили<br /> <strong>@ViewBag.quantity</strong> единиц(у/ы) товара <br /> 
+        <strong>@Model.Name</strong><br /> в корзину</span><br />
+    }
+</div>

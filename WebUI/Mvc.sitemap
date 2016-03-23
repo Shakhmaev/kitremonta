@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<mvcSiteMap xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://mvcsitemap.codeplex.com/schemas/MvcSiteMap-File-4.0"
+            xsi:schemaLocation="http://mvcsitemap.codeplex.com/schemas/MvcSiteMap-File-4.0 MvcSiteMapSchema.xsd">
+
+  <mvcSiteMapNode title="Главная" key="Home" controller="Item" action="Index" cacheResolvedUrl="false">
+    <mvcSiteMapNode title="Все товары" action="List" controller="Item" visibility="MenuHelper, SiteMapPathHelper, !*" />
+    <mvcSiteMapNode title="Поиск" action="Search" controller="Item" visibility="SiteMapPathHelper, !*" />
+    <mvcSiteMapNode title="Корзина" controller="Cart" action="Index" visibility="SiteMapPathHelper, !*"/>
+    <mvcSiteMapNode title="Name" controller="Item" action="List" cacheResolvedUrl="false" dynamicNodeProvider="Store.WebUI.Infrastructure.DynamicNodeProvider, WebUI"/>
+  </mvcSiteMapNode>
+
+</mvcSiteMap>

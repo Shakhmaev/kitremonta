@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap-theme.css" rel="stylesheet" />
+    <link href="~/Content/Styles/ErrorStyles.css" rel="stylesheet" />
+    <link href="~/Content/Styles/Styles1.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-2.2.0.min.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/Scripts/common.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.2.0.min.js" type="text/javascript"></script>
+    <script src="~/signalr/hubs" type="text/javascript"></script>
+    <title>@ViewBag.Title</title>
+    @RenderSection("HScripts", false)
+</head>
+<body>
+    <div>
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="container-fluid pull-right">
+            <a class="btn" href="@Url.Action("Index","Item")">На сайт</a>
+
+                <a class="btn btn-primary" href="@Url.Action("Index","Admin")">Вернуться к панели</a>
+        </div>
+    }
+    
+        @if (TempData["message"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["message"]
+            </div>
+        }
+        @RenderBody()
+
+    </div>
+    <div class="AdminNotification text-center" id="notification" style="visibility:hidden"></div>
+@RenderSection("BScripts", false)
+    <script type="text/javascript">
+    $(function () {
+
+        var NotifySound = document.createElement('audio');
+        NotifySound.setAttribute('src', '@Url.Content("~/Content/Sound/notify.mp3")');
+
+            var hub = $.connection.notifyHub;
+
+            hub.client.notify = function (message) {
+                var div = $("#notification");
+                div.html("<div>" + message + "</div>");
+                div.attr("style", "");
+                div.on('click', function () {
+                    div.hide();
+                    location.reload();
+                });
+                NotifySound.play();
+            };
+
+            $.connection.hub.start().done(function () {
+                hub.server.registerAdmin();
+            });
+        });
+    </script>
+
+</body>
+</html>

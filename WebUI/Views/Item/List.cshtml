@@ -1,0 +1,240 @@
+﻿@using Store.WebUI.Models;
+@using Store.WebUI.HtmlHelpers;
+@model ItemsListViewModel
+
+<div class="container content">
+
+    @{
+        if (Model.Side.Count() > 0)
+        {
+            ViewBag.Title = Model.Side.ElementAt(2).Value.ElementAt(0).Description + " - "
+                + MvcSiteMapProvider.SiteMaps.Current.CurrentNode.Title;
+        }
+        else
+        {
+            ViewBag.Title = "Все товары";
+        }
+    }
+
+    @section HScripts {
+        <link href="~/Content/Styles/nouislider.min.css" rel="stylesheet" />
+        <link href="~/Content/bootstrap-multiselect.css" rel="stylesheet" />
+        <script type="text/javascript" src="~/Scripts/nouislider.min.js"></script>
+        <script type="text/javascript" src="~/Scripts/bootstrap-multiselect.js"></script>
+    }
+
+    <div class="col-xs-12 subcats">
+        @if (Model.Side.Count() > 0)
+        {
+            <text><h3>
+                    Страны производства и бренды в разделе
+                    "@Model.Side.ElementAt(2).Value.ElementAt(0).Description"
+                </h3></text>
+            <text>Страны: </text>
+            foreach (var ctg in Model.Side.ElementAt(0).Value)
+            {
+                <text>
+                    @Html.ActionLink(ctg.Description, "List", new { category = ctg.Name })
+                </text>
+            }
+            <text><br />Производители: </text>
+            foreach (var ctg in Model.Side.ElementAt(1).Value)
+            {
+                <text>
+                    @Html.ActionLink(ctg.Description, "List", new { category = ctg.Name })
+                </text>
+            }
+        }
+    </div>
+
+    <div class="container-fluid">
+        @if (Model.currentctg != null && Model.currentctg.Text != null)
+        {
+            <div class="center-block"><h1>@Model.currentctg.Description</h1></div>
+            if (Model.currentctg.Text != null)
+            {
+                <div class="text-info">@Model.currentctg.Text</div>
+            }
+            if (Model.currentctg.Photo != null)
+            {
+                <img class="img-thumbnail" src="@Html.Action("GetCategoryImage","ImageView",new { id = Model.currentctg.CategoryId})" />
+            }
+
+        }
+    </div>
+
+    <div class="container-fluid">
+        <div class="container-fluid list-descendants">
+            <div class="col-xs-12" style="text-align:center;"><h3>@Model.categoryTypeMessage</h3></div>
+            @foreach (var ctg in Model.Categories)
+            {
+                <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 subctgs" style="text-align:center;">
+                    <p><a href="@Url.Action("List", "Item", new { category = ctg.Name })">@ctg.Description</a></p>
+                    <p><img class="img-thumbnail" style="max-height:250px;max-width:250px;" src="@Html.Action("GetCategoryImage","ImageView",new { id = ctg.CategoryId})" /></p>
+                </div>
+            }
+        </div>
+        <div class="col-xs-12">
+            <h2>Товары в данном разделе и подразделах</h2>
+        </div>
+        <div class="container-fluid list-top withbackgr col-lg-2 col-xs-12">
+            <div class="row"><label>Фильтрация</label></div>
+            <div class="row filters">
+                <div class="col-sm-6 col-lg-12 slider">
+                    <div id="range"></div>
+                    <h4>От <label id="lowerCurrent" data-lower=""></label></h4>
+                    <h4>до <label id="higherCurrent" data-higher=""></label></h4>
+                </div>
+                <div class="col-sm-2 col-lg-12 col-xs-4">
+                    <h4>Отображать по </h4>
+                    @Html.DropDownListFor(
+             x => x.filters.PageSize,
+             new SelectList(new List<SelectListItem>(){ new SelectListItem(){ Text="3", Value="3"},
+             new SelectListItem(){ Text="5", Value="5"}, new SelectListItem(){ Text="20", Value="20"}, new SelectListItem(){ Text="50", Value="50"}}, "Value", "Text", Model.filters.PageSize))
+                    <h4> на странице</h4>
+                </div>
+                <div class="col-sm-2 col-xs-4 col-lg-12">
+                    <h4>Со скидкой @Html.CheckBoxFor(model => model.filters.WithDiscount)</h4>
+                    <h4>Только горячие @Html.CheckBoxFor(model => model.filters.Hot)</h4>
+                </div>
+                <div class="col-sm-2 col-lg-12 col-xs-4">
+                    <h4>Бренды</h4>
+                    @Html.ListBoxFor(model => model.filters.SelectedBrands,
+            new SelectList(Model.filters.AllBrands), new { id = "brands", multiple = "multiple" })
+                </div>
+                <div class="col-sm-2 col-lg-12 col-xs-4">
+                    <h4>Страна</h4>
+                    @Html.ListBoxFor(model => model.filters.SelectedCountries,
+            new SelectList(Model.filters.AllCountries), new { id = "countries", multiple = "multiple" })
+                </div>
+                <div class="col-sm-2 col-lg-12 col-xs-4">
+                    <h4>Тип</h4>
+                    @Html.ListBoxFor(model => model.filters.SelectedPurposes,
+            new SelectList(Model.filters.AllPurposes), new { id = "purposes", multiple = "multiple" })
+                </div>
+                <div class="col-lg-12 col-sm-12 col-xs-12">
+                    <h4>Сортировать по</h4>
+                    @Html.DropDownList("sort",
+            new SelectList(new List<SelectListItem>()
+            {
+                new SelectListItem(){ Text="По цене(по возр.)", Value="pricelowtohigh"},
+                new SelectListItem(){ Text="По цене(по убыв.)", Value="pricehightolow"},
+                new SelectListItem(){ Text="По имени", Value="name"},
+                new SelectListItem(){ Text="По дате", Value="date"}
+            }, "Value", "Text", Model.filters.SortBy))
+                </div>
+            </div>
+            <div class="row">
+                <button class="btn btn-warning filter">Фильтровать</button>
+            </div>
+        </div>
+
+        <div class="load col-xs-12 col-lg-10">
+            @Html.Action("LoadSummary", "Item", new { category = Model.CurrentCategory, filters = Model.filters })
+        </div>
+    </div>
+</div> 
+
+@section Scripts {
+    <script type="text/javascript">
+    var args = {
+        higher: '@Model.HigherPrice',
+        lower: '@Model.LowerPrice'
+    };
+    initslider(args);
+
+    function initsum(pg) {
+        var br = $('#brands option:selected').map(function (a, item) { return item.value; })
+        delete br.prevObject;
+        delete br.context;
+        var brands = new Array();
+        for (var i = 0; i < br.length; i++) {
+            brands[i] = br[i];
+        }
+        if (brands.length == 0) {
+            brands[0] = "All";
+        }
+
+        var cntrs = $('#countries option:selected').map(function (a, item) { return item.value; })
+        delete cntrs.prevObject;
+        delete cntrs.context;
+        var countries = new Array();
+        for (var i = 0; i < cntrs.length; i++) {
+            countries[i] = cntrs[i];
+        }
+        if (countries.length == 0) {
+            countries[0] = "All";
+        }
+
+        var prps = $('#purposes option:selected').map(function (a, item) { return item.value; })
+        delete prps.prevObject;
+        delete prps.context;
+        var purposes = new Array();
+        for (var i = 0; i < prps.length; i++) {
+            purposes[i] = prps[i];
+        }
+        if (purposes.length == 0) {
+            purposes[0] = "All";
+        }
+        var conf = {
+            url: '@Url.Action("LoadSummary","Item")',
+            high: $("#higherCurrent").data("higher"),
+            low: $("#lowerCurrent").data("lower"),
+            ps: $("#filters_PageSize").val(),
+            page: pg,
+            sort: $("[name=sort]").val(),
+            brands: brands,
+            purposes: purposes,
+            countries: countries
+        }
+        if (pg != undefined) {
+            if (pg === -3) {
+                conf.page = parseInt($("li.active a.linkbtn").attr("id")) - 1;
+            }
+            else if (pg === -2) {
+                conf.page = parseInt($("li.active a.linkbtn").attr("id")) + 1;
+            }
+            else conf.page = pg;
+        }
+        else {
+            conf.page = $(".linkbtn").attr("id");
+        }
+
+        if ('@Model.CurrentCategory' != "") {
+            conf.category = '@Model.CurrentCategory';
+        }
+
+        if ($("#filters_WithDiscount").is(":checked")) {
+            conf.discount = true;
+        }
+        else conf.discount = false;
+
+        if ($("#filters_Hot").is(":checked")) {
+            conf.hot = true;
+        }
+        else conf.hot = false;
+
+        return conf;
+    }
+
+        $("#brands").multiselect({
+            numberDisplayed: 1,
+            nonSelectedText: 'Все',
+            nSelectedText: ' выбрано',
+            allSelectedText: 'Всё выбрано'
+        });
+        $("#purposes").multiselect({
+            numberDisplayed: 1,
+            nonSelectedText: 'Все',
+            nSelectedText: ' выбрано',
+            allSelectedText:'Всё выбрано'
+        });
+        $("#countries").multiselect({
+            numberDisplayed: 1,
+            nonSelectedText: 'Все',
+            nSelectedText: ' выбрано',
+            allSelectedText:'Всё выбрано'
+        });
+
+    </script>
+}

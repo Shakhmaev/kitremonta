@@ -1,0 +1,34 @@
+﻿@helper GetTree(List<Store.Domain.Entities.Category> categories, int parentID) { 
+        var cates = categories;
+        if (parentID==-1){
+            cates = categories.Where(x=>x.ParentID == null).ToList();
+        }
+        else {
+            cates = categories.Where(a => a.ParentID == parentID).ToList();
+        }
+    foreach (var i in cates)
+    {
+        <li>
+            @{
+                var subcategs = categories.Where(a=>a.ParentID==i.CategoryId).Count();
+                if (subcategs > 0)
+                {
+                    <span class="collapse collapsible">&nbsp;</span>
+                }
+                else
+                {
+                    <span style="width:15px; display:inline-block">&nbsp;</span>
+                }
+                <span>
+                    <a href="#" id="@i.CategoryId">@i.Description</a>
+                </span>
+                if (subcategs > 0)
+                {
+                    <ul>
+                        @GetTree(categories, i.CategoryId)
+                    </ul>
+                }
+            }
+        </li>   
+    }
+}

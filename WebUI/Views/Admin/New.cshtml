@@ -1,0 +1,31 @@
+﻿@model Store.WebUI.Models.AdminNewItemViewModel
+
+@{
+    ViewBag.Title = "Новый товар по ссылке";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@if (Model != null)
+{
+    <text><div class="hidden">@Model.url</div></text>
+}
+
+<div class="container-fluid">
+    <h2>Новый товар из ссылки</h2><p>Введите url</p>
+    @using (Html.BeginForm("New", "Admin"))
+    {
+        @Html.TextBox("url");
+    }
+    <button class="btn btn-success" id="loaditem">Жми</button>
+</div>
+
+
+<script type="text/javascript">
+    ///<reference path="Scripts/jquery-2.2.0.js" />
+    $(document).ready(function () {
+        $("#loaditem").on('click', function () {
+            var p = $("table[width='95%']");
+            if (p.length > 0) alert(p);
+        });
+    });
+</script>

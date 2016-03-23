@@ -1,0 +1,155 @@
+﻿@model Store.WebUI.Models.CalculatorViewModel
+
+<div class="calculator" id="calc_@Model.ItemID">
+    @if (Model.OnlyInPacks)
+    {
+        <h4><span class="label label-info">Продается кратно упаковкам</span></h4>
+    }
+    else
+    {
+        <h4><span class="label label-info">Продается поштучно</span></h4>
+    }
+    <p style="margin-bottom:0px;">В упаковке @Model.InPack</p>
+    <div class="fuelux">
+        <span class="text-info">Мне надо: </span>
+        <div class="spinbox" data-initialize="spinbox" id="spin_@Model.ItemID">
+            <input type="text" class="form-control input-mini spinbox-input" min="0" value="0">
+            <div class="spinbox-buttons btn-group btn-group-vertical">
+                <button type="button" class="btn btn-default spinbox-up btn-xs">
+                    <span class="glyphicon glyphicon-chevron-up"></span><span class="sr-only">Увеличить</span>
+                </button>
+                <button type="button" class="btn btn-default spinbox-down btn-xs">
+                    <span class="glyphicon glyphicon-chevron-down"></span><span class="sr-only">Уменьшить</span>
+                </button>
+            </div>
+        </div>
+        @if (Model.m2 > 0 && Model.sht > 0)
+        {
+            @Html.DropDownList("SelectCountUnit",new SelectList(new List<SelectListItem>{
+                    new SelectListItem() { Text = "м2", Value="m2" },
+                     new SelectListItem() { Text = "шт.", Value="sht" }
+                }, "Value", "Text"))
+                @Html.Hidden("unit", "m2");
+        }
+        else if (Model.sht > 0)
+        {
+            <text>шт.</text>
+            @Html.Hidden("unit","sht");
+        }
+        else
+        {
+            <text>м2</text>
+            @Html.Hidden("unit", "m2");
+        }
+
+        @if (Model.OnlyInPacks)
+        {
+            @Html.Hidden("Quantity",0);
+            <div class="packs">
+                Упаковок: <span class="badge" >0</span>
+            </div>
+            <div class="summ">
+                Сумма: <span class="badge" >0 руб</span>
+            </div>
+        }
+        else
+        {
+            @Html.Hidden("Quantity", 0);
+            <div class="summ">
+                Сумма: <span class="badge" >0 руб.</span>
+            </div>
+        }
+    </div>
+</div>
+
+<script type="text/javascript">
+    $("#calc_" +@Model.ItemID +" select").change(function (event) {
+        $("#calc_" +@Model.ItemID +" input[name='unit']").val($("#calc_" +@Model.ItemID +" select option:selected").val());
+        $("#spin_" +@Model.ItemID +"").trigger('changed.fu.spinbox', [$("#spin_" +@Model.ItemID +"").spinbox('value')]);
+    });
+
+    $("#spin_" +@Model.ItemID +" > input").keyup(function (event) {
+        if ('@Model.OnlyInPacks' != "True") {
+            var str = $(this).val().replace(',', '');
+            str = str.replace('.', '');
+            $(this).val(str);
+        }
+        else $(this).val($(this).val().replace(',', '.'));
+    });
+
+    $("#spin_" +@Model.ItemID +"").on('changed.fu.spinbox', function (event, value) {
+        var select = $("#calc_" +@Model.ItemID +" select");
+        var strm2 = '@Model.m2';
+        var strm2 = strm2.replace(',', '.');
+        var m2 = parseFloat(strm2);
+
+        if (select.length > 0) {
+            if ($("#calc_"+@Model.ItemID+" select").val() == "sht") //если выбраны штуки
+            {
+                var packs = Math.ceil(value / parseFloat(@Model.sht));
+                $("#calc_" +@Model.ItemID +" .packs > .badge").text(packs);
+                $("#calc_" +@Model.ItemID + " [name='Quantity']").val(packs);
+
+                if ('@Model.PriceForM2' == "True") {
+                    $("#calc_"+@Model.ItemID+" .summ > .badge").text(Math.round(parseFloat(@Model.Price) * packs
+                        * m2));
+                    $("#calc_" +@Model.ItemID + " [name='Quantity']").val($("#spin_" +@Model.ItemID +"").spinbox("value"));
+                }
+                else {
+                    $("#calc_" +@Model.ItemID +" .summ > .badge").text(Math.round(parseFloat(@Model.Price) * value));
+                    $("#calc_" +@Model.ItemID + " [name='Quantity']").val($("#spin_" +@Model.ItemID +"").spinbox("value"));
+                }
+            }
+            else {
+                var packs = Math.ceil(parseFloat(value / m2));
+                $("#calc_" +@Model.ItemID + " [name='Quantity']").val(packs);
+                $("#calc_"+@Model.ItemID+" .packs > .badge").text(packs);
+                if ('@Model.PriceForM2' == "true") {
+                    $("#calc_" +@Model.ItemID +" .summ > .badge").text(Math.round(parseFloat(@Model.Price) * packs
+                        * m2));
+                }
+                else {
+                    $("#calc_" +@Model.ItemID +" .summ > .badge").text(Math.round(parseFloat(@Model.Price) * m2 * packs));
+                }
+            }
+        }
+        else {
+            if ($("#calc_"+@Model.ItemID+" input[name='unit']").val() == "sht") {
+                var packs = Math.ceil(value / parseFloat(@Model.sht));
+                $("#calc_" +@Model.ItemID + " [name='Quantity']").val(packs);
+                $("#calc_"+@Model.ItemID+" .packs > .badge").text(packs);
+
+                if ('@Model.PriceForM2' == "True") {
+                    $("#calc_"+@Model.ItemID+" .summ > .badge").html(Math.round(parseFloat(@Model.Price) * packs
+                        * m2));
+                    $("#calc_" +@Model.ItemID + " [name='Quantity']").val($("#spin_" +@Model.ItemID +"").spinbox("value"));
+                }
+                else {
+                    $("#calc_" +@Model.ItemID +" .summ > .badge").html(Math.round(parseFloat(@Model.Price) * value));
+                    $("#calc_" +@Model.ItemID + " [name='Quantity']").val($("#spin_" +@Model.ItemID +"").spinbox("value"));
+                }
+            }
+            else if ($("input[name='unit']").val() == "m2") {
+                var packs = Math.ceil(value / m2);
+
+                $("#calc_" +@Model.ItemID + " [name='Quantity']").val(packs);
+                $("#calc_"+@Model.ItemID+" .packs > .badge").text(packs);
+
+
+                if ('@Model.PriceForM2' == "true") {
+                    $("#calc_"+@Model.ItemID+" .summ > .badge").html(Math.round(parseFloat(@Model.Price) * packs
+                        * m2));
+                }
+                else {
+                    $("#calc_"+@Model.ItemID+" .summ > .badge").html(Math.round(parseFloat(@Model.Price) * parseFloat(@Model.SizeInM2)
+                        * m2 * packs));
+                }
+            }
+        }
+        $(document).trigger("badgesChanged", '@Model.ItemID');
+    })
+
+    function Changed() {
+
+    };
+</script>

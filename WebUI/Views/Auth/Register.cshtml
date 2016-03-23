@@ -1,0 +1,27 @@
+﻿@model Store.WebUI.Models.RegisterModel
+@{
+    ViewBag.Title = "Register";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+<div class="parent-center">
+    <div class="center-block">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h2>Регистрация</h2>
+            </div>
+
+            @Html.ValidationSummary(false)
+
+            @using (Html.BeginForm())
+            {
+                @Html.EditorForModel()
+                <br />
+                <p>
+                    <button type="submit" class="btn btn-success">Зарегистрироваться</button>
+                </p>
+            }
+        </div>
+    </div>
+</div>

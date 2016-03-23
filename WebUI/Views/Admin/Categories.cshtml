@@ -1,0 +1,58 @@
+﻿@model List<Store.Domain.Entities.Category>
+@{
+    ViewBag.Title = "Управление категориями";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container">
+    <h2>Категории</h2>
+    <div style="border:1px solid black; display:inline-block; margin:20px;">
+        <div class="categoriestree">
+            <ul>
+                @CategoriesTree.GetTree(Model, -1)
+            </ul>
+        </div> 
+
+    </div>
+        <div class="col-xs-12"><br />
+            <label>Создание новой категории</label>
+            <p>Для создания новой категории выберите сверху одну из категорий, которая станет родительской, введите в поле ниже имя создаваемой категории и нажмите на кнопку.</p>
+            <p>Если не выбрать родительскую категорию, то новая категория будет на верху иерархии.</p>
+
+            @using (Html.BeginForm("CreateCategory","Admin",null,FormMethod.Post, new { @style="margin:20px;"}))
+            {
+                @Html.TextBox("name")<br /><br />
+                @Html.Hidden("parentID");
+                <button type="submit" class="btn btn-success">Создать новую категорию</button>
+            }
+        </div>
+    <div class="col-xs-12">
+        <br />
+        <label>Обновление категорий из xls</label>
+        @using (Html.BeginForm("UploadCategoriesXls", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            <input type="file" accept="xls,xlsx" name="Sheet" size="40" style="margin: 10px;"
+                   onchange='$("#upload-file-info2").html($(this).val().toString());'>
+            <input type="submit" class="btn btn-default btn-sm" value="Загрузить" />
+        }
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#parentID").attr('value', '-1');
+        $(".categoriestree li>ul").css('display', 'none');
+        $(".collapsible").click(function (e) {
+            e.preventDefault();
+            $(this).toggleClass("collapse expand");
+            $(this).closest('li').children('ul').slideToggle();
+        });
+
+        $(".categoriestree a").click(function (e) {
+            e.preventDefault();
+            $(".category-selected").toggleClass("category-selected");
+            $(this).toggleClass("category-selected");
+            $("#parentID").attr('value', $(this).attr('id'));
+        });
+    });
+</script>

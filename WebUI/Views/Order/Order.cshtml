@@ -1,0 +1,54 @@
+﻿@model Store.Domain.Entities.OrderDetails
+
+@{
+    ViewBag.Title = "Оформление заказа";
+    Layout = "~/Views/Order/_LayoutOrder.cshtml";
+}
+
+
+<div class="container text-center withbackgr">
+    <h1>Оформление заказа</h1>
+    <p>Введите ваши контактные данные, и наши сотрудники свяжутся с вами в ближайшее время.</p>
+</div>
+
+<div class="container withbackgr">
+    @Html.ValidationSummary()
+    @using (Html.BeginForm("Index", "Order"))
+    {
+        foreach (var prop in ViewData.ModelMetadata.Properties)
+        {
+            switch (prop.PropertyName)
+            {
+                case "cart": { break; }
+                default :
+                    {
+                        <div class="form-group">
+                            <label style="padding-left:30px;">@(prop.DisplayName ?? prop.PropertyName)</label>
+                            @Html.TextBox(prop.PropertyName, null, new { @class = "form-control", rows = 1 })
+                            @Html.ValidationMessage(prop.PropertyName)
+                        </div>
+                        break;
+                    }
+            }
+        }
+        
+        <div class="panel-footer">
+
+            <div class="validation-captcha">
+                @if (ViewBag.Msg != null)
+                {
+                    <text>@ViewBag.Msg</text>
+                }
+            </div>
+
+            <form action="@Url.Action("VerifyRecaptcha","User")" method="POST">
+                <div class="g-recaptcha" data-sitekey="6LdOOxsTAAAAALYpch2y48HTMPVNR_det-GxHf9b"></div>
+                <br />
+            </form>
+
+                <input type="submit" value="Сохранить" class="btn btn-primary" />
+                @Html.ActionLink("Вернуться к корзине", "Index", "Cart", null, new { @class = "btn btn-default" })
+        </div>
+    }
+
+</div>

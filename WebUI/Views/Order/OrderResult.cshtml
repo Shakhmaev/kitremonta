@@ -1,0 +1,17 @@
+﻿
+@{
+    ViewBag.Title = "Результат оформления заказа";
+    Layout = "~/Views/Order/_LayoutOrder.cshtml";
+}
+
+<div class="withbackgr text-center">
+    @if (ViewData["message"] == null)
+    {
+        <h2>Вы успешно заказали товары. Наши сотрудники свяжутся с вами в ближайшее время.</h2>
+    }
+    else
+    {
+        <h2>@ViewData["message"]</h2>
+    }
+</div>
+

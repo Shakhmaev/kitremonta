@@ -1,0 +1,89 @@
+﻿@model Store.Domain.Entities.Item
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = Model.Name;
+}
+
+@section HScripts {
+}
+
+<div class="container details-container">
+
+    <h2>Описание товара</h2>
+    <div class="details">
+        <div class="row">
+            <div class="col-xs-12">
+                <h3>
+                    <strong class="h3">@Model.Name</strong>
+                </h3>
+                
+            </div>
+            <div class="col-xs-12">
+                <h3>
+                    <span class="pull-right label label-primary" style="margin:5px;">@Model.Price.ToString("# руб")/@Model.PriceUnit</span>
+                </h3>
+            </div>
+            <div class="col-xs-12">
+                @using (Ajax.BeginForm(Model.ItemType == "keram" ? "AddToCart" : "AddToCartQuantity", "Cart", new AjaxOptions
+                    {
+                        HttpMethod = "POST",
+                        OnBegin = "AddedItemPopUp('/Content/Styles/Img/load.gif')",
+                        OnComplete = Model.ItemType == "keram" == true ? "AddItemToCart" : null,
+                        UpdateTargetId = "PopupWrapper",
+                        OnSuccess = Model.ItemType == "keram" == true ? "SetPicId(" + Model.Id + ",'" + Html.Action("GetImage", "Item", new { Model.Id }) + "','.well')" : null,
+                    }))
+                    {
+
+                        <div class="details center-block" style="margin:5px">                            
+                            @Html.Action("Calculator", new { itemId = Model.Id })
+                            @Html.HiddenFor(x => x.Id)
+                            <button type="submit" class="btn btn-success" value="В корзину">
+                                <i class="fa fa-cart-plus fa-lg"></i> В корзину
+                            </button>
+                        </div>
+                    }
+            </div>
+        </div>
+        <div class="row item-content">
+            <div class="container-fluid">
+                <div class="col-sm-5 col-lg-4">
+                    <div class="row" id="@Model.Id">
+                        <div class="main-img" id="gal">
+                            <img id="zoom_03" class="img-thumbnail" src="@Html.Action("GetImage","Item",new {Model.Id})" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div id="gallery_01">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-7 col-lg-8">
+                    @if (Model.Description != null) 
+                    { 
+                        <span class="lead ">@Html.Raw(@Model.Description.Replace("\n", "</br>"))</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/Scripts/jquery.elevateZoom-3.0.8.min.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var args = {
+                id: '@Model.Id',
+                url1: '@Url.Action("GetExtraImages", "ImageView", new { id = Model.Id })',
+                name: JSON.stringify('@Model.Name'),
+                GetImagesUrlWithStamp: "@Url.Action("GetImage", "Item", new { Model.Id})+&amp;timestamp=",
+                urlCart: '@Url.Action("Index","Cart")'
+            };
+            js(args);
+            js.ReloadExtraImagesNoX();
+        });
+    </script>
+
+}

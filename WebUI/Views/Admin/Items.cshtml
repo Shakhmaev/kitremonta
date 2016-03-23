@@ -1,0 +1,55 @@
+﻿@model Store.WebUI.Models.AdminItemsViewModel
+
+@{
+    ViewBag.Title = "Панель администратора - список товаров";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="panel panel-default withbackgr">
+    <div class="panel-heading">
+        <h3>Hello @User.Identity.Name</h3> 
+    </div>
+    @using (Html.BeginForm("Items", "Admin", FormMethod.Post, new { @class = "navbar-form navbar-left" }))
+    {
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="Введите текст поиска" name="search">
+        </div>
+        <input type="submit" class="btn btn-default" value="Поиск">
+    }
+    <div class="panel-body">
+
+        <table class="table table-striped table-condensed table-bordered">
+            <tr>
+                <th>Id</th>
+                <th>Название</th>
+                <th>Цена</th>
+                <th>Действия</th>
+            </tr>
+
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td class="text-center">@item.Id</td>
+                    <td class="text-left">@Html.ActionLink(item.Name,"Edit", new { item.Id })</td>
+                    <td class="text-center">@item.Price.ToString("#")</td>
+                    <td class="text-center">
+                        @using (Html.BeginForm("Delete","Admin")){
+                            @Html.Hidden("Id",item.Id);
+                            <input type="submit" class="btn btn-default btn-xs" value="Удалить" />
+                        }
+                    </td>
+                </tr>
+            }
+
+        </table>
+
+
+        <div class="col-xs-12 pagin-center">
+            @Html.AdminPageLinks(Model.PagingInfo, x => Url.Action("Items", new { page = x }))
+        </div>
+    </div>
+    <div class="panel-footer">
+        @Html.ActionLink("Добавить", "Create", null, new { @class = "btn btn-default" })
+    </div>
+
+</div>

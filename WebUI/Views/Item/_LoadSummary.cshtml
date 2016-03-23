@@ -1,0 +1,31 @@
+﻿@using Store.WebUI.Models;
+@model FilteredListViewModel
+
+
+<div class="col-xs-12">
+    <br />
+    <h4>Найдено товаров <span id="total">(@Model.PagingInfo.TotalItems)</span> на (@Model.PagingInfo.TotalPages) страницах.</h4>
+</div>
+
+<div class="col-xs-12 pagin-right">
+    @Html.PageLinks(Model.PagingInfo, x => Url.Action("LoadSummary", new { category = Model.CurrentCategory, page = x, PageSize = 3 }))
+</div>
+
+    <div class="row">
+        @foreach (var p in @Model.Items)
+        {
+            <div class="col-sm-4 col-md-3 col-xs-12 block">
+                @Html.Partial("ItemSummary", p, new ViewDataDictionary { { "summaryfor", "allItems" } })
+            </div>
+        }
+    </div>
+
+@section Menu{
+    <!--<div id="categories" class="col-xs-3 hidden-xs">
+        @Html.Action("Menu", "Nav")
+    </div>-->
+}
+
+<div class="col-xs-12 pagin-center">
+    @Html.PageLinks(Model.PagingInfo, x => Url.Action("LoadSummary", new {category = Model.CurrentCategory, page = x, PageSize = 3 }))
+</div>

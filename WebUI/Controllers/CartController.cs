@@ -67,7 +67,6 @@ namespace Store.WebUI.Controllers
             return RedirectToAction("Index", new { returnUrl });
         }
 
-       
 
         public void Clear(CartIdWrapper cartid)
         {

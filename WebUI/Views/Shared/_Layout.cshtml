@@ -51,73 +51,72 @@
                 +7 (911) 815-12-19 &nbsp;&nbsp;
         </div>
 
-    <div class="container content">
-        <nav class="navbar" role="navigation">
-            <div class="container-fluid">
-                <!-- Brand and toggle get grouped for better mobile display -->
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle auth" data-toggle="collapse" data-target="#navbar-collapse-auth">
-                        <span class="sr-only">Вход/Регистрация</span>
-                        <span class="fa fa-user fa-lg menubutton"></span>
-                    </button>
-                    <button type="button" class="navbar-toggle search" data-toggle="collapse" data-target="#navbar-collapse-search">
-                        <span class="sr-only">Поиск</span>
-                        <span class="fa fa-search fa-lg menubutton"></span>
-                    </button>
-                    <a href="@Url.Action("Index","Item")"><i class="fa fa-home fa-lg fa-2x navbar-brand">КИТ ремонта</i></a>
-                </div>
+    <nav class="navbar" role="navigation">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle auth" data-toggle="collapse" data-target="#navbar-collapse-auth">
+                    <span class="sr-only">Вход/Регистрация</span>
+                    <span class="fa fa-user fa-lg menubutton"></span>
+                </button>
+                <button type="button" class="navbar-toggle search" data-toggle="collapse" data-target="#navbar-collapse-search">
+                    <span class="sr-only">Поиск</span>
+                    <span class="fa fa-search fa-lg menubutton"></span>
+                </button>
+                <a href="@Url.Action("Index","Item")"><i class="fa fa-home fa-lg fa-2x navbar-brand">КИТ ремонта</i></a>
+            </div>
 
-                <!-- Collect the nav links, forms, and other content for toggling -->
-                <div class="collapse navbar-collapse" id="navbar-collapse-search">
-                    @using (Html.BeginForm("Search", "Item", FormMethod.Post, new { @class = "navbar-form navbar-left" }))
-                    {
-                        <div class="form-group">
-                            <input type="text" class="form-control" placeholder="Введите текст поиска" name="search">
-                        </div>
-                        <input type="submit" class="btn btn-default" value="Поиск">
-                    }
-                    <div class="hidden-xs">
-                        @Html.Action("Login", "Nav")
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="navbar-collapse-search">
+                @using (Html.BeginForm("Search", "Item", FormMethod.Post, new { @class = "navbar-form navbar-left" }))
+                {
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Введите текст поиска" name="search">
                     </div>
-                </div>
-                <div class="collapse navbar-right" id="navbar-collapse-auth">
+                    <input type="submit" class="btn btn-default" value="Поиск">
+                }
+                <div class="hidden-xs">
                     @Html.Action("Login", "Nav")
                 </div>
-            </div><!-- /.container-fluid -->
-        </nav>
-
-        <div class="row InfoContainer">
-            <div class="InfoLine">
+            </div>
+            <div class="collapse navbar-right" id="navbar-collapse-auth">
+                @Html.Action("Login", "Nav")
+            </div>
+        </div><!-- /.container-fluid -->
+    </nav>
+    
+        <div class="container InfoContainer" >
+            <div class="row InfoLine">
                 <div class="col-xs-12">
                     <a href="@Url.Action("Index","Item")">
                         <div class="logo">
                             <img src="@Url.Content("/Content/Styles/Img/logo.png")" />
-
+                            
                         </div>
                     </a>
                     <ul class="nav navbar-nav navbar-right cart-mini" id="cartInfo">
                         @*<div class="bolt"></div>
-                            <div class="bolt rotate" style="right: 0px; left: auto;"></div>
-                            <div class="bolt" style="right: 0px; left: auto; top:auto; bottom:0px;"></div>
-                            <div class="bolt rotate" style="top:auto; bottom:0px;"></div>*@
+                        <div class="bolt rotate" style="right: 0px; left: auto;"></div>
+                        <div class="bolt" style="right: 0px; left: auto; top:auto; bottom:0px;"></div>
+                        <div class="bolt rotate" style="top:auto; bottom:0px;"></div>*@
                         @Html.Action("Summary", "Cart")
                     </ul>
                 </div>
             </div>
         </div>
 
+    
 
 
 
-
-        <div class="menu">
-            <div class="menu-container">
-                <div class="menu">
-                    @Html.MvcSiteMap().Menu()
-                </div>
+    <div class="container-fluid menu">
+        <div class="menu-container">
+            <div class="menu">
+                @Html.MvcSiteMap().Menu()
             </div>
         </div>
     </div>
+
 
     @{
         var action = ViewContext.RouteData.Values["action"];

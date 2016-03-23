@@ -77,11 +77,10 @@
     </ul>
 </li>
 <script>
-        $("#clearcart").on('click', function (e) {
+        $("#clearcart").on('click', function () {
             $.ajax({
                 url: '@Url.Action("Clear", "Cart")',
                 success: function () { RefreshCartInfo(); }
             });
-            e.preventDefault();
         });
 </script>

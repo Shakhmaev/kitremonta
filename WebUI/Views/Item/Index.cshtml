@@ -12,106 +12,103 @@
     </script>
 }
 
-<div class="container content">
 
-    <div class="container container-carousel" style="margin-top:20px;">
-        @Html.Partial("_carousel")
-    </div>
-
-
-    <div class="tabbable">
-        <!-- Only required for left/right tabs -->
-        <ul class="nav nav-justified nav-tabs">
-            <li class="active"><a href="#tab2" data-toggle="tab">Новые</a></li>
-            <li><a href="#tab1" data-toggle="tab">Распродажа</a></li>
-        </ul>
-        <div class="tab-content">
-
-            <div class="tab-pane active fade in" id="tab2">
-                <div class="divline"><h2>Последние поступления</h2></div>
-                @if (@Model.LastItems.Count() > 0)
-            {
-                    <div class="container-fluid">
-
-                        <div class="row">
-                            @foreach (var p in @Model.LastItems)
-                        {
-                                <div class="col-lg-2 col-sm-4 col-md-3 col-xs-12 block">
-                                    @Html.Partial("ItemSummary", p, new ViewDataDictionary { { "summaryfor", "lastItems" } })
-                                </div>
-                        }
-                        </div>
-                    </div>
-            }
-            else {
-                    <div class="container-fluid">
-                        <br />
-                        <br />
-                        <br />
-                        <br />
-                        <p>В данный момент нету таких товаров</p>
-                    </div>
-            }
-            </div>
-            <div class="tab-pane fade" id="tab1">
-                <div class="divline"><h2>Распродажа</h2></div>
-                @if (@Model.DiscountItems.Count() > 0)
-            {
-                    <div class="container-fluid">
-                        <div class="row">
-                            @foreach (var p in @Model.DiscountItems)
-                        {
-                                <div class="col-lg-2 col-sm-4 col-md-3 col-xs-12 block">
-                                    @{Html.RenderPartial("ItemSummary", p, new ViewDataDictionary { { "summaryfor", "discountItems" } });}
-                                </div>
-                        }
-                        </div>
-                    </div>
-            }
-            else {
-                    <div class="container-fluid">
-                        <br />
-                        <br />
-                        <br />
-                        <br />
-                        <p>В данный момент нету таких товаров</p>
-                    </div>
-            }
-            </div>
-        </div>
-    </div>
-
-    <div class="categories hidden-xs hidden-sm">
-        @Html.MvcSiteMap().SiteMap()
-    </div>
-
-    <div class="divline"><h2>Почему у нас?</h2></div>
-    <div class="container-fluid">
-        <div class="row whyus">
-            <div class="col-xs-12 col-sm-4">
-                <div class="circle container">
-                    <p class="fa fa-thumbs-up fa-lg fa-4x"></p>
-                </div>
-                <p class="circle-p">Качество проверенное временем</p>
-            </div>
-            <div class="col-xs-12 col-sm-4">
-                <div class="circle container">
-                    <p class="fa fa-money fa-lg fa-4x"></p>
-                </div>
-                <p class="circle-p">Очень привлекательные цены</p>
-            </div>
-            <div class="col-xs-12 col-sm-4">
-                <div class="circle container">
-                    <p class="fa fa-list-alt fa-lg fa-4x"></p>
-                </div>
-                <p class="circle-p">Множество супер предложений</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="vk_comments"></div>
-
+<div class="container container-carousel" style="margin-top:20px;">
+    @Html.Partial("_carousel")
 </div>
+
+
+<div class="tabbable">
+    <!-- Only required for left/right tabs -->
+    <ul class="nav nav-justified nav-tabs">
+        <li class="active"><a href="#tab2" data-toggle="tab">Новые</a></li>
+        <li><a href="#tab1" data-toggle="tab">Распродажа</a></li>
+    </ul>
+    <div class="tab-content">
+       
+        <div class="tab-pane active fade in" id="tab2">
+            <div class="divline"><h2>Последние поступления</h2></div>
+            @if (@Model.LastItems.Count() > 0)
+            {
+                <div class="container-fluid">
+
+                    <div class="row">
+                        @foreach (var p in @Model.LastItems)
+                        {
+                            <div class="col-lg-2 col-sm-4 col-md-3 col-xs-12 block">
+                                @Html.Partial("ItemSummary", p, new ViewDataDictionary { { "summaryfor", "lastItems" } })
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else {
+                <div class="container-fluid">
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <p>В данный момент нету таких товаров</p>
+                </div>
+            }
+        </div>
+        <div class="tab-pane fade" id="tab1">
+            <div class="divline"><h2>Распродажа</h2></div>
+            @if (@Model.DiscountItems.Count() > 0)
+            {
+                <div class="container-fluid">
+                    <div class="row">
+                        @foreach (var p in @Model.DiscountItems)
+                        {
+                            <div class="col-lg-2 col-sm-4 col-md-3 col-xs-12 block">
+                                @{Html.RenderPartial("ItemSummary", p, new ViewDataDictionary { { "summaryfor", "discountItems" } });}
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else {
+                <div class="container-fluid">
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <p>В данный момент нету таких товаров</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="categories hidden-xs hidden-sm">
+    @Html.MvcSiteMap().SiteMap()
+</div>
+
+<div class="divline"><h2>Почему у нас?</h2></div>
+<div class="container-fluid">
+    <div class="row whyus">
+        <div class="col-xs-12 col-sm-4">
+            <div class="circle container">
+                <p class="fa fa-thumbs-up fa-lg fa-4x"></p>
+            </div>
+            <p class="circle-p">Качество проверенное временем</p>
+        </div>
+        <div class="col-xs-12 col-sm-4">
+            <div class="circle container">
+                <p class="fa fa-money fa-lg fa-4x"></p>
+            </div>
+            <p class="circle-p">Очень привлекательные цены</p>
+        </div>
+        <div class="col-xs-12 col-sm-4">
+        	<div class="circle container" >
+                <p class="fa fa-list-alt fa-lg fa-4x"></p>
+            </div>
+            <p class="circle-p">Множество супер предложений</p>
+        </div>
+    </div>
+</div>
+
+<div id="vk_comments"></div>
 
 <script type="text/javascript" src="//vk.com/js/api/openapi.js?121"></script>
 <script type="text/javascript">

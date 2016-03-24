@@ -1,5 +1,5 @@
 ﻿body {
-    background-color:white;
+    background-color:#CCFFFF;
 }
 
 html {
@@ -13,12 +13,15 @@ html {
 }
 
 .navbar {
+    margin-left:-16px;
+    margin-right:-16px;
     background-color:white;
     border:1px solid black; 
     border-radius:0px;
 }
 
 .container.content {
+    background:white;
     border-right:1px solid black;
     border-left:1px solid black;
 }
@@ -36,10 +39,11 @@ html {
 }
 
 .path {
-    margin:1px;
+    margin:15px;
     color:#242729;
     z-index:10;
-    font-size:15px;
+    font-size:17px;
+    font-weight:bold;
     width:100%;
 }
 
@@ -52,6 +56,7 @@ html {
     list-style: none;
     box-sizing: border-box;
     margin-bottom:20px;
+    border-radius:15px 15px 0 0;
 }
 
 
@@ -123,8 +128,9 @@ html {
     border-bottom: 5px solid #ccc;
 }
 
-.categories > ul > li > ul > li a {
-    
+.categories > ul > li > ul > li a:hover {
+    color:white;
+    background:#4d96a3;
 }
 
 .categories > ul > li > ul > li > a {
@@ -239,6 +245,7 @@ div.tabbable {
 }
 
 .container-carousel {
+    margin:0 auto;
     max-width:1000px;
     margin-bottom:30px; 
     padding:0px;
@@ -436,7 +443,7 @@ A.itemLink:hover h4
     text-align:center;
     position:relative;
     margin-top:20px;
-
+    margin-right:0px;
 }
 
 .cart-mini:hover{
@@ -712,6 +719,10 @@ div.ItemDiv {
    box-shadow:none;
 }
 
+.img-thumbnail:hover{
+    background-color:#336666;
+}
+
 .details > .row {
     margin-right:0px;
     margin-left:0px;
@@ -733,7 +744,7 @@ div.ItemDiv {
     padding:20px;
     padding-left:50px;
     padding-right:50px;
-    margin-top:20px;
+    margin-top:0px;
     min-height:200px;
     background-color:#242729;
     color:rgba(237,237,237,1);
@@ -1254,6 +1265,12 @@ opacity:1;
         font-size:16px;
     }
 
+}
+
+@media (min-width:768px){
+    .container.content {
+        width:95%;
+    }
 }
 
 @media (min-width:768px) and (max-width:991px) {

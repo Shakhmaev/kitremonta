@@ -44,8 +44,8 @@ Screen style's
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 
 .menu-container {
-    width: 100%;
-    margin: 0 auto;
+    margin-right:-16px;
+    margin-left:-16px;
     background: #4f779a;
     z-index:3;
     position:relative;
@@ -239,7 +239,6 @@ Mobile style's
 
 @media only screen and (max-width: 959px) {
     .menu-container {
-        width: 100%;
     }
     .menu-mobile {
         display: block;

@@ -2,8 +2,6 @@
 @using Store.WebUI.HtmlHelpers;
 @model ItemsListViewModel
 
-<div class="container content">
-
     @{
         if (Model.Side.Count() > 0)
         {
@@ -69,8 +67,9 @@
             @foreach (var ctg in Model.Categories)
             {
                 <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 subctgs" style="text-align:center;">
-                    <p><a href="@Url.Action("List", "Item", new { category = ctg.Name })">@ctg.Description</a></p>
-                    <p><img class="img-thumbnail" style="max-height:250px;max-width:250px;" src="@Html.Action("GetCategoryImage","ImageView",new { id = ctg.CategoryId})" /></p>
+                    <a href="@Url.Action("List", "Item", new { category = ctg.Name })"><p>@ctg.Description</p>
+                        <p><img class="img-thumbnail" style="max-height:250px;max-width:250px;" src="@Html.Action("GetCategoryImage","ImageView",new { id = ctg.CategoryId})" /></p>
+                    </a>
                 </div>
             }
         </div>
@@ -133,7 +132,6 @@
             @Html.Action("LoadSummary", "Item", new { category = Model.CurrentCategory, filters = Model.filters })
         </div>
     </div>
-</div> 
 
 @section Scripts {
     <script type="text/javascript">

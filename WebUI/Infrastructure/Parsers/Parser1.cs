@@ -20,7 +20,7 @@ namespace Store.WebUI.Infrastructure.Parsers
         ExcelWorksheet workSheet;
         IItemRepository repos;
         Translitter translit = new Translitter();
-        Regex CatMatch = new Regex(@"^(\s+(\w+.*)\s*$)|(\s*(\w+.*)\s+$)");
+        Regex CatMatch = new Regex(@"^(\s*([\w-\s]+?)\s*$)");
         public Parser1(HttpPostedFileBase file, IItemRepository repo)
         {
             repos = repo;
@@ -120,11 +120,11 @@ namespace Store.WebUI.Infrastructure.Parsers
 
                     for (int i = 0; i < hierarchy.Count(); i++)
                     {
-                        hierarchy[i] = hierarchy[i].First().ToString().ToUpper() + hierarchy[i].ToLower().Substring(1);
+                        hierarchy[i] = hierarchy[i].First().ToString().ToUpper() + hierarchy[i].Substring(1);
                         if (CatMatch.IsMatch(TranslitNames[i]))
                         {
                             hierarchy[i] = CatMatch.Replace(TranslitNames[i], "$2");
-                            hierarchy[i] = hierarchy[i].First().ToString().ToUpper() + hierarchy[i].ToLower().Substring(1);
+                            hierarchy[i] = hierarchy[i].First().ToString().ToUpper() + hierarchy[i].Substring(1);
                             TranslitNames[i] = CatMatch.Replace(TranslitNames[i], "$2");
                         }
                         TranslitNames[i] = translit.GetTranslit(TranslitNames[i].ToLower());
@@ -153,10 +153,10 @@ namespace Store.WebUI.Infrastructure.Parsers
                     string fname = Path.GetFileNameWithoutExtension(imagesphys[0]);
                     string ext = Path.GetExtension(imagesphys[0]);
                     string fullname = path + "\\" + fname + "-mini" + ext;
-                    if (File.Exists(fullname))
+                    /*if (File.Exists(fullname))
                     {
                         File.Delete(fullname);
-                    }
+                    }*/
                     miniimg.Save(fullname);
 
                     

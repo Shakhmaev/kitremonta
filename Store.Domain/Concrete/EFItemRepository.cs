@@ -158,7 +158,8 @@ namespace Store.Domain.Concrete
                     Category category = new Category
                     {
                         Name = Names[i],
-                        Description = hierarchy[i]
+                        Description = hierarchy[i],
+                        Type = type
                     };
                     if (current != null)
                     {

@@ -5,13 +5,11 @@
     ViewBag.Title = "Поиск";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class="container-fluid">
     <h2>Результаты поиска</h2>
 
     <div class="load col-xs-12 col-lg-12">
         @Html.Action("LoadSummary", "Item", new { category = "All", filters = Model.filters, page = 1, search = Model.search })
     </div>
-</div>
 <script type="text/javascript">
 
 function initsum(pg) {

@@ -70,7 +70,7 @@ namespace Store.WebUI.Controllers
                     case "show_collections":
                         {
                             model.categoryTypeMessage = "Коллекции";
-                            model.Categories = GetDescendantCollections(ctg).OrderBy(x=>x.Name);
+                            model.Categories = GetChildCollectionsAvoidLowerSubs(ctg);
                             break;
                         }
                     case "Collection":
@@ -153,7 +153,7 @@ namespace Store.WebUI.Controllers
                 categories = categories.Union(sub.SubCategories).Where(x=>x.Type=="Country");
             }
 
-            return categories;
+            return categories.Distinct();
         }
 
         private IEnumerable<Category> FindInDescendantBrands(Category ctg)
@@ -168,7 +168,28 @@ namespace Store.WebUI.Controllers
                 }
             }
 
-            return categories;
+            return categories.Distinct();
+        }
+
+        private IEnumerable<Category> GetChildCollectionsAvoidLowerSubs(Category ctg)
+        {
+            if (ctg.SubCategories.Count() > 0)
+            {
+                IEnumerable<Category> collections = new List<Category>();
+                if (ctg.SubCategories.Any(x => x.Type == "Country" || x.Type == "application" || x.Type == "Brand"))
+                {
+                    foreach (var sub in ctg.SubCategories)
+                    {
+                        collections = collections.Union(GetChildCollectionsAvoidLowerSubs(sub));
+                    }
+                }
+                else
+                {
+                    collections = collections.Union(ctg.SubCategories);
+                }
+                return collections.Distinct();
+            }
+            return new List<Category>();
         }
 
         private IEnumerable<Category> GetDescendantCollections(Category ctg)
@@ -180,7 +201,7 @@ namespace Store.WebUI.Controllers
                 {
                    collections = collections.Union(GetDescendantCollections(sub));
                 }
-                return collections;
+                return collections.Distinct();
             }
             return new List<Category>();
         }

@@ -150,10 +150,13 @@ namespace Store.Domain.Concrete
                     switch (i)
                     {
                         case 0: type = "show_collections"; break;
-                        case 1: type = "show_collections"; break;
-                        case 2: type = "Country"; break;
-                        case 3: type = "Brand"; break;
+                        case 1: type = "Country"; break;
+                        case 2: type = "Brand"; break;
                         default: type = "Collection"; break;
+                    }
+                    if (i == hierarchy.Count() - 1)
+                    {
+                        type = "application";
                     }
                     Category category = new Category
                     {

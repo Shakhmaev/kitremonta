@@ -22,7 +22,7 @@ namespace Store.Domain.Concrete
         {
             get { return context.Items; }
         }
-
+     
         public IEnumerable<IdentityRole> Roles
         {
             get { return context.Roles; }
@@ -47,8 +47,11 @@ namespace Store.Domain.Concrete
         {
             if (item.Id==0)
             {
-                Category cat = SubCategoryGetOrCreate(item.SubCategory);
-                cat.items.Add(item);
+                foreach (var ct in item.ParentCategories)
+                {
+                    Category cat = SubCategoryGetOrCreate(ct);
+                    cat.items.Add(item);
+                }
             }
             else
             {
@@ -65,39 +68,24 @@ namespace Store.Domain.Concrete
                     }
                     dbEntry.IsHot = item.IsHot;
 
-                    var CatExists = context.Categories.FirstOrDefault(x=>x.CategoryId==item.SubCategory.CategoryId);
-                    if (CatExists!=null)
+                    foreach (var ctg in dbEntry.ParentCategories)
                     {
-                        dbEntry.SubCategory.items.Remove(dbEntry);
-                        CatExists.items.Add(dbEntry);
-                    }
-                    else
-                    {
-                        Category cat = SubCategoryGetOrCreate(item.SubCategory);
-                        cat.items = new List<Item>();
-                        dbEntry.SubCategory.items.Remove(dbEntry);
-                        cat.items.Add(dbEntry);
+                        var CatExists = context.Categories.FirstOrDefault(x => x.CategoryId == ctg.CategoryId);
+                        if (CatExists != null)
+                        {
+                            ctg.items.Remove(dbEntry);
+                            CatExists.items.Add(dbEntry);
+                        }
+                        else
+                        {
+                            Category cat = SubCategoryGetOrCreate(ctg);
+                            cat.items = new List<Item>();
+                            ctg.items.Remove(dbEntry);
+                            cat.items.Add(dbEntry);
+                        }
                     }
                     dbEntry.DiscountPercent = item.DiscountPercent;
                 }
-            }
-            context.SaveChanges();
-        }
-
-        public void SaveOrUpdateItemFromXls(Item it, string category)
-        {
-            it.SubCategory.ParentID = context.Categories.First(x => x.Description == category).CategoryId;
-            Category sub = SubCategoryGetOrCreate(it.SubCategory);
-            var item = sub.items.FirstOrDefault(x => x.Name == it.Name);
-            if (item != null) //update item
-            {
-                item.Name = it.Name;
-                item.Brand = it.Brand;
-            }
-            else //create item
-            {
-                it.SubCategory = null;
-                sub.items.Add(it);
             }
             context.SaveChanges();
         }
@@ -126,10 +114,10 @@ namespace Store.Domain.Concrete
             to.Application = from.Application;
         }
 
-        public void SaveOrUpdateItemFromXlsOne(Item item, string[] hierarchy, string[] Names, IEnumerable<string> images)
+        public void SaveOrUpdateItemFromXlsOne(Item item, List<string[]> hierarchy, List<string[]> Names, IEnumerable<string> images)
         {
             Category current = null;
-            var it = context.Items.FirstOrDefault(x => x.Name == item.Name);
+            var it = context.Items.FirstOrDefault(x => x.article==item.article);
             if (it != null) //update item
             {
                 MapItem(ref item, ref it);
@@ -145,40 +133,49 @@ namespace Store.Domain.Concrete
             }
             else
             {
-                for (int i = 0; i < hierarchy.Count(); i++)
+                for (int i = 0; i < hierarchy.Count; i++)
                 {
-                    string type = "";
-                    switch (i)
+                    for (int j = 0; j < hierarchy[i].Count(); j++)
                     {
-                        case 0: type = "show_collections"; break;
-                        case 1: type = "Country"; break;
-                        case 2: type = "Brand"; break;
-                        default: type = "Collection"; break;
-                    }
-                    Category category = new Category
-                    {
-                        Name = Names[i],
-                        Description = hierarchy[i],
-                        Type = type
-                    };
-                    if (current != null)
-                    {
-                        category.ParentID = current.CategoryId;
-                    }
-                    var cat = SubCategoryGetOrCreate(category);
-                    if (i == hierarchy.Count() - 1)
-                    {
-                        if (images.Count() > 0)
+                        string type = "";
+                        switch (j)
                         {
-                            item.Photos = new List<Photo>();
-                            foreach (var img in images)
-                            {
-                                item.Photos.Add(new Photo { url = img });
-                            }
+                            case 0: type = "show_collections"; break;
+                            case 1: type = "Country"; break;
+                            case 2: type = "Brand"; break;
+                            default: type = "Collection"; break;
                         }
-                        cat.items.Add(item);
+                        Category category = new Category
+                        {
+                            Name = Names[i][j],
+                            Description = hierarchy[i][j],
+                            Type = type
+                        };
+                        if (current != null)
+                        {
+                            category.ParentID = current.CategoryId;
+                        }
+                        var cat = SubCategoryGetOrCreate(category);
+                        if (j == hierarchy[i].Count() - 1)
+                        {
+                            if (images.Count() > 0)
+                            {
+                                item.Photos = new List<Photo>();
+                                foreach (var img in images)
+                                {
+                                    item.Photos.Add(new Photo { url = img });
+                                }
+                            }
+                            it = context.Items.FirstOrDefault(x => x.article == item.article);
+                            if (it != null)
+                            {
+                                item = it;
+                            }
+                            cat.items.Add(item);
+                        }
+                        current = cat;
                     }
-                    current = cat;
+                    current = null;
                 }
             }
             SaveChanges();

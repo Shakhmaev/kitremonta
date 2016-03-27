@@ -38,7 +38,7 @@ namespace Store.WebUI.Infrastructure
         }
 
         IEnumerable<DynamicNode> GetSubCategNodes(Category subcateg)
-        {
+        {   
             DynamicNode node = new DynamicNode(Convert.ToString(subcateg.CategoryId),
                     Convert.ToString(subcateg.Parent.CategoryId), subcateg.Description, subcateg.Name);
             node.RouteValues.Add("category", subcateg.Name);
@@ -66,11 +66,15 @@ namespace Store.WebUI.Infrastructure
             
             foreach (var item in items)
             {
-                DynamicNode nodeitem = new DynamicNode("id_"+Convert.ToString(item.Id),
-                    item.Name);
-                nodeitem.ParentKey = Convert.ToString(item.SubCategory.CategoryId);
-                nodeitem.RouteValues.Add("id", item.Id);
-                yield return nodeitem;
+                foreach (var ctg in item.ParentCategories)
+                {
+                    DynamicNode nodeitem = new DynamicNode("id_" + Convert.ToString(item.Id) 
+                        + "-parentid_" + Convert.ToString(ctg.CategoryId),
+                        item.Name);
+                    nodeitem.ParentKey = Convert.ToString(ctg.CategoryId);
+                    nodeitem.RouteValues.Add("id", item.Id);
+                    yield return nodeitem;
+                }
             }
         }
     }

@@ -41,142 +41,178 @@ namespace Store.WebUI.Infrastructure.Parsers
             pack = new ExcelPackage(fi);
         }
 
-        public void Parse()
+        public List<string> Parse()
         {
+            List<string> messages = new List<string>();
             if (pack != null)
             {
-                var currentSheet = pack.Workbook.Worksheets;
-                workSheet = currentSheet.First();
-                var noOfCol = workSheet.Dimension.End.Column;
-                var noOfRow = workSheet.Dimension.End.Row;
-
-                for (int rowIterator = 2; rowIterator <= noOfRow; rowIterator++)
+                try
                 {
-                    if (workSheet.Cells[rowIterator, 7].Value == null) break;
-                    Item item = new Item
+                    var currentSheet = pack.Workbook.Worksheets;
+                    workSheet = currentSheet.First();
+                    var noOfCol = workSheet.Dimension.End.Column;
+                    var noOfRow = workSheet.Dimension.End.Row;
+
+
+                    for (int rowIterator = 2; rowIterator <= noOfRow; rowIterator++)
                     {
-                        Brand = workSheet.Cells[rowIterator, 4].Value.ToString(),
-                        Type = workSheet.Cells[rowIterator, 1].Value.ToString(),
-                        article = workSheet.Cells[rowIterator, 6].Value.ToString(),
-                        Name = workSheet.Cells[rowIterator, 7].Value.ToString(),
-                        IsHot = false,
-                        Price = Convert.ToInt32(workSheet.Cells[rowIterator, 8].Value),
-                        CountInPack = workSheet.Cells[rowIterator, 11].Value.ToString(),
-                        PriceUnit = workSheet.Cells[rowIterator, 9].Value.ToString(),
-                        Country = workSheet.Cells[rowIterator, 3].Value.ToString(),
-                        Purpose = workSheet.Cells[rowIterator, 12].Value.ToString(),
-                        Surface = workSheet.Cells[rowIterator, 13].Value.ToString(),
-                        Picture = workSheet.Cells[rowIterator, 14].Value.ToString(),
-                        Color = workSheet.Cells[rowIterator, 15].Value.ToString(),
-                        Size = workSheet.Cells[rowIterator, 16].Value.ToString(),
-                    };
+                        if (workSheet.Cells[rowIterator, 7].Value == null) break;
+                        Item item = new Item
+                        {
+                            Brand = workSheet.Cells[rowIterator, 4].Value.ToString(),
+                            Type = workSheet.Cells[rowIterator, 1].Value.ToString(),
+                            article = workSheet.Cells[rowIterator, 6].Value.ToString(),
+                            Name = workSheet.Cells[rowIterator, 7].Value.ToString(),
+                            IsHot = false,
+                            Price = Convert.ToInt32(workSheet.Cells[rowIterator, 8].Value),
+                            CountInPack = workSheet.Cells[rowIterator, 11].Value.ToString(),
+                            PriceUnit = workSheet.Cells[rowIterator, 9].Value.ToString(),
+                            Country = workSheet.Cells[rowIterator, 3].Value.ToString(),
+                            Purpose = workSheet.Cells[rowIterator, 12].Value.ToString(),
+                            Surface = workSheet.Cells[rowIterator, 13].Value.ToString(),
+                            Picture = workSheet.Cells[rowIterator, 14].Value.ToString(),
+                            Color = workSheet.Cells[rowIterator, 15].Value.ToString(),
+                            Size = workSheet.Cells[rowIterator, 16].Value.ToString(),
+                        };
 
-                    string inpack = item.CountInPack.Replace('.', ',');
-                    Regex reginpack = new Regex(@"^([0-9]+[,]*[0-9]*)*(.+[/\\]\s*)*([0-9]*)(.*)*");
-                    Match m = reginpack.Match(inpack);
+                        string inpack = item.CountInPack.Replace('.', ',');
+                        Regex reginpack = new Regex(@"^([0-9]+[,]*[0-9]*)*(.+[/\\]\s*)*([0-9]*)(.*)*");
+                        Match m = reginpack.Match(inpack);
 
-                    double m2 = 0;
-                    int sht = 0;
-                    if (m.Groups[3].Value != "")
-                    {
-                        bool m2p = double.TryParse(m.Groups[1].ToString(), out m2); ;
-                        bool shtp = int.TryParse(m.Groups[3].ToString(), out sht);
-                        if (m2p) item.m2 = m2; else item.m2 = 0;
-                        if (shtp) item.sht = sht; else item.sht = 0;
-                    }
-                    else
-                    {
-                        int.TryParse(m.Groups[1].ToString(), out sht);
-                        item.sht = sht;
-                    }
+                        double m2 = 0;
+                        int sht = 0;
+                        if (m.Groups[3].Value != "")
+                        {
+                            bool m2p = double.TryParse(m.Groups[1].ToString(), out m2); ;
+                            bool shtp = int.TryParse(m.Groups[3].ToString(), out sht);
+                            if (m2p) item.m2 = m2; else item.m2 = 0;
+                            if (shtp) item.sht = sht; else item.sht = 0;
+                        }
+                        else
+                        {
+                            int.TryParse(m.Groups[1].ToString(), out sht);
+                            item.sht = sht;
+                        }
 
-                    Regex sizeregx = new Regex(@"^([0-9]+[,]*[0-9]*)[xXхХ×*]([0-9]+[,]*[0-9]*)");
-                    m = sizeregx.Match(item.Size.Replace('.', ','));
-                    item.SizeInM2 = (double)((double.Parse(m.Groups[1].Value) * double.Parse(m.Groups[2].Value)) / 10000);
+                        Regex sizeregx = new Regex(@"^([0-9]+[,]*[0-9]*)[xXхХ×*]([0-9]+[,]*[0-9]*)");
+                        m = sizeregx.Match(item.Size.Replace('.', ','));
+                        if (m.Success)
+                        {
+                            item.SizeInM2 = (double)((double.Parse(m.Groups[1].Value) * double.Parse(m.Groups[2].Value)) / 10000);
+                        }
 
-                    item.PriceForM2 = item.PriceUnit.ToLower().Contains("м2") ? true : false;
+                        item.PriceForM2 = item.PriceUnit.ToLower().Contains("м2") ? true : false;
 
-                    item.ItemType = "keram";
+                        item.ItemType = "keram";
 
-                    string oip = workSheet.Cells[rowIterator, 10].Value.ToString();
-                    if (oip == "+")
-                    {
-                        item.OnlyInPacks = true;
-                    }
-                    else
-                    {
-                        item.OnlyInPacks = false;
-                    }
+                        //string oip = workSheet.Cells[rowIterator, 10].Value.ToString();
+                        if (workSheet.Cells[rowIterator, 11].Value.ToString().Contains("м2"))    //if (oip == "+")
+                        {
+                            item.OnlyInPacks = true;
+                        }
+                        else
+                        {
+                            item.OnlyInPacks = false;
+                        }
 
-                    item.Application = workSheet.Cells[rowIterator, 2].Value.ToString();
+                        item.Application = workSheet.Cells[rowIterator, 2].Value.ToString();
 
-                    string[] hierarchy = new string[] { workSheet.Cells[rowIterator, 1].Value.ToString(), //тип
+                        string[] hierarchy = new string[] { workSheet.Cells[rowIterator, 1].Value.ToString(), //тип
                         workSheet.Cells[rowIterator, 3].Value.ToString(), //страна
                         workSheet.Cells[rowIterator, 4].Value.ToString(), //производитель
                     };
-                    hierarchy = hierarchy.Concat(workSheet.Cells[rowIterator, 5].Value.ToString().Split(',')).ToArray();
 
-                    
+                        string[] hierarchyarray = workSheet.Cells[rowIterator, 5].Value.ToString().Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+                        List<string[]> hierarchylist = new List<string[]>();
+                        List<string[]> translitnameslist = new List<string[]>();
 
-                    string[] TranslitNames = new string[hierarchy.Count()];
-                    hierarchy.CopyTo(TranslitNames,0);
-
-                    for (int i = 0; i < hierarchy.Count(); i++)
-                    {
-                        hierarchy[i] = hierarchy[i].First().ToString().ToUpper() + hierarchy[i].Substring(1);
-                        if (CatMatch.IsMatch(TranslitNames[i]))
+                        for (int i = 0; i < hierarchyarray.Length; i++)
                         {
-                            hierarchy[i] = CatMatch.Replace(TranslitNames[i], "$2");
-                            hierarchy[i] = hierarchy[i].First().ToString().ToUpper() + hierarchy[i].Substring(1);
-                            TranslitNames[i] = CatMatch.Replace(TranslitNames[i], "$2");
+                            string[] splitting = hierarchyarray[i].Split(',');
+                            splitting = hierarchy.Union(splitting).ToArray();
+                            string[] translits = new string[splitting.Length];
+                            for (int j = 0; j < splitting.Count(); j++)
+                            {
+                                splitting[j] = splitting[j].First().ToString().ToUpper() + splitting[j].Substring(1);
+                                if (CatMatch.IsMatch(splitting[j]))
+                                {
+                                    splitting[j] = CatMatch.Replace(splitting[j], "$2");
+                                    splitting[j] = splitting[j].First().ToString().ToUpper() + splitting[j].Substring(1);
+                                }
+                                translits[j] = translit.GetTranslit(splitting[j].ToLower());
+                            }
+                            hierarchylist.Add(splitting);
+                            translitnameslist.Add(translits);
                         }
-                        TranslitNames[i] = translit.GetTranslit(TranslitNames[i].ToLower());
+
+                        string ImgPath = HostingEnvironment.MapPath("~/Uploads/Images/");
+
+                        var imagesnames = Directory.EnumerateFiles(ImgPath, "*.*", SearchOption.AllDirectories);
+
+                        //string[] imgsames = workSheet.Cells[rowIterator,16].Value.
+
+                        string[] str = workSheet.Cells[rowIterator, 17].Value.ToString().Split(',').ToArray();
+
+
+                        var imagesphys = new string[] { };
+
+                        foreach (var st in str)
+                        {
+                            imagesphys = imagesphys.Union(imagesnames.Where(x => x.ToLower().Contains(st.ToLower())
+                                && !x.ToLower().Contains("-mini"))).ToArray();
+
+                            foreach (var image in imagesphys.Skip(1).Where(x => !x.ToLower().Contains("-mini")))
+                            {
+                                if (Regex.IsMatch(Path.GetFileNameWithoutExtension(image), @"_\d+"))
+                                {
+                                    File.Delete(image);
+                                }
+                            }
+                        }
+
+                        if (imagesphys.Length == 0)
+                        {
+                            imagesphys = imagesphys.Union(imagesnames.Where(x => x.ToLower().Contains(item.article.Replace(@"\", "").Replace(" ", "").ToLower())
+                                && !x.ToLower().Contains("-mini"))).ToArray();
+                        }
+
+
+                        if (imagesphys.Length > 0)
+                        {
+                            Image img = Image.FromFile(imagesphys[0]);
+
+                            Image miniimg = MakeMini(img, 300, 200);
+
+                            string path = Path.GetDirectoryName(imagesphys[0]);
+                            string fname = Path.GetFileNameWithoutExtension(imagesphys[0]);
+                            string ext = Path.GetExtension(imagesphys[0]);
+                            string fullname = path + "\\" + fname + "-mini" + ext;
+                            /*if (File.Exists(fullname))
+                            {
+                                File.Delete(fullname);
+                            }*/
+                            miniimg.Save(fullname);
+
+                        }
+
+                        List<string> images = new List<string>();
+
+                        for (int i = 0; i < imagesphys.Count(); i++)
+                        {
+                            images.Add(imagesphys.ElementAt(i).Replace(ImgPath, String.Empty));
+                        }
+
+                        repos.SaveOrUpdateItemFromXlsOne(item, hierarchylist, translitnameslist, images);
+
                     }
-
-                    string ImgPath = HostingEnvironment.MapPath("~/Uploads/Images/");
-
-                    var imagesnames = Directory.EnumerateFiles(ImgPath, "*.*", SearchOption.AllDirectories);
-
-                    //string[] imgsames = workSheet.Cells[rowIterator,16].Value.
-
-                    string[] str = workSheet.Cells[rowIterator, 17].Value.ToString().Split(',').ToArray();
-
-                    
-                    var imagesphys = new string[]{};
-
-                    foreach(var st in str)
-                    imagesphys = imagesphys.Union(imagesnames.Where(x => x.ToLower().Contains(st.ToLower()) 
-                        && !x.ToLower().Contains("-mini"))).ToArray();
-
-                    Image img = Image.FromFile(imagesphys[0]);
-
-                    Image miniimg = MakeMini(img,300,200);
-
-                    string path = Path.GetDirectoryName(imagesphys[0]);
-                    string fname = Path.GetFileNameWithoutExtension(imagesphys[0]);
-                    string ext = Path.GetExtension(imagesphys[0]);
-                    string fullname = path + "\\" + fname + "-mini" + ext;
-                    /*if (File.Exists(fullname))
-                    {
-                        File.Delete(fullname);
-                    }*/
-                    miniimg.Save(fullname);
-
-                    
-
-                    List<string> images = new List<string>();
- 
-                    for (int i = 0; i < imagesphys.Count(); i++)
-                    {
-                        images.Add(imagesphys.ElementAt(i).Replace(ImgPath, String.Empty));
-                    }
-
-                    repos.SaveOrUpdateItemFromXlsOne(item, hierarchy, TranslitNames, images);
-
+                    pack.Dispose();
                 }
-                pack.Dispose();
+                catch (Exception e)
+                {
+                    messages.Add(e.Message + e.Source);
+                }
             }
-
+            return messages;
         }
 
         private Image MakeMini(Image img, int x1, int y1) {
@@ -185,7 +221,7 @@ namespace Store.WebUI.Infrastructure.Parsers
             if (img.Width >= img.Height)
             {
                 x1 = 200;
-                y1 = (int)Math.Round((double)img.Height / (img.Width / 200));
+                y1 = (int)Math.Round((double)img.Height / ((double)img.Width / 200));
                 y2 = (int)Math.Round((double)((200 - y1) / 2));
 
             }
@@ -194,7 +230,7 @@ namespace Store.WebUI.Infrastructure.Parsers
                 if (img.Width < img.Height)
                 {
                     y1 = 200;
-                    x1 = (int)Math.Round((double)img.Width / (img.Height / 200));
+                    x1 = (int)Math.Round((double)img.Width / ((double)img.Height / 200));
                     x2 = (int)Math.Round((double)((200 - x1) / 2));
                 }
             }

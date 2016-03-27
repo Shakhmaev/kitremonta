@@ -318,7 +318,6 @@
     <Compile Include="Infrastructure\Hubs\NotifyHub.cs" />
     <Compile Include="Infrastructure\NinjectDependencyResolver.cs" />
     <Compile Include="Infrastructure\Parsers\ParserCategories.cs" />
-    <Compile Include="Infrastructure\Parsers\ParserXlsDyn.cs" />
     <Compile Include="Infrastructure\Parsers\Parser1.cs" />
     <Compile Include="Infrastructure\Parsers\Translitter.cs" />
     <Compile Include="Models\AdminItemsViewModel.cs" />

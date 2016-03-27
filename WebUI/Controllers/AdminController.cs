@@ -107,7 +107,7 @@ namespace Store.WebUI.Controllers
 
             ViewBag.CategoriesList = FormCategoriesList();
 
-            ViewBag.SubCategories = GetSubCategories((int)item.SubCategory.ParentID);
+            ViewBag.SubCategories = GetSubCategories(item.Id);
 
             return View(item);
         }
@@ -193,7 +193,7 @@ namespace Store.WebUI.Controllers
         {
             ViewBag.CategoriesList = FormCategoriesList();
             ViewBag.SubCategories = new List<KeyValuePair<int, string>>();
-            return View("Edit", new Item { SubCategory = new Category() });
+            return View("Edit", new Item { ParentCategories = new List<Category>() });
         }
 
         public ActionResult Delete(int Id)
@@ -218,10 +218,11 @@ namespace Store.WebUI.Controllers
             return CategoriesList;
         }
 
-        public string GetSubCategories(int val)
+        public string GetSubCategories(int itemId)
         {
             var SubsList = new List<KeyValuePair<int, string>>();
-            foreach (var cat in repository.Categories.Where(x => x.ParentID == val))
+            var Categories = repository.Categories.Where(x => x.items.Contains(repository.Items.FirstOrDefault(k => k.Id == itemId)));
+            foreach (var cat in Categories)
             {
                 SubsList.Add(new KeyValuePair<int,string>(cat.CategoryId, cat.Name));
             }
@@ -237,8 +238,13 @@ namespace Store.WebUI.Controllers
                 HttpPostedFileBase file = Request.Files["Sheet"];
 
                 Parser1 p = new Parser1(file,repository);
-                p.Parse();
-                TempData["message"] = string.Format("Файл был загружен и обработан.");
+                List<string> msgs = p.Parse();
+                string str = "";
+                foreach (var msg in msgs)
+                {
+                    str = String.Concat(str, msg + "\n");
+                }
+                TempData["message"] = string.Format("Файл был загружен и обработан. {0} ",str);
             }
             return RedirectToAction("Index");
         }

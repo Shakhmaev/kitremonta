@@ -115,8 +115,7 @@ namespace Store.Domain.Entities
         public byte[] ImageData { get; set; }
 
         public string ImageMimeType { get; set; }
-        public int SubCategoryID { get; set; }
-        public virtual Category SubCategory { get; set; }
+        public virtual ICollection<Category> ParentCategories { get; set; }
         [HiddenInput]
         public virtual ICollection<Photo> Photos { get; set; }
 
@@ -156,7 +155,7 @@ namespace Store.Domain.Entities
             public Mapping() 
             {
                 HasOptional(x => x.Parent).WithMany(x => x.SubCategories);
-                HasMany(x => x.items).WithOptional(x => x.SubCategory).WillCascadeOnDelete(true);
+                HasMany(x => x.items).WithMany(x=>x.ParentCategories);
             }
         }
     }

@@ -21,7 +21,7 @@ namespace Store.WebUI.Controllers
         {
             ViewBag.CurrentCategory = category;
             IEnumerable<string> categories = repository.Items
-                .Select(item=>item.SubCategory.Name)
+                .Select(item=>item.ParentCategories.FirstOrDefault(x=>x.Name==category).Name)
                 .Distinct()
                 .OrderBy(x=>x);
             return PartialView(categories);

@@ -54,6 +54,11 @@ namespace Store.Domain.Entities
         [Required(ErrorMessage = "Пожалуйста, введите назначение")]
         public string Purpose { get; set; }
 
+
+        [Display(Name = "Применение")]
+        [Required(ErrorMessage = "Пожалуйста, введите применение")]
+        public string Application { get; set; }
+
         [Display(Name = "Рисунок")]
         [Required(ErrorMessage = "Пожалуйста, введите тип рисунка")]
         public string Picture { get; set; }

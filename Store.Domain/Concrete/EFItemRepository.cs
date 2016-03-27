@@ -123,6 +123,7 @@ namespace Store.Domain.Concrete
             to.m2 = from.m2;
             to.ItemType = from.ItemType;
             to.PriceForM2 = from.PriceForM2;
+            to.Application = from.Application;
         }
 
         public void SaveOrUpdateItemFromXlsOne(Item item, string[] hierarchy, string[] Names, IEnumerable<string> images)
@@ -153,10 +154,6 @@ namespace Store.Domain.Concrete
                         case 1: type = "Country"; break;
                         case 2: type = "Brand"; break;
                         default: type = "Collection"; break;
-                    }
-                    if (i == hierarchy.Count() - 1)
-                    {
-                        type = "application";
                     }
                     Category category = new Category
                     {

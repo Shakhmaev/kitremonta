@@ -126,9 +126,11 @@ namespace Store.WebUI.Controllers
             ISiteMap map = MvcSiteMapProvider.SiteMaps.Current;
             foreach (var ct in repository.Categories.Where(x => x.ParentID == null))
             {
-                if (map.FindSiteMapNodeFromCurrentContext()
-                .IsDescendantOf(map.FindSiteMapNodeFromKey(ct.CategoryId.ToString())) ||
-                    map.FindSiteMapNodeFromCurrentContext() == map.FindSiteMapNodeFromKey(ct.CategoryId.ToString()))
+                ISiteMapNode node = map.FindSiteMapNodeFromCurrentContext();
+                ISiteMapNode ctnode = map.FindSiteMapNodeFromKey(ct.CategoryId.ToString());
+                if (node
+                .IsDescendantOf(ctnode) ||
+                    node == ctnode)
                 {
                     return new List<KeyValuePair<string, IEnumerable<Category>>>(){
                         new KeyValuePair<string,IEnumerable<Category>>("Countries",
@@ -148,12 +150,9 @@ namespace Store.WebUI.Controllers
         {
             IEnumerable<Category> categories = new List<Category>();
 
-            foreach (var sub in ctg.SubCategories)
-            {
-                categories = categories.Union(sub.SubCategories).Where(x=>x.Type=="Country");
-            }
+                categories = categories.Union(ctg.SubCategories).Where(x=>x.Type=="Country");
 
-            return categories.Distinct();
+            return categories;
         }
 
         private IEnumerable<Category> FindInDescendantBrands(Category ctg)
@@ -162,13 +161,10 @@ namespace Store.WebUI.Controllers
 
             foreach (var sub in ctg.SubCategories)
             {
-                foreach (var ssub in sub.SubCategories)
-                {
-                    categories = categories.Union(ssub.SubCategories).Where(x => x.Type == "Brand");
-                }
+                    categories = categories.Union(sub.SubCategories).Where(x => x.Type == "Brand");
             }
 
-            return categories.Distinct();
+            return categories;
         }
 
         private IEnumerable<Category> GetChildCollectionsAvoidLowerSubs(Category ctg)

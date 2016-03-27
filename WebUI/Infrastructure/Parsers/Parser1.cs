@@ -108,14 +108,15 @@ namespace Store.WebUI.Infrastructure.Parsers
                         item.OnlyInPacks = false;
                     }
 
+                    item.Application = workSheet.Cells[rowIterator, 2].Value.ToString();
+
                     string[] hierarchy = new string[] { workSheet.Cells[rowIterator, 1].Value.ToString(), //тип
                         workSheet.Cells[rowIterator, 3].Value.ToString(), //страна
                         workSheet.Cells[rowIterator, 4].Value.ToString(), //производитель
                     };
                     hierarchy = hierarchy.Concat(workSheet.Cells[rowIterator, 5].Value.ToString().Split(',')).ToArray();
 
-                    hierarchy = hierarchy.Concat((new string[] { 
-                        workSheet.Cells[rowIterator, 2].Value.ToString(), })).ToArray(); //применение
+                    
 
                     string[] TranslitNames = new string[hierarchy.Count()];
                     hierarchy.CopyTo(TranslitNames,0);

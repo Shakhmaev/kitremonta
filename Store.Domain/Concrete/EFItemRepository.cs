@@ -206,7 +206,7 @@ namespace Store.Domain.Concrete
             return context.Categories.First(x => x.Name == categ.Name && x.ParentID == category.ParentID);
         }
 
-        public void UpdateCategoryFromXls(Category ctg, string image)
+        public void UpdateCategoryFromXls(Category ctg, string image, List<string> extraImages)
         {
             Category category = Categories.FirstOrDefault(x => x.Description == ctg.Description);
             if (category != null)
@@ -215,6 +215,11 @@ namespace Store.Domain.Concrete
                 if (!String.IsNullOrEmpty(image))
                 {
                     category.Photo = new Photo() { url = image };
+                    category.ExtraPhotos = new List<Photo>();
+                    foreach (var pht in extraImages)
+                    {
+                        category.ExtraPhotos.Add(new Photo() { url = pht });
+                    }
                 }
             }
             SaveChanges();

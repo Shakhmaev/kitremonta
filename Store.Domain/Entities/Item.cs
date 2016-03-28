@@ -147,6 +147,7 @@ namespace Store.Domain.Entities
         public int? ParentID { get; set; }
         public virtual Category Parent { get; set; }
         public virtual Photo Photo { get; set; }
+        public virtual ICollection<Photo> ExtraPhotos { get; set; }
         public virtual ICollection<Category> SubCategories { get; set; }
         public virtual ICollection<Item> items { get; set; }
 

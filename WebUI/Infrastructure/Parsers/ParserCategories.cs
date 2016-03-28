@@ -3,8 +3,10 @@ using Store.Domain.Abstract;
 using Store.Domain.Entities;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Hosting;
 
@@ -61,9 +63,43 @@ namespace Store.WebUI.Infrastructure.Parsers
 
                     image = imagesnames.FirstOrDefault(x => x.ToLower().Contains(image.ToLower()));
 
+                    string[] imagesphys = new string[] { };
+
+                    string[] str = workSheet.Cells[rowIterator, 4].Value.ToString().Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries)
+                        .ToArray();
+
+                    foreach (var st in str)
+                        {
+                            imagesphys = imagesphys.Union(imagesnames.Where(x => x.ToLower().Contains(st.ToLower())
+                                && !x.ToLower().Contains("-mini"))).ToArray();
+                        }
+
+
+                    if (imagesphys.Length > 0)
+                        {
+                            Image miniimg = Parser1.MakeMini(Image.FromFile(image), 300, 200);
+
+                            string path = Path.GetDirectoryName(image);
+                            string fname = Path.GetFileNameWithoutExtension(image);
+                            string ext = Path.GetExtension(image);
+                            string fullname = path + "\\" + fname + "-mini" + ext;
+                            /*if (File.Exists(fullname))
+                            {
+                                File.Delete(fullname);
+                            }*/
+                            miniimg.Save(fullname);
+                        }
+
+                    List<string> extraImages = new List<string>();
+
+                    for (int i = 0; i < imagesphys.Count(); i++)
+                    {
+                        extraImages.Add(imagesphys.ElementAt(i).Replace(ImgPath, String.Empty));
+                    }
+
                     image = image.Replace(ImgPath, String.Empty);
 
-                    repos.UpdateCategoryFromXls(ctg, image);
+                    repos.UpdateCategoryFromXls(ctg, image, extraImages);
 
                 }
                 pack.Dispose();

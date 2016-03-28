@@ -24,7 +24,7 @@ namespace Store.Domain.Abstract
         Category SubCategoryGetOrCreate(Category category);
         void SaveOrUpdateItemFromXlsOne(Item item, List<string[]> hierarchy, List<string[]> Names, IEnumerable<string> images);
 
-        void UpdateCategoryFromXls(Category ctg, string image);
+        void UpdateCategoryFromXls(Category ctg, string image, List<string> extraImages);
         Item DeleteItem(int Id);
 
         void SaveChanges();

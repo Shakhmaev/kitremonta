@@ -215,7 +215,7 @@ namespace Store.WebUI.Infrastructure.Parsers
             return messages;
         }
 
-        private Image MakeMini(Image img, int x1, int y1) {
+        public static Image MakeMini(Image img, int x1, int y1) {
             int x2 = 3;
             int y2 = 3;
             if (img.Width >= img.Height)
@@ -237,7 +237,7 @@ namespace Store.WebUI.Infrastructure.Parsers
             img = ScaleImage(img, x1, y1);
             return img;
         }
-        private Image ScaleImage(Image source, int width, int height)
+        private static Image ScaleImage(Image source, int width, int height)
         {
 
             Image dest = new Bitmap(width, height);

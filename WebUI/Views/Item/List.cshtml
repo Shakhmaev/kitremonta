@@ -64,7 +64,7 @@
 
     <div class="container-fluid">
         <div style="border-top:2px solid #222222; margin-top:10px;">
-            @if (Model.currentctg != null && Model.currentctg.Text != null)
+            @if (Model.currentctg != null && Model.currentctg.Text != null && Model.currentctg.Type!="show_collections")
             {
                 <text><strong><p>В интерьере + варианты оформления</p></strong></text>
                 foreach (var phto in Model.currentctg.ExtraPhotos)
@@ -104,8 +104,8 @@
                     <h4>Отображать по </h4>
                     @Html.DropDownListFor(
              x => x.filters.PageSize,
-             new SelectList(new List<SelectListItem>(){ new SelectListItem(){ Text="3", Value="3"},
-             new SelectListItem(){ Text="5", Value="5"}, new SelectListItem(){ Text="20", Value="20"}, new SelectListItem(){ Text="50", Value="50"}}, "Value", "Text", Model.filters.PageSize))
+             new SelectList(new List<SelectListItem>(){
+             new SelectListItem(){ Text="5", Value="5"}, new SelectListItem(){ Text="12", Value="12"}, new SelectListItem(){ Text="20", Value="20"}, new SelectListItem(){ Text="50", Value="50"}}, "Value", "Text", Model.filters.PageSize))
                     <h4> на странице</h4>
                 </div>
                 <div class="col-sm-2 col-xs-4 col-lg-12">
@@ -145,18 +145,21 @@
         </div>
 
         <div class="load col-xs-12 col-lg-10">
-            @Html.Action("LoadSummary", "Item", new { category = Model.CurrentCategory, filters = Model.filters })
         </div>
     </div>
 
 @section Scripts {
     <script type="text/javascript">
+    loadsummary(initsum(1));
+    loadsummary.begin();
+
     var args = {
         higher: '@Model.HigherPrice',
         lower: '@Model.LowerPrice'
     };
     initslider(args);
 
+    
     function initsum(pg) {
         var br = $('#brands option:selected').map(function (a, item) { return item.value; })
         delete br.prevObject;
@@ -227,6 +230,8 @@
             conf.hot = true;
         }
         else conf.hot = false;
+
+        conf.loadimg = '@Url.Content("~/Content/Styles/Img/load.gif")';
 
         return conf;
     }

@@ -1,6 +1,6 @@
 ﻿@model Store.Domain.Entities.Cart
 
-<li class="dropdown">
+
     <a href="/Cart/Index"  role="button" aria-expanded="false" id="cartlink">
         <span class="img-cart"></span> Корзина<br>Товаров: <span class="badge">@Model.Lines.Sum(x => x.Quantity)</span> 
     </a>
@@ -11,7 +11,7 @@
         <div class="over">
             @foreach (var c in Model.Lines)
             {
-                <li>
+                <li class="item-cart-li" data-liid="@c.Item.Id">
                     <span class="item">
                         <span class="row">
                             <span class="col-xs-6 item-left">
@@ -20,6 +20,7 @@
                             <span class="col-xs-6">
                                 @using (Ajax.BeginForm("RemoveFromCart", "Cart", new AjaxOptions()
                                 {
+                                    //OnBegin = "RemoveFromCart("+c.Item.Id+")",
                                     OnSuccess = "RefreshCartInfo",
                                 }))
                                 {
@@ -75,7 +76,6 @@
             </div>
         }
     </ul>
-</li>
 <script>
         $("#clearcart").on('click', function (e) {
             $.ajax({

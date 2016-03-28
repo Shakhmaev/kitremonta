@@ -31,7 +31,6 @@ namespace Store.WebUI.Controllers
             IndexViewModel model;
             model = new IndexViewModel
             {
-
                 DiscountItems = repository.Items.Where(x=>x.DiscountPercent>0).Take(12),
                 LastItems = repository.Items.Reverse().Take(12)
             };
@@ -39,13 +38,21 @@ namespace Store.WebUI.Controllers
             return View(model);
         }
 
-        public ViewResult List(string category, int page = 1, int PageSize = 20)
+        public ActionResult ItemSummary(int id)
+        {
+            Item item = repository.Items.FirstOrDefault(x => x.Id == id);
+            return PartialView("ItemSummary",item);
+        }
+
+        public ViewResult List(string category, int page = 1, int PageSize = 12)
         {
             ItemsListViewModel model = new ItemsListViewModel();
             model.Side = new List<KeyValuePair<string, IEnumerable<Category>>>();
             IEnumerable<string> Brands = new List<string>();
             IEnumerable<string> Countries = new List<string>();
             IEnumerable<string> Purposes = new List<string>();
+
+            Console.WriteLine("123");
 
             if (category != (string)null)
             {

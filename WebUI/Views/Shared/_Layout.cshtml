@@ -32,8 +32,11 @@
                 $.ajax({
                     type: "GET",
                     url: "/Cart/Summary/",
+                    beforeSend: function() {
+                        $("#cartInfo>.dropdown .over").slice(2).html("<img src='@Url.Content("~/Content/Styles/Img/load.gif")'/>");
+                    },
                     success: function (viewHTML) {
-                        $("#cartInfo").html(viewHTML);
+                        $("#cartInfo>.dropdown").html(viewHTML);
                     },
                     error: function (errorData) { onError(errorData); }
                 });
@@ -41,6 +44,9 @@
         function AddItemToCart() {
             ModalButtonsAdd();
             RefreshCartInfo();
+        }
+        function RemoveFromCart(id) {
+            $(".item-cart-li[data-liid=" + id + "]").fadeToggle(200);
         }
 
     </script>
@@ -100,7 +106,9 @@
                             <div class="bolt rotate" style="right: 0px; left: auto;"></div>
                             <div class="bolt" style="right: 0px; left: auto; top:auto; bottom:0px;"></div>
                             <div class="bolt rotate" style="top:auto; bottom:0px;"></div>*@
-                        @Html.Action("Summary", "Cart")
+                        <li class="dropdown">
+                            @Html.Action("Summary", "Cart")
+                        </li>
                     </ul>
                 </div>
             </div>

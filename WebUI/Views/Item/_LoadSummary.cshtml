@@ -14,8 +14,7 @@
     <div class="row">
         @foreach (var p in @Model.Items)
         {
-            <div class="col-sm-4 col-md-3 col-xs-12 block">
-                @Html.Partial("ItemSummary", p, new ViewDataDictionary { { "summaryfor", "allItems" } })
+            <div class="col-sm-4 col-md-3 col-xs-12 block" data-itemid="@p.Id">
             </div>
         }
     </div>
@@ -29,3 +28,22 @@
 <div class="col-xs-12 pagin-center">
     @Html.PageLinks(Model.PagingInfo, x => Url.Action("LoadSummary", new {category = Model.CurrentCategory, page = x, PageSize = 3 }))
 </div>
+
+
+<script type="text/javascript">
+    $(".block").each(function (i, v) {
+            $.ajax({
+                url: '@Url.Action("ItemSummary")' + '?id=' + $(v).attr('data-itemid'),
+                beforesend: function() {
+                    $(v).html("<img src='@Url.Content("~/Content/Styles/Img/load.gif")'/>");
+                },
+                success: function (data) {
+                    $(v).html(data);
+                    $(v).find(".item-sum-block").fadeIn(700);
+                },
+                failure: function (response) {
+
+                }
+            });
+        });
+</script>

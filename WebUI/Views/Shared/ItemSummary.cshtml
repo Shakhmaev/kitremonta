@@ -1,5 +1,4 @@
 ﻿@model Store.Domain.Entities.Item
-@using Store.WebUI.Models;
 
 
     @if (Model.IsHot)
@@ -28,13 +27,13 @@
     @if (ViewBag.lastItems)
     {
         <text>
-            <div class="well item-sum-block" id="@Model.Id">
+            <div class="well item-sum-block" style="display:none" id="@Model.Id">
         </text>
     }
     else
     {
         <text>
-            <div class="well item-sum-block" id="@Model.Id">
+            <div class="well item-sum-block" style="display:none" id="@Model.Id">
         </text>
     }
 

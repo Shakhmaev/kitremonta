@@ -695,6 +695,7 @@ div.ItemDiv {
 }
 
 .details .center-block {
+    min-width:0;
     width:100%;
 }
 
@@ -983,7 +984,6 @@ div.image > a > img{
 }
 
 .zoomWrapper > img {
-    padding:0px;
 }
 
 .main-img .img-thumbnail {

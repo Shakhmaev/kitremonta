@@ -362,6 +362,11 @@ $(document).ready(function () {
 
     $(document).on('click', ".linkbtn", function (event) {
         event.preventDefault(); //проверка на нажатие уже включенной страницы
+        $("html,body").finish();
+        $("html,body").animate({
+            scrollTop: $(".load").offset().top
+        },
+            "slow");
         var conf = initsum(this.id);
         loadsummary(conf);
         loadsummary.begin();
@@ -459,12 +464,11 @@ function loadsummary (conf) {
                 },
                 page: conf.page
             },
+            beforeSend: function(){
+                $(".load").html("<div class='container-fluid center-block' style='height:200px; margin-top:100px;'><img src='"+conf.loadimg+"'/></div>")
+            },
             success: function (data) {
                 $(".load").html(data);
-                $("html,body").finish();
-                $("html,body").animate({
-                    scrollTop: $(".load").offset().top },
-                    "slow");
             },
             error: function (response) {
             //alert(response);  

@@ -3,6 +3,7 @@ using Store.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -60,6 +61,25 @@ namespace Store.WebUI.Controllers
                 return Url.Content("~/Uploads/CategoryImages/" + ctg.Photo.url);
             }
             else return null;
+        }
+
+        public string GetCategoryImageMini(int id)
+        {
+            Category ctg = repository.Categories.FirstOrDefault(x => x.CategoryId == id);
+
+            if (ctg != null && ctg.Photo != null)
+            {
+                return Url.Content("~/Uploads/CategoryImages/"
+                         + Path.GetDirectoryName(ctg.Photo.url) + "/"
+                         + Path.GetFileNameWithoutExtension(ctg.Photo.url) + "-mini"
+                         + Path.GetExtension(ctg.Photo.url));
+            }
+            else return null;
+        }
+
+        public string GetCategoryExtraImage(string url)
+        {
+            return Url.Content("~/Uploads/CategoryImages/" + url);
         }
 	}
 }

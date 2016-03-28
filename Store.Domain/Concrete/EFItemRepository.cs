@@ -214,7 +214,8 @@ namespace Store.Domain.Concrete
                 category.Text = ctg.Text;
                 if (!String.IsNullOrEmpty(image))
                 {
-                    category.Photo = new Photo() { url = image };
+                    if (!String.IsNullOrEmpty(image))
+                        category.Photo = new Photo() { url = image };
                     category.ExtraPhotos = new List<Photo>();
                     foreach (var pht in extraImages)
                     {

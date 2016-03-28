@@ -52,20 +52,23 @@ namespace Store.WebUI.Infrastructure.Parsers
                 {
                     Category ctg = new Category
                     {
-                        Text = workSheet.Cells[rowIterator, 2].Value.ToString(),
+                        Text = workSheet.Cells[rowIterator, 2].Value!=null? workSheet.Cells[rowIterator, 2].Value.ToString():"",
                         Description = workSheet.Cells[rowIterator, 1].Value.ToString(),
                     };
                     string ImgPath = HostingEnvironment.MapPath("~/Uploads/CategoryImages/");
 
                     var imagesnames = Directory.EnumerateFiles(ImgPath, "*.*", SearchOption.AllDirectories);
 
-                    string image = workSheet.Cells[rowIterator, 3].Value.ToString();
+                    string image = workSheet.Cells[rowIterator, 3].Value!=null? workSheet.Cells[rowIterator, 3].Value.ToString():"";
 
                     image = imagesnames.FirstOrDefault(x => x.ToLower().Contains(image.ToLower()));
 
                     string[] imagesphys = new string[] { };
 
-                    string[] str = workSheet.Cells[rowIterator, 4].Value.ToString().Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries)
+                    string[] str = new string[] { };
+
+                    if (workSheet.Cells[rowIterator, 4].Value!=null)
+                    str = workSheet.Cells[rowIterator, 4].Value.ToString().Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries)
                         .ToArray();
 
                     foreach (var st in str)
@@ -75,7 +78,7 @@ namespace Store.WebUI.Infrastructure.Parsers
                         }
 
 
-                    if (imagesphys.Length > 0)
+                    if (!String.IsNullOrEmpty(image))
                         {
                             Image miniimg = Parser1.MakeMini(Image.FromFile(image), 300, 200);
 
@@ -88,6 +91,7 @@ namespace Store.WebUI.Infrastructure.Parsers
                                 File.Delete(fullname);
                             }*/
                             miniimg.Save(fullname);
+                            image = image.Replace(ImgPath, String.Empty);
                         }
 
                     List<string> extraImages = new List<string>();
@@ -96,8 +100,6 @@ namespace Store.WebUI.Infrastructure.Parsers
                     {
                         extraImages.Add(imagesphys.ElementAt(i).Replace(ImgPath, String.Empty));
                     }
-
-                    image = image.Replace(ImgPath, String.Empty);
 
                     repos.UpdateCategoryFromXls(ctg, image, extraImages);
 

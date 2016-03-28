@@ -179,6 +179,10 @@ html {
     list-style:disc;
 }
 
+.categories > ul > li > ul > li > ul > li > ul > li > ul > li > ul > li{
+    display:none;
+}
+
 .categories > ul > li > ul > li > ul > li > a {
     font-size:1.3em;
     font-weight:bold;
@@ -963,6 +967,7 @@ div.image > a > img{
 
 .details-container{
     max-width:1000px;
+    width:100%;
 }
 
 .row.item-content {

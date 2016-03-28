@@ -61,7 +61,7 @@ namespace Store.WebUI.Infrastructure.Parsers
 
                     string image = workSheet.Cells[rowIterator, 3].Value!=null? workSheet.Cells[rowIterator, 3].Value.ToString():"";
 
-                    image = imagesnames.FirstOrDefault(x => x.ToLower().Contains(image.ToLower()));
+                    image = imagesnames.FirstOrDefault(x => x.ToLower().Contains(image.ToLower()) && !x.ToLower().Contains("-mini"));
 
                     string[] imagesphys = new string[] { };
 

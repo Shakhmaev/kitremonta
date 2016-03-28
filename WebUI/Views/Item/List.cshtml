@@ -50,26 +50,27 @@
         @if (Model.currentctg != null && Model.currentctg.Text != null)
         {
             <div class="center-block"><h1>@Model.currentctg.Description</h1></div>
+            if (Model.currentctg.Photo != null)
+            {
+                <img class="img-thumbnail center-block" style="width:auto;" src="@Html.Action("GetCategoryImage","ImageView",new { id = Model.currentctg.CategoryId})" />
+            }
             if (Model.currentctg.Text != null)
             {
                 <div class="text-info">@Model.currentctg.Text</div>
-            }
-            if (Model.currentctg.Photo != null)
-            {
-                <img class="img-thumbnail" src="@Html.Action("GetCategoryImage","ImageView",new { id = Model.currentctg.CategoryId})" />
             }
 
         }
     </div>
 
-    <div class="container">
-        <div>
+    <div class="container-fluid">
+        <div style="border-top:2px solid #222222; margin-top:10px;">
             @if (Model.currentctg != null && Model.currentctg.Text != null)
             {
+                <text><strong><p>В интерьере + варианты оформления</p></strong></text>
                 foreach (var phto in Model.currentctg.ExtraPhotos)
                 {
                     <div class="col-xs-6 col-md-4 col-lg-3">
-                        <img class="img-thumbnail" style="max-height:300px;max-width:300px;" src="@Html.Action("GetCategoryImageMini","ImageView",new { id = phto.url })" />
+                        <img class="img-thumbnail" style="max-height:300px;max-width:300px;" src="@Html.Action("GetCategoryExtraImage","ImageView",new { url = phto.url })" />
                     </div>
                 }
             }
@@ -89,7 +90,7 @@
             }
         </div>
         <div class="col-xs-12">
-            <h2>Товары в данном разделе и подразделах</h2>
+            <h2>Товары в разделе @(Model.currentctg!=null?Model.currentctg.Description:"")</h2>
         </div>
         <div class="container-fluid list-top withbackgr col-lg-2 col-xs-12">
             <div class="row"><label>Фильтрация</label></div>

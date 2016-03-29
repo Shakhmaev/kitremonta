@@ -2,7 +2,7 @@
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewBag.Title = Model.Name;
+    ViewBag.Title = Model.Brand + " - " + Model.Name;
 }
 
 @section HScripts {
@@ -13,10 +13,7 @@
     <h2>Описание товара</h2>
     <div class="details">
             <div class="col-xs-12">
-                <h3>
-                    <strong class="h3">@Model.Name (артикул @Model.article)</strong>
-                </h3>
-                
+                    <h1><strong>@Model.Name</strong> (артикул @Model.article)</h1>
             </div>
             <div class="col-xs-12">
                 <h3>

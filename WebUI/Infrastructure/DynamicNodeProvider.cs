@@ -21,7 +21,7 @@ namespace Store.WebUI.Infrastructure
             IEnumerable<Category> categories = repos.Categories.Where(x => x.ParentID == null);
             foreach (var cat in categories)
             {
-                DynamicNode Dnode = new DynamicNode(Convert.ToString(cat.CategoryId), "Home", cat.Description, cat.Name);
+                DynamicNode Dnode = new DynamicNode(Convert.ToString(cat.CategoryId), "Home", cat.Description, cat.Description);
                 Dnode.RouteValues.Add("category",cat.Name);
                 DynamicNode all = new DynamicNode(Convert.ToString(cat.CategoryId) + "_all", Dnode.Key, "Все", "Все");
                 all.RouteValues.Add("category", cat.Name);
@@ -40,7 +40,7 @@ namespace Store.WebUI.Infrastructure
         IEnumerable<DynamicNode> GetSubCategNodes(Category subcateg)
         {   
             DynamicNode node = new DynamicNode(Convert.ToString(subcateg.CategoryId),
-                    Convert.ToString(subcateg.Parent.CategoryId), subcateg.Description, subcateg.Name);
+                    Convert.ToString(subcateg.Parent.CategoryId), subcateg.Description, subcateg.Description);
             node.RouteValues.Add("category", subcateg.Name);
             yield return node;
             foreach (var sub in subcateg.SubCategories)
@@ -62,7 +62,7 @@ namespace Store.WebUI.Infrastructure
         }
         public override IEnumerable<DynamicNode> GetDynamicNodeCollection(ISiteMapNode node)
         {
-            IEnumerable<Item> items = repos.Items;
+            IEnumerable<Item> items = repos.Items.GroupBy(x=>x.article).Select(g=>g.FirstOrDefault());
             
             foreach (var item in items)
             {

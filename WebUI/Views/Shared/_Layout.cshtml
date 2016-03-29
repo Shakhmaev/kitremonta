@@ -24,6 +24,7 @@
         <script src="~/signalr/hubs" type="text/javascript"></script>
     }
     <title>@ViewBag.Title</title>
+    @Html.MvcSiteMap().MetaRobotsTag()
     @RenderSection("HScripts", false)
 </head>
 <body>

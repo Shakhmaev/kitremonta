@@ -3,11 +3,12 @@
             xmlns="http://mvcsitemap.codeplex.com/schemas/MvcSiteMap-File-4.0"
             xsi:schemaLocation="http://mvcsitemap.codeplex.com/schemas/MvcSiteMap-File-4.0 MvcSiteMapSchema.xsd">
 
-  <mvcSiteMapNode title="Главная" key="Home" controller="Item" action="Index" cacheResolvedUrl="false">
+  <mvcSiteMapNode title="Главная" key="Home" controller="Item" action="Index">
     <mvcSiteMapNode title="Все товары" action="List" controller="Item" visibility="MenuHelper, SiteMapPathHelper, !*" />
-    <mvcSiteMapNode title="Поиск" action="Search" controller="Item" visibility="SiteMapPathHelper, !*" />
-    <mvcSiteMapNode title="Корзина" controller="Cart" action="Index" visibility="SiteMapPathHelper, !*"/>
-    <mvcSiteMapNode title="Name" controller="Item" action="List" cacheResolvedUrl="false" dynamicNodeProvider="Store.WebUI.Infrastructure.DynamicNodeProvider, WebUI"/>
+    <mvcSiteMapNode title="Поиск" action="Search" controller="Item" visibility="SiteMapPathHelper, !*" metaRobotsValues="noindex" />
+    <mvcSiteMapNode title="Корзина" controller="Cart" action="Index" visibility="SiteMapPathHelper, !*" metaRobotsValues="noindex"/>
+    <mvcSiteMapNode title="Description" controller="Item" action="List" dynamicNodeProvider="Store.WebUI.Infrastructure.DynamicNodeProvider, WebUI"/>
+    <mvcSiteMapNode title="Name" controller="Item" action="ItemDetails" dynamicNodeProvider="Store.WebUI.Infrastructure.DynamicItemsNodeProvider, WebUI" visibility="SiteMapPathHelper, XmlSiteMapResult, !*"/>
   </mvcSiteMapNode>
 
 </mvcSiteMap>

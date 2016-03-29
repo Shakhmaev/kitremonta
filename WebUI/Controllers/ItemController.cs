@@ -52,8 +52,6 @@ namespace Store.WebUI.Controllers
             IEnumerable<string> Countries = new List<string>();
             IEnumerable<string> Purposes = new List<string>();
 
-            Console.WriteLine("123");
-
             if (category != (string)null)
             {
                 var ctg = repository.Categories.FirstOrDefault(x => x.Name == category);
@@ -343,8 +341,7 @@ namespace Store.WebUI.Controllers
         }
 
 
-        [MvcSiteMapNodeAttribute(DynamicNodeProvider = "Store.WebUI.Infrastructure.DynamicItemsNodeProvider, WebUI", 
-            Attributes = @"{ ""visibility"": ""SiteMapPathHelper, !*"" }")]
+        
          public ViewResult ItemDetails(int id)
         {
             Item item = repository.Items.Where(x => x.Id == id).FirstOrDefault();

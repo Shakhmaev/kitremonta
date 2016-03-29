@@ -5,12 +5,18 @@
     @{
         if (Model.Side.Count() > 0)
         {
+            if (Model.Side.ElementAt(2).Value.ElementAt(0).Description != MvcSiteMapProvider.SiteMaps.Current.CurrentNode.Title){
             ViewBag.Title = Model.Side.ElementAt(2).Value.ElementAt(0).Description + " - "
                 + MvcSiteMapProvider.SiteMaps.Current.CurrentNode.Title;
+            }
+            else
+            {
+                ViewBag.Title = Model.Side.ElementAt(2).Value.ElementAt(0).Description;
+            }
         }
         else
         {
-            ViewBag.Title = "Все товары";
+            ViewBag.Title = "Каталог товаров для дома и ремонта: керамическая плитка, керамогранит, сантехника, обои, напольные покрытия";
         }
     }
 
@@ -59,6 +65,14 @@
                 <div class="text-info">@Model.currentctg.Text</div>
             }
 
+        }
+        else if (Model.currentctg!=null)
+        {
+            <h1><strong>@Model.currentctg.Description</strong></h1>
+        }
+        else
+        {
+            <h1><strong>Каталог товаров для дома и ремонта</strong></h1>
         }
     </div>
 

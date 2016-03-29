@@ -55,12 +55,7 @@ namespace Store.WebUI.Controllers
 
         public string GetCategoryImage(int id)
         {
-            Category ctg = repository.Categories.FirstOrDefault(x => x.CategoryId == id);
-            if (ctg != null && ctg.Photo!=null)
-            {
-                return Url.Content("~/Uploads/CategoryImages/" + ctg.Photo.url);
-            }
-            else return null;
+            return Url.Content("~/Uploads/CategoryImages/" + repository.GetCategoryImageUrl(id));
         }
 
         public string GetCategoryImageMini(int id)
@@ -69,10 +64,8 @@ namespace Store.WebUI.Controllers
 
             if (ctg != null && ctg.Photo != null)
             {
-                return Url.Content("~/Uploads/CategoryImages/"
-                         + Path.GetDirectoryName(ctg.Photo.url) + "/"
-                         + Path.GetFileNameWithoutExtension(ctg.Photo.url) + "-mini"
-                         + Path.GetExtension(ctg.Photo.url));
+                return Url.Content("~/Uploads/CategoryImages/" + 
+                         repository.GetCategoryImageMiniUrl(ctg.CategoryId));
             }
             else return null;
         }

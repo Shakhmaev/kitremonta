@@ -1,28 +1,44 @@
 ﻿
-
-<div id="carousel" class="carousel slide">
-    <ol class="carousel-indicators hidden-xs">
-    	<li class="active" data-target="#carousel" data-slide-to="0"></li>
-        <li data-target="#carousel" data-slide-to="1"></li>
-        <li data-target="#carousel" data-slide-to="2"></li>
-    </ol>
-
-    <div class="carousel-inner">
-        <div class="item carousel-img active">
-            <img src="https://pop-music.ru/images/header/banner/1.jpg" alt="">
-        </div>
-        <div class="item carousel-img">
-            <img src="https://pop-music.ru/images/header/banner/13.jpg"  alt="">
-        </div>
-        <div class="item carousel-img">
-            <img src="https://pop-music.ru/images/header/banner/5.jpg" alt="">
-        </div>
+<div class="jcarousel-wrapper">
+    <div class="jcarousel">
+        <ul>
+        </ul>
     </div>
-
-    <a href="#carousel" class="left carousel-control" data-slide="prev">
-        <span class="glyphicon glyphicon-chevron-left"></span>
-    </a>
-    <a href="#carousel" class="right carousel-control" data-slide="next">
-        <span class="glyphicon glyphicon-chevron-right"></span>
-    </a>
+    <a href="#" class="jcarousel-control-prev" >‹</a>
+    <a href="#" class="jcarousel-control-next" >›</a>
+    <div class="jcarousel-pagination"></div>
 </div>
+
+<script type="text/javascript">
+    $(function() {
+        $('.jcarousel').jcarousel({
+            
+        });
+
+        $('.jcarousel-prev').jcarouselControl({
+            target: '-=1'
+        });
+
+        $('.jcarousel-next').jcarouselControl({
+            target: '+=1'
+        });
+
+        $('.jcarousel-pagination').jcarouselPagination({
+            item: function (page) {
+                return '<a href="#' + page + '">' + page + '</a>';
+            }
+        });
+    });
+    function reloadCarousel(data) {
+        $(data).each(function (i, k) {
+            $('.jcarousel ul')
+                .append('<li><a href="' + k[0] + '"><img src="' + k[1] + '"/></a></li>');
+        });
+        $('.jcarousel').jcarousel('reload');
+        $('.jcarousel-pagination').jcarouselPagination({
+            item: function (page) {
+                return '<a href="#' + page + '">' + page + '</a>';
+            }
+        });
+    }
+</script>

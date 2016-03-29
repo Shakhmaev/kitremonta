@@ -30,5 +30,9 @@ namespace Store.Domain.Abstract
         void SaveChanges();
 
         void DeleteExtraPhoto(int Id, int PhotoId);
+
+        string GetCategoryImageUrl(int id);
+
+        string GetCategoryImageMiniUrl(int id);
     }
 }

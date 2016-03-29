@@ -189,6 +189,8 @@
     <Content Include="Content\Styles\Img\redux2.png" />
     <Content Include="Content\Styles\Img\strelka.png" />
     <Content Include="Content\Styles\ionicons.min.css" />
+    <Content Include="Content\Styles\jCarouselStyles.css" />
+    <Content Include="Content\Styles\lity.min.css" />
     <Content Include="Content\Styles\nouislider.min.css" />
     <Content Include="Content\Styles\style.css" />
     <Content Include="Content\Styles\Styles1.css" />
@@ -229,6 +231,7 @@
     <Content Include="favicon.ico" />
     <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Scripts\lity.min.js" />
     <Content Include="Global.asax" />
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
@@ -256,6 +259,10 @@
     <None Include="Properties\PublishProfiles\IStore.pubxml" />
     <None Include="Properties\PublishProfiles\kitremonta.pubxml" />
     <None Include="Properties\PublishProfiles\spbguitars.pubxml" />
+    <Content Include="Scripts\jcarousel.core_plugin.js" />
+    <Content Include="Scripts\jcarousel.autoscroll.js" />
+    <Content Include="Scripts\jcarousel.control.js" />
+    <Content Include="Scripts\jcarousel.responsive.js" />
     <None Include="Scripts\jquery-2.2.0.intellisense.js" />
     <Content Include="Infrastructure\Bootstrap-image-gallery\css\bootstrap-image-gallery.css" />
     <Content Include="Infrastructure\Bootstrap-image-gallery\css\bootstrap-image-gallery.min.css" />
@@ -268,6 +275,7 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\common.js" />
+    <Content Include="Scripts\jcarousel.core.js" />
     <Content Include="Scripts\jquery-2.2.0.js" />
     <Content Include="Scripts\jquery-2.2.0.min.js" />
     <Content Include="Scripts\jquery-2.2.0.min.map" />
@@ -285,6 +293,7 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\megamenu.js" />
     <Content Include="Scripts\nouislider.min.js" />
+    <Content Include="Scripts\jcarousel.pagination.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

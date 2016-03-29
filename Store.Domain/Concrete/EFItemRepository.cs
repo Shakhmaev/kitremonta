@@ -249,6 +249,30 @@ namespace Store.Domain.Concrete
             return dbEntry;
         }
 
+        public string GetCategoryImageUrl(int id)
+        {
+            Category ctg = Categories.FirstOrDefault(x => x.CategoryId == id);
+            if (ctg != null && ctg.Photo != null)
+            {
+                return ctg.Photo.url;
+            }
+            else return null;
+        }
+
+        public string GetCategoryImageMiniUrl(int id)
+        {
+            Category ctg = Categories.FirstOrDefault(x => x.CategoryId == id);
+
+            if (ctg != null && ctg.Photo != null)
+            {
+                return 
+                         Path.GetDirectoryName(ctg.Photo.url) + "/"
+                         + Path.GetFileNameWithoutExtension(ctg.Photo.url) + "-mini"
+                         + Path.GetExtension(ctg.Photo.url);
+            }
+            else return null;
+        }
+
         public void Dispose()
         {
             if (context != null)

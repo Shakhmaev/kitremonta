@@ -436,5 +436,19 @@ namespace Store.WebUI.Controllers
             model.search = search;
             return View(model);
         }
+
+        public JsonResult GetRandomCollections()
+        {
+            Random r = new Random();
+            int sk = r.Next(0,repository.Categories.Count()-7);
+            var ctgs = repository.Categories.Skip(sk).Take(6);
+            List<string[]> list = new List<string[]>();
+            foreach (var ctg in ctgs)
+            {
+                list.Add(new string[] { Url.Action("List", "Item", new { category = ctg.Name }),
+                    Url.Content("~/Uploads/CategoryImages/" + repository.GetCategoryImageMiniUrl(ctg.CategoryId)) });
+            }
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
 	}
 }

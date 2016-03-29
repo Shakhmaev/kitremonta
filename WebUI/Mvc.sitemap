@@ -9,6 +9,9 @@
     <mvcSiteMapNode title="Корзина" controller="Cart" action="Index" visibility="SiteMapPathHelper, !*" metaRobotsValues="noindex"/>
     <mvcSiteMapNode title="Description" controller="Item" action="List" dynamicNodeProvider="Store.WebUI.Infrastructure.DynamicNodeProvider, WebUI"/>
     <mvcSiteMapNode title="Name" controller="Item" action="ItemDetails" dynamicNodeProvider="Store.WebUI.Infrastructure.DynamicItemsNodeProvider, WebUI" visibility="SiteMapPathHelper, XmlSiteMapResult, !*"/>
+    <mvcSiteMapNode title="Оформление заказа" action="Index" controller="Order" visibility="XmlSiteMapResult, !*" metaRobotsValues="noindex" />
+    <mvcSiteMapNode title="Вход" action="Login" controller="Auth" visibility="XmlSiteMapResult, !*" metaRobotsValues="noindex" />
+    <mvcSiteMapNode title="Регистрация" action="Register" controller="Auth" visibility="XmlSiteMapResult, !*" metaRobotsValues="noindex" />
   </mvcSiteMapNode>
 
 </mvcSiteMap>

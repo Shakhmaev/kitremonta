@@ -363,12 +363,13 @@ del {
 
 
 #gallery_01 {
+    margin-top:10px;
     text-align:center;
 }
 
 /*set a border on the images to prevent shifting*/ 
 #gallery_01 img{
-    border:4px solid white;
+    border:1px solid black;
 
 } /*Change the colour*/ 
 
@@ -376,7 +377,7 @@ del {
     text-decoration:none;
 }
 #gallery_01 .active img{
-    border:2px solid #333 !important;
+    border:3px solid #333 !important;
 } 
 
 #img_00 {
@@ -992,8 +993,9 @@ div.image > a > img{
    margin:auto;
    position:absolute;
    top: 0; left: 0; bottom: 0; right: 0;
-   border: none;
+   border: 1px solid black;
    box-shadow:none;
+   padding:0px;
 }
 
 /*/DETAILS FOR ITEM*/

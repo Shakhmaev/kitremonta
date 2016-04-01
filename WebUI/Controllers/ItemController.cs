@@ -452,3 +452,5 @@ namespace Store.WebUI.Controllers
         }
 	}
 }
+
+//TODO: керамическая плитка / керамогранит (совпадения в адресах)

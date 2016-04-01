@@ -135,21 +135,21 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    @{
-        var action = ViewContext.RouteData.Values["action"];
-        var controller = ViewContext.RouteData.Values["controller"];
-        
-        if (action != "Index" || controller != "Item") {
-            @Html.MvcSiteMap().SiteMapPath()
+        @{
+            var action = ViewContext.RouteData.Values["action"];
+            var controller = ViewContext.RouteData.Values["controller"];
+
+            if (action != "Index" || controller != "Item")
+            {
+                @Html.MvcSiteMap().SiteMapPath()
+            }
         }
-    }
 
-    <div class="container content">
         @RenderBody()
-    </div>
 
+
+    </div>
     <div class="container-fluid footer">
         <div class="row">
             <div class="col-sm-3">

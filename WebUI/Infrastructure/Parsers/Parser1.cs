@@ -66,14 +66,17 @@ namespace Store.WebUI.Infrastructure.Parsers
                             IsHot = false,
                             Price = Convert.ToInt32(workSheet.Cells[rowIterator, 8].Value),
                             CountInPack = workSheet.Cells[rowIterator, 11].Value.ToString(),
-                            PriceUnit = workSheet.Cells[rowIterator, 9].Value.ToString(),
                             Country = workSheet.Cells[rowIterator, 3].Value.ToString(),
                             Purpose = workSheet.Cells[rowIterator, 12].Value.ToString(),
                             Surface = workSheet.Cells[rowIterator, 13].Value.ToString(),
                             Picture = workSheet.Cells[rowIterator, 14].Value.ToString(),
                             Color = workSheet.Cells[rowIterator, 15].Value.ToString(),
                             Size = workSheet.Cells[rowIterator, 16].Value.ToString(),
+                            Weight = workSheet.Cells[rowIterator, 18].Value.ToString()
                         };
+
+                        var pru = workSheet.Cells[rowIterator, 9].Value.ToString();
+                        item.PriceUnit = pru.Contains("шт") ? "шт" : "м2";
 
                         string inpack = item.CountInPack.Replace('.', ',');
                         Regex reginpack = new Regex(@"^([0-9]+[,]*[0-9]*)*(.+[/\\]\s*)*([0-9]*)(.*)*");
@@ -154,30 +157,27 @@ namespace Store.WebUI.Infrastructure.Parsers
                         string[] str = workSheet.Cells[rowIterator, 17].Value.ToString().Split(',').ToArray();
 
 
-                        var imagesphys = new string[] { };
+                        //var imagesphys = new string[] { };
+
+                        var imagesphys = new List<string>();
 
                         foreach (var st in str)
                         {
                             imagesphys = imagesphys.Union(imagesnames.Where(x => x.ToLower().Contains(st.ToLower())
-                                && !x.ToLower().Contains("-mini"))).ToArray();
+                                && !x.ToLower().Contains("-mini"))).ToList();
 
                             foreach (var image in imagesphys.Skip(1).Where(x => !x.ToLower().Contains("-mini")))
                             {
-                                if (Regex.IsMatch(Path.GetFileNameWithoutExtension(image), @"_\d+"))
+                                if (Regex.IsMatch(Path.GetFileNameWithoutExtension(image), @"_\d+$"))
                                 {
+                                    imagesphys.Remove(image);
                                     File.Delete(image);
                                 }
                             }
                         }
 
-                        if (imagesphys.Length == 0)
-                        {
-                            imagesphys = imagesphys.Union(imagesnames.Where(x => x.ToLower().Contains(item.article.Replace(@"\", "").Replace(" ", "").ToLower())
-                                && !x.ToLower().Contains("-mini"))).ToArray();
-                        }
 
-
-                        if (imagesphys.Length > 0)
+                        if (imagesphys.Count > 0)
                         {
                             Image img = Image.FromFile(imagesphys[0]);
 
@@ -187,17 +187,16 @@ namespace Store.WebUI.Infrastructure.Parsers
                             string fname = Path.GetFileNameWithoutExtension(imagesphys[0]);
                             string ext = Path.GetExtension(imagesphys[0]);
                             string fullname = path + "\\" + fname + "-mini" + ext;
-                            /*if (File.Exists(fullname))
+                            if (!File.Exists(fullname))
                             {
-                                File.Delete(fullname);
-                            }*/
-                            miniimg.Save(fullname);
+                                miniimg.Save(fullname);
+                            }
 
                         }
 
                         List<string> images = new List<string>();
 
-                        for (int i = 0; i < imagesphys.Count(); i++)
+                        for (int i = 0; i < imagesphys.Count; i++)
                         {
                             images.Add(imagesphys.ElementAt(i).Replace(ImgPath, String.Empty));
                         }

@@ -6,6 +6,7 @@ using System.Linq;
 using System;
 using System.IO;
 using Microsoft.AspNet.Identity.EntityFramework;
+using System.Text.RegularExpressions;
 
 namespace Store.Domain.Concrete
 {
@@ -112,6 +113,7 @@ namespace Store.Domain.Concrete
             to.ItemType = from.ItemType;
             to.PriceForM2 = from.PriceForM2;
             to.Application = from.Application;
+            to.Weight = from.Weight;
         }
 
         public void SaveOrUpdateItemFromXlsOne(Item item, List<string[]> hierarchy, List<string[]> Names, IEnumerable<string> images)
@@ -158,20 +160,24 @@ namespace Store.Domain.Concrete
                         var cat = SubCategoryGetOrCreate(category);
                         if (j == hierarchy[i].Count() - 1)
                         {
-                            if (images.Count() > 0)
+                            if (item.Id > 0) { } //если этот товар уже есть не добавляем фото
+                            else
                             {
-                                item.Photos = new List<Photo>();
-                                foreach (var img in images)
+                                if (images.Count() > 0)
                                 {
-                                    item.Photos.Add(new Photo { url = img });
+                                    item.Photos = new List<Photo>();
+                                    foreach (var img in images)
+                                    {
+                                        item.Photos.Add(new Photo { url = img });
+                                    }
+                                }
+                                it = context.Items.FirstOrDefault(x => x.article == item.article);
+                                if (it != null)
+                                {
+                                    item = it;
                                 }
                             }
-                            it = context.Items.FirstOrDefault(x => x.article == item.article);
-                            if (it != null)
-                            {
-                                item = it;
-                            }
-                            cat.items.Add(item);
+                            cat.items.Add(item); //добавляем товар в категорию
                         }
                         current = cat;
                     }
@@ -192,7 +198,12 @@ namespace Store.Domain.Concrete
             {
                 if (category.ParentID > 0)
                 {
-                    categ = context.Categories.FirstOrDefault(x => x.Name == category.Name && x.ParentID == category.ParentID);
+                    var categs = context.Categories.Where(x => x.Name == category.Name && x.ParentID != category.ParentID);
+                    if (categs.Count() > 0) // если с одним именем больше одного, тогда сделать имя уникальным
+                    {
+                        category.Name = category.Name + "_" + (categs.Count()+1);
+                    }
+                    categ = Categories.FirstOrDefault(x=>x.Name == category.Name && x.ParentID == category.ParentID);
                 }
                 else categ = context.Categories.FirstOrDefault(x => x.Name == category.Name);
             }
@@ -208,18 +219,41 @@ namespace Store.Domain.Concrete
 
         public void UpdateCategoryFromXls(Category ctg, string image, List<string> extraImages)
         {
-            Category category = Categories.FirstOrDefault(x => x.Description == ctg.Description);
-            if (category != null)
+            var categories = Categories.Where(x => x.Description == ctg.Description);
+            if (categories.Count() > 0)
             {
-                category.Text = ctg.Text;
-                if (!String.IsNullOrEmpty(image))
+                foreach (var category in categories)
                 {
+                    category.Text = ctg.Text;
                     if (!String.IsNullOrEmpty(image))
-                        category.Photo = new Photo() { url = image };
-                    category.ExtraPhotos = new List<Photo>();
-                    foreach (var pht in extraImages)
                     {
-                        category.ExtraPhotos.Add(new Photo() { url = pht });
+                        if (!String.IsNullOrEmpty(image))
+                        {
+                            if (category.Photo == null)
+                                category.Photo = new Photo() { url = image };
+                            else
+                            {
+                                category.Photo.url = image;
+                            }
+                        }
+                        if (category.ExtraPhotos == null)
+                        {
+                            category.ExtraPhotos = new List<Photo>();
+                            foreach (var pht in extraImages)
+                            {
+                                category.ExtraPhotos.Add(new Photo() { url = pht });
+                            }
+                        }
+                        else
+                        {   
+                            foreach (var pht in extraImages)
+                            {
+                                if (!category.ExtraPhotos.Any(x => x.url == pht))
+                                {
+                                    category.ExtraPhotos.Add(new Photo() { url = pht });
+                                }
+                            }
+                        }
                     }
                 }
             }

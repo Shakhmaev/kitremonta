@@ -95,6 +95,8 @@ namespace Store.Domain.Entities
         public bool PriceForM2 { get; set; }
         [HiddenInput]
         public double SizeInM2 { get; set; }
+
+        public string Weight { get; set; }
         
 
         [Display(Name = "Скидка (%)")]

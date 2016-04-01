@@ -80,12 +80,12 @@
         <div style="border-top:2px solid #222222; margin-top:10px;">
             @if (Model.currentctg != null && Model.currentctg.Text != null && Model.currentctg.Type!="show_collections")
             {
-                <text><strong><p>В интерьере + варианты оформления</p></strong></text>
+                <text><strong><p>Коллекция в интерьере и варианты оформления</p></strong></text>
                 foreach (var phto in Model.currentctg.ExtraPhotos)
                 {
-                    <div class="col-xs-6 col-md-4 col-lg-3">
+                    <div class="col-xs-6 col-md-4 col-lg-3" style="text-align:center">
                         <a href="@Html.Action("GetCategoryExtraImage","ImageView",new { url = phto.url })" data-lity>
-                            <img class="img-thumbnail" src="@Html.Action("GetCategoryExtraImage","ImageView",new { url = phto.url })" />
+                            <img class="img-thumbnail" style="max-height:250px;" src="@Html.Action("GetCategoryExtraImage","ImageView",new { url = phto.url })" />
                         </a>
                     </div>
                 }

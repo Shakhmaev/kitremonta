@@ -22,7 +22,11 @@ html {
 
 .container.content {
     background:white;
-    border-right:1px solid black;
+    box-shadow:
+    0 10px 10px rgba(0, 0, 0, .3),
+    -23px 0 20px -23px rgba(0, 0, 0, .8),
+    23px 0 20px -23px rgba(0, 0, 0, .8),
+    0 0 40px rgba(0, 0, 0, .1) inset;
     border-left:1px solid black;
 }
 

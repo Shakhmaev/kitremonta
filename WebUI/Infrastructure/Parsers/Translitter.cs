@@ -85,6 +85,7 @@ namespace Store.WebUI.Infrastructure.Parsers
             transliter.Add(" ", "-");
             transliter.Add(@"/", "-");
             transliter.Add(@"\", "-");
+            transliter.Add("\"", "");
         }
         public string GetTranslit(string sourceText)
         {

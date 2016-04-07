@@ -249,6 +249,25 @@ namespace Store.WebUI.Controllers
             return RedirectToAction("Index");
         }
 
+        public ActionResult UploadKMPriceXls()
+        {
+            if (Request != null)
+            {
+                HttpPostedFileBase file = Request.Files["Sheet"];
+
+                ParserKMdealer p = new ParserKMdealer(file, repository);
+                List<string> msgs = p.Parse();
+                string str = "Количество ненайденных = " + msgs.Count;
+                
+                foreach (var msg in msgs)
+                {
+                    str = String.Concat(str, msg + "\r\n");
+                }
+                TempData["message"] = string.Format("Файл был загружен и обработан. {0} ", str);
+            }
+            return RedirectToAction("Index");
+        }
+
         public ActionResult UploadCategoriesXls()
         {
             if (Request != null)

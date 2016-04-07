@@ -19,6 +19,8 @@ namespace Store.WebUI.Models
         public IEnumerable<string> SelectedCountries { get; set; }
         public IEnumerable<string> AllPurposes { get; set; }
         public IEnumerable<string> SelectedPurposes { get; set; }
+        public IEnumerable<string> AllApplications { get; set; }
+        public IEnumerable<string> SelectedApplications { get; set; }
         public ItemsListFiltersModel() { }
         public ItemsListFiltersModel(int high, int low, int ps, string sort)
         {

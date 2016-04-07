@@ -18,7 +18,7 @@
 
     <div class="tabbable">
         <!-- Only required for left/right tabs -->
-        <ul class="nav nav-justified nav-tabs">
+        <ul class="nav nav-tabs">
             <li class="active"><a href="#tab2" data-toggle="tab">Новые</a></li>
             <li><a href="#tab1" data-toggle="tab">Распродажа</a></li>
         </ul>
@@ -106,27 +106,32 @@
         </div>
     </div>
 
-<script type="text/javascript">
-        $(".block").each(function (i, v) {
-            $.ajax({
-                url: '@Url.Action("ItemSummary")' + '?id=' + $(v).attr('data-itemid'),
-                beforesend: function() {
-                    $(v).html("<img src="+'@Url.Content("~/Content/Styles/Img/load.gif")'+"/>");
-                },
-                success: function (data) {
-                    $(v).html(data);
-                    $(v).find(".item-sum-block").fadeIn(700);
-                    //$(v).find(".item-sum-block").toggle(700);
-                },
-                failure: function (response) {
+<script type="text/javascript" src="~/Content/slick/slick.min.js"></script>
 
-                }
-            });
+<script type="text/javascript">
+    $(".block").each(function (i, v) {
+        $.ajax({
+            url: '@Url.Action("ItemSummary")' + '?id=' + $(v).attr('data-itemid'),
+            beforesend: function () {
+                $(v).html("<img src=" + '/Content/Styles/Img/load.gif' + "/>");
+            },
+            success: function (data) {
+                $(v).html(data);
+                $(v).find(".item-sum-block").fadeIn(700);
+                //$(v).find(".item-sum-block").toggle(700);
+            },
+            failure: function (response) {
+
+            }
         });
+    });
 
     $(function () {
         $.ajax({
             url: '@Url.Action("GetRandomCollections","Item")',
+            beforeSend: function () {
+                $(".jcarousel-wrapper").show('slow');
+            },
             success: function (data){
                 reloadCarousel(data);
             }

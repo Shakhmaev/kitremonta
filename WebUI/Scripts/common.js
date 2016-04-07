@@ -460,7 +460,8 @@ function loadsummary (conf) {
                     SortBy: conf.sort,
                     SelectedBrands: conf.brands,
                     SelectedCountries: conf.countries,
-                    SelectedPurposes: conf.purposes
+                    SelectedPurposes: conf.purposes,
+                    SelectedApplications: conf.applications
                 },
                 page: conf.page
             },

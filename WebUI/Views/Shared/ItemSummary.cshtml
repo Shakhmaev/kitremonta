@@ -28,7 +28,7 @@
     {
         <text>
             <div class="well item-sum-block" style="display:none" id="@Model.Id">
-        </text>
+</text>
     }
     else
     {
@@ -37,66 +37,66 @@
         </text>
     }
 
-
-            <div class="row">
-                <div class="col-xs-12 item-sum-img">
-                    <a href="@Url.Action("ItemDetails", "Item", new { id = Model.Id })" class="itemLink">
-                        <img class="img-thumbnail" src="@Html.Action("GetMiniImage","Item",new {Model.Id})" />
-                    </a>
+<div class="row">
+    <div class="col-xs-12 item-sum-img">
+        <a href="@Url.Action("ItemDetails", "Item", new { id = Model.Id })" target="_blank" class="itemLink">
+            <img class="img-thumbnail" src="@Html.Action("GetMiniImage","Item",new {Model.Id})" />
+        </a>
+    </div>
+    <div class="col-xs-12 item-sum-name">
+        <a href="@Url.Action("ItemDetails", "Item", new { id = Model.Id })" target="_blank" class="itemLink">
+            <h4>
+                <strong>@Model.Name</strong>
+            </h4>
+        </a>
+    </div>
+    <div class="col-xs-12 item-info">
+        <a href="@Url.Action("ItemDetails", "Item", new { id = Model.Id })" target="_blank" class="itemLink">
+            @if (Model.DiscountPercent > 0)
+            {
+                <div class="row label-row">
+                    <span class="label label-danger">Скидка</span>
                 </div>
-
-                <div class="col-xs-12 item-sum-name">
-                    <a href="@Url.Action("ItemDetails", "Item", new { id = Model.Id })" class="itemLink">
-                        <h4>
-                            <strong>@Model.Name</strong>
-                        </h4>
-                    </a>
+                <div class="row label-row">
+                    <span class="label label-primary">
+                        <del>@Model.Price.ToString("# руб")</del>
+                        <i class="fa fa-arrow-right"></i>
+                        @Model.CurrentPrice
+                    </span>
                 </div>
-
-                <div class="col-xs-12 item-info">
-                    <a href="@Url.Action("ItemDetails", "Item", new { id = Model.Id })" class="itemLink">
-
-                        @if (Model.DiscountPercent > 0)
-                        {
-                            <div class="row label-row">
-                                <span class="label label-danger">Скидка</span>
-                            </div>
-                            <div class="row label-row">
-                                <span class="label label-primary">
-                                    <del>@Model.Price.ToString("# руб")</del>
-                                    <i class="fa fa-arrow-right"></i>
-                                    @Model.CurrentPrice
-                                </span>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="row label-row">
-                                <span class="label label-primary">@Model.Price руб/@Model.PriceUnit</span>
-                            </div>
-                        }
-                    </a>
+            }
+            else
+            {
+                <div class="row label-row">
+                    <span class="label label-primary">@Model.Price руб/@Model.PriceUnit</span>
                 </div>
+            }
+        </a>
+    </div>
 
-
-
-                @using (Ajax.BeginForm(Model.ItemType=="keram"?"AddToCart":"AddToCartQuantity", "Cart", new AjaxOptions
+    @using (Ajax.BeginForm(Model.ItemType == "keram" ? "AddToCart" : "AddToCartQuantity", "Cart", new AjaxOptions
                     {
                         HttpMethod = "POST",
                         OnBegin = "AddedItemPopUp('/Content/Styles/Img/load.gif')",
-                        OnComplete = Model.ItemType=="keram"==true?"AddItemToCart":null,
+                        OnComplete = Model.ItemType == "keram" == true ? "AddItemToCart" : null,
                         UpdateTargetId = "PopupWrapper",
-                        OnSuccess = Model.ItemType=="keram"==true?"SetPicId(" + Model.Id + ",'" + Html.Action("GetImage", "Item", new { Model.Id }) + "','.well')":null,
+                        OnSuccess = Model.ItemType == "keram" == true ? "SetPicId(" + Model.Id + ",'" + Html.Action("GetImage", "Item", new { Model.Id }) + "','.well')" : null,
                     }))
-                {
-                @Html.Action("Calculator", new { itemId = Model.Id })
-                    
-                <div class="pull-right">
-                    @Html.HiddenFor(x => x.Id)
-                    <button type="submit" class="btn btn-success" value="В корзину">
-                        <i class="fa fa-cart-plus fa-lg"></i> В корзину
-                    </button>
-                </div>
-                }
-            </div>
-            </div>
+    {
+        @Html.Action("Calculator", new { itemId = Model.Id })
+
+        <div class="pull-right">
+            @Html.HiddenFor(x => x.Id)
+            <button type="submit" class="btn btn-success" value="В корзину">
+                <i class="fa fa-cart-plus fa-lg"></i> В корзину
+            </button>
+        </div>
+    }
+</div>
+</div>
+
+<script type="text/javascript">
+    if ('@Model.Price' == '0') {
+        $(".block[data-itemid=@Model.Id] > .well ").append("<div class='disable-overlay'></div>");
+    }
+</script>

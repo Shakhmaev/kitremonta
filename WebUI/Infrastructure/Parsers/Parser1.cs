@@ -59,21 +59,23 @@ namespace Store.WebUI.Infrastructure.Parsers
                         if (workSheet.Cells[rowIterator, 7].Value == null) break;
                         Item item = new Item
                         {
-                            Brand = workSheet.Cells[rowIterator, 4].Value.ToString(),
+                            Brand = workSheet.Cells[rowIterator, 3].Value.ToString(),
                             Type = workSheet.Cells[rowIterator, 1].Value.ToString(),
-                            article = workSheet.Cells[rowIterator, 6].Value.ToString(),
                             Name = workSheet.Cells[rowIterator, 7].Value.ToString(),
                             IsHot = false,
                             Price = Convert.ToInt32(workSheet.Cells[rowIterator, 8].Value),
                             CountInPack = workSheet.Cells[rowIterator, 11].Value.ToString(),
                             Country = workSheet.Cells[rowIterator, 3].Value.ToString(),
-                            Purpose = workSheet.Cells[rowIterator, 12].Value.ToString(),
-                            Surface = workSheet.Cells[rowIterator, 13].Value.ToString(),
-                            Picture = workSheet.Cells[rowIterator, 14].Value.ToString(),
-                            Color = workSheet.Cells[rowIterator, 15].Value.ToString(),
+                            Purpose = workSheet.Cells[rowIterator, 12].Value.ToString().ToLower(),
+                            Surface = workSheet.Cells[rowIterator, 13].Value.ToString().ToLower(),
+                            Picture = workSheet.Cells[rowIterator, 14].Value.ToString().ToLower(),
+                            Color = workSheet.Cells[rowIterator, 15].Value.ToString().ToLower(),
                             Size = workSheet.Cells[rowIterator, 16].Value.ToString(),
                             Weight = workSheet.Cells[rowIterator, 18].Value.ToString()
                         };
+
+                        item.article = workSheet.Cells[rowIterator, 6].Value != null ? workSheet.Cells[rowIterator, 6].Value.ToString() : "-";
+
 
                         var pru = workSheet.Cells[rowIterator, 9].Value.ToString();
                         item.PriceUnit = pru.Contains("шт") ? "шт" : "м2";
@@ -103,6 +105,7 @@ namespace Store.WebUI.Infrastructure.Parsers
                         {
                             item.SizeInM2 = (double)((double.Parse(m.Groups[1].Value) * double.Parse(m.Groups[2].Value)) / 10000);
                         }
+                        item.Size = Regex.Replace(item.Size,"[xXхХ×*]","x");
 
                         item.PriceForM2 = item.PriceUnit.ToLower().Contains("м2") ? true : false;
 
@@ -123,7 +126,7 @@ namespace Store.WebUI.Infrastructure.Parsers
                         string[] hierarchy = new string[] { workSheet.Cells[rowIterator, 1].Value.ToString(), //тип
                         workSheet.Cells[rowIterator, 3].Value.ToString(), //страна
                         workSheet.Cells[rowIterator, 4].Value.ToString(), //производитель
-                    };
+                        };
 
                         string[] hierarchyarray = workSheet.Cells[rowIterator, 5].Value.ToString().Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
                         List<string[]> hierarchylist = new List<string[]>();

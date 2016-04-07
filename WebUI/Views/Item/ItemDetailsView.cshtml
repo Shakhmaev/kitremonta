@@ -61,8 +61,7 @@
                     }
                 </div>
                 <div class="col-sm-7 col-lg-8">
-                    <div class="details-list">
-                        <ul class="details-list">
+                        <ul class="details-list" style="margin-left:20px; overflow:hidden; margin-top:20px;">
                             <li>Артикул: @Model.article</li>
                             <li>Страна: @Model.Country</li>
                             <li>Производитель: @Model.Brand</li>
@@ -72,7 +71,8 @@
                             <li>Цвет: @Model.Color</li>
                             <li>Рисунок: @Model.Picture</li>
                             <li>В одной упаковке: @Model.CountInPack</li>
-                            <li>Входит в коллекции: 
+                            <li>
+                                Входит в коллекции:
                                 <ul>
                                     @foreach (var ctg in Model.ParentCategories)
                                     {
@@ -85,7 +85,6 @@
                                 </ul>
                             </li>
                         </ul>
-                    </div>
                 </div>
             </div>
         </div>

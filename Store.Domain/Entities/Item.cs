@@ -146,6 +146,7 @@ namespace Store.Domain.Entities
         public string Description { get; set; }
         public string Text { get; set; }
         public string Type { get; set; }
+        public string Application { get; set; }
         public int? ParentID { get; set; }
         public virtual Category Parent { get; set; }
         public virtual Photo Photo { get; set; }

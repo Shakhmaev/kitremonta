@@ -44,13 +44,14 @@ namespace Store.WebUI.Controllers
             return PartialView("ItemSummary",item);
         }
 
-        public ViewResult List(string category, int page = 1, int PageSize = 12)
+        public ViewResult List(string category, int page = 1, int PageSize = 12, string application = "all")
         {
             ItemsListViewModel model = new ItemsListViewModel();
             model.Side = new List<KeyValuePair<string, IEnumerable<Category>>>();
             IEnumerable<string> Brands = new List<string>();
             IEnumerable<string> Countries = new List<string>();
             IEnumerable<string> Purposes = new List<string>();
+            IEnumerable<string> Applications = new List<string>();
 
             if (category != (string)null)
             {
@@ -68,6 +69,12 @@ namespace Store.WebUI.Controllers
                     Brands = items.Select(x => x.Brand).Distinct();
                     Countries = items.Select(x => x.Country).Distinct();
                     Purposes = items.Select(x => x.Purpose).Distinct();
+                    foreach (var ctgdesc in repository.GetDescendantCollections(ctg))
+                    {
+                        if (ctgdesc.Application!=null)
+                            (Applications as List<string>).Add(ctgdesc.Application);
+                    }
+                    Applications = Applications.Distinct();
                 }
                 switch (ctg.Type)
                 {
@@ -75,7 +82,7 @@ namespace Store.WebUI.Controllers
                     case "show_collections":
                         {
                             model.categoryTypeMessage = "Коллекции";
-                            model.Categories = GetChildCollectionsAvoidLowerSubs(ctg);
+                            model.Categories = repository.GetChildCollectionsAvoidLowerSubs(ctg);
                             break;
                         }
                     case "Collection":
@@ -88,7 +95,7 @@ namespace Store.WebUI.Controllers
                     case "Country":
                         {
                             model.categoryTypeMessage = "Бренды";
-                            model.Categories = GetBrandsByCountry(ctg.Description);
+                            model.Categories = repository.GetBrandsByCountry(ctg.Description);
                             break;
                         }
                     default: 
@@ -104,6 +111,12 @@ namespace Store.WebUI.Controllers
                 Brands = repository.Items.Select(x => x.Brand).Distinct();
                 Countries = repository.Items.Select(x => x.Country).Distinct();
                 Purposes = repository.Items.Select(x => x.Purpose).Distinct();
+                foreach (var ctg in repository.Categories)
+                {
+                    if (ctg.Application != null) 
+                        (Applications as List<string>).Add(ctg.Application);
+                }
+                Applications = Applications.Distinct();
                 model.Categories = repository.Categories.Where(x => x.ParentID == null);
                 model.categoryTypeMessage = "Разделы";
             }
@@ -121,101 +134,18 @@ namespace Store.WebUI.Controllers
 
             model.filters.SelectedPurposes = new List<string>();
 
+            model.filters.AllApplications = Applications;
+
+            model.filters.SelectedApplications = new List<string>();
+
+            if (application != "all")
+            {
+                (model.filters.SelectedApplications as List<string>).Add(application);
+            }
+
             model.CurrentCategory = category;
 
             return View(model);
-        }
-
-        private List<KeyValuePair<string,IEnumerable<Category>>> GetSideCollection()
-        {
-            ISiteMap map = MvcSiteMapProvider.SiteMaps.Current;
-            foreach (var ct in repository.Categories.Where(x => x.ParentID == null))
-            {
-                ISiteMapNode node = map.FindSiteMapNodeFromCurrentContext();
-                ISiteMapNode ctnode = map.FindSiteMapNodeFromKey(ct.CategoryId.ToString());
-                if (node
-                .IsDescendantOf(ctnode) ||
-                    node == ctnode)
-                {
-                    return new List<KeyValuePair<string, IEnumerable<Category>>>(){
-                        new KeyValuePair<string,IEnumerable<Category>>("Countries",
-                            new List<Category>(FindInDescendantCountries(ct))),
-                        new KeyValuePair<string,IEnumerable<Category>>("Brands",
-                            new List<Category>(FindInDescendantBrands(ct))),
-                        new KeyValuePair<string,IEnumerable<Category>>("RootCategory",
-                            new List<Category>(){ ct })
-                        };
-
-                }
-            }
-            return null;
-        }
-
-        private IEnumerable<Category> FindInDescendantCountries(Category ctg)
-        {
-            IEnumerable<Category> categories = new List<Category>();
-
-                categories = categories.Union(ctg.SubCategories).Where(x=>x.Type=="Country");
-
-            return categories;
-        }
-
-        private IEnumerable<Category> FindInDescendantBrands(Category ctg)
-        {
-            IEnumerable<Category> categories = new List<Category>();
-
-            foreach (var sub in ctg.SubCategories)
-            {
-                    categories = categories.Union(sub.SubCategories).Where(x => x.Type == "Brand");
-            }
-
-            return categories;
-        }
-
-        private IEnumerable<Category> GetChildCollectionsAvoidLowerSubs(Category ctg)
-        {
-            if (ctg.SubCategories.Count() > 0)
-            {
-                IEnumerable<Category> collections = new List<Category>();
-                if (ctg.SubCategories.Any(x => x.Type == "Country" || x.Type == "application" || x.Type == "Brand"))
-                {
-                    foreach (var sub in ctg.SubCategories)
-                    {
-                        collections = collections.Union(GetChildCollectionsAvoidLowerSubs(sub));
-                    }
-                }
-                else
-                {
-                    collections = collections.Union(ctg.SubCategories);
-                }
-                return collections.Distinct();
-            }
-            return new List<Category>();
-        }
-
-        private IEnumerable<Category> GetDescendantCollections(Category ctg)
-        {
-            if (ctg.SubCategories.Count() > 0) 
-            { 
-                IEnumerable<Category> collections = ctg.SubCategories.Where(x=>x.Type == "Collection");
-                foreach (var sub in ctg.SubCategories)
-                {
-                   collections = collections.Union(GetDescendantCollections(sub));
-                }
-                return collections.Distinct();
-            }
-            return new List<Category>();
-        }
-
-        private IEnumerable<Category> GetBrandsByCountry(string country)
-        {
-            Category countryctg = repository.Categories.FirstOrDefault(x => x.Type == "Country" 
-                && x.Description == country);
-            if (countryctg.SubCategories.Count() > 0)
-            {
-                return new List<Category>(countryctg.SubCategories.Where(x => x.Type == "Brand"));
-            }
-            else return null;
         }
 
         public PartialViewResult LoadSummary(string category, ItemsListFiltersModel filters, int page = 1, string search = "all")
@@ -268,6 +198,20 @@ namespace Store.WebUI.Controllers
                 else items = items.Where(x => filters.SelectedPurposes.Contains(x.Purpose));
             }
 
+            if (filters.SelectedApplications.Count() > 0)
+            {
+                if (filters.SelectedApplications.First() == "All")
+                {
+
+                }
+                else 
+                {
+                    var parents = items.SelectMany(x => x.ParentCategories).Distinct();
+                    parents = parents.Where(x=> filters.SelectedApplications.Contains(x.Application) || x.Application=="универсал");
+                    items = parents.SelectMany(x => x.items).Distinct();
+                }
+            }
+
             if (filters.WithDiscount)
             {
                 items = items.Where(x => x.DiscountPercent > 0);
@@ -308,12 +252,20 @@ namespace Store.WebUI.Controllers
                 page = 1;
             }
 
+
+            //вначале плитка, потом всё остальное
+            var firstgoing = items.Where(x => (x.Purpose == "для стен" || x.Purpose == "для пола") && x.Price > 0);
+
+            items = firstgoing.Union(items.Except(firstgoing));
+            //-
+
             items = items
                     .Where(x => x.CurrentPrice >= filters.LowerPrice && x.CurrentPrice <= filters.HigherPrice);
 
             fmodel.Items = items
                     .Skip((page - 1) * filters.PageSize)
                     .Take(filters.PageSize);
+
 
             fmodel.PagingInfo = new PagingInfo
             {
@@ -328,6 +280,31 @@ namespace Store.WebUI.Controllers
             return PartialView("_LoadSummary",fmodel);
         }
 
+        private List<KeyValuePair<string, IEnumerable<Category>>> GetSideCollection()
+        {
+            ISiteMap map = MvcSiteMapProvider.SiteMaps.Current;
+            foreach (var ct in repository.Categories.Where(x => x.ParentID == null))
+            {
+                ISiteMapNode node = map.FindSiteMapNodeFromCurrentContext();
+                ISiteMapNode ctnode = map.FindSiteMapNodeFromKey(ct.CategoryId.ToString());
+                if (node
+                .IsDescendantOf(ctnode) ||
+                    node == ctnode)
+                {
+                    return new List<KeyValuePair<string, IEnumerable<Category>>>(){
+                        new KeyValuePair<string,IEnumerable<Category>>("Countries",
+                            new List<Category>(repository.FindInDescendantCountries(ct))),
+                        new KeyValuePair<string,IEnumerable<Category>>("Brands",
+                            new List<Category>(repository.FindInDescendantBrands(ct))),
+                        new KeyValuePair<string,IEnumerable<Category>>("RootCategory",
+                            new List<Category>(){ ct })
+                        };
+
+                }
+            }
+            return null;
+        }
+
         private IEnumerable<Item> GetItems(Category category)
         {
             IEnumerable<Item> items = category.items;
@@ -339,8 +316,6 @@ namespace Store.WebUI.Controllers
 
             return items;
         }
-
-
         
          public ViewResult ItemDetails(int id)
         {
@@ -440,8 +415,10 @@ namespace Store.WebUI.Controllers
         public JsonResult GetRandomCollections()
         {
             Random r = new Random();
-            int sk = r.Next(0,repository.Categories.Count()-7);
-            var ctgs = repository.Categories.Skip(sk).Take(6);
+            var categories = repository.GetDescendantCollections(repository.Categories.FirstOrDefault(x=>x.Description=="Керамическая плитка"))
+                .Where(x => x.Type == "Collection");
+            int sk = r.Next(0,categories.Count()-7);
+            var ctgs = categories.Skip(sk).Take(6);
             List<string[]> list = new List<string[]>();
             foreach (var ctg in ctgs)
             {

@@ -18,7 +18,7 @@ Body - not related to megamenu
 
 .menu-container a {
     text-decoration:none;
-    color: #f0f0f0;
+    color: white;
 }
 
 .description {
@@ -44,9 +44,9 @@ Screen style's
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 
 .menu-container {
-    margin-right:-16px;
-    margin-left:-16px;
-    background: #4f779a;
+    margin-right: -1px;
+    margin-left:-1px;
+    background: #0097A7;
     z-index:3;
     position:relative;
     border:1px solid black;
@@ -120,7 +120,7 @@ Screen style's
 
 .menu > ul > li {
     float: left;
-    background:#4f779a;
+    background:#0097A7;
     padding: 0;
     margin: 0;
 }
@@ -131,8 +131,13 @@ Screen style's
     display: block;
 }
 
+.menu > ul > li > a{
+    font-size:15px;
+    font-weight:bold;
+}
+
 .menu > ul > li:hover {
-    background: #0094ff;
+    background: #006064;
 }
 
 .menu > ul > li > ul {
@@ -175,11 +180,13 @@ Screen style's
     width: 95%;
     display: block;
     border-bottom: 1px solid #ccc;
+    padding-left:10px;
 }
 
 .menu > ul > li > ul > li a:hover {
     background-color:#55c2d1;
     border-bottom: 1px solid transparent;
+    border-radius:5px;
 }
 
 .menu > ul > li > ul > li > a {

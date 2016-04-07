@@ -1,44 +1,48 @@
 ﻿
-<div class="jcarousel-wrapper">
-    <div class="jcarousel">
-        <ul>
-        </ul>
-    </div>
-    <a href="#" class="jcarousel-control-prev" >‹</a>
-    <a href="#" class="jcarousel-control-next" >›</a>
-    <div class="jcarousel-pagination"></div>
+<div class="carousel">
+    <div><img class="center-block" src="/Content/Styles/Img/load.gif" style="min-width:initial; width:initial;" /></div>
 </div>
 
 <script type="text/javascript">
-    $(function() {
-        $('.jcarousel').jcarousel({
-            
-        });
-
-        $('.jcarousel-prev').jcarouselControl({
-            target: '-=1'
-        });
-
-        $('.jcarousel-next').jcarouselControl({
-            target: '+=1'
-        });
-
-        $('.jcarousel-pagination').jcarouselPagination({
-            item: function (page) {
-                return '<a href="#' + page + '">' + page + '</a>';
-            }
+    $(function () {
+        $('.carousel').slick({
+            autoplay: true,
+            dots: true,
+            slidesToShow:4,
+            responsive: [
+                {
+                    breakpoint: 900,
+                    settings: {
+                        slidesToShow: 3,
+                        slidesToScroll: 1,
+                        infinite: true,
+                        dots: true
+                    }
+                },
+                {
+                    breakpoint: 600,
+                    settings: {
+                        slidesToShow: 2,
+                        slidesToScroll: 1
+                    }
+                },
+                {
+                    breakpoint: 480,
+                    settings: {
+                        slidesToShow: 1,
+                        slidesToScroll: 1
+                    }
+                }
+            ]
         });
     });
     function reloadCarousel(data) {
+        $('.carousel').slick('slickRemove', '0');
         $(data).each(function (i, k) {
-            $('.jcarousel ul')
-                .append('<li><a href="' + k[0] + '"><img src="' + k[1] + '"/></a></li>');
+            $('.carousel')
+                .slick('slickAdd','<div><a href="' + k[0] + '"><img src="' + k[1] + '"/></a></div>');
         });
-        $('.jcarousel').jcarousel('reload');
-        $('.jcarousel-pagination').jcarouselPagination({
-            item: function (page) {
-                return '<a href="#' + page + '">' + page + '</a>';
-            }
-        });
+        //$('.jcarousel').jcarousel('reload');
+        //$('.jcarousel').show('slow');
     }
 </script>

@@ -53,8 +53,14 @@ namespace Store.WebUI.Infrastructure.Parsers
                     Category ctg = new Category
                     {
                         Text = workSheet.Cells[rowIterator, 2].Value!=null? workSheet.Cells[rowIterator, 2].Value.ToString():"",
-                        Description = workSheet.Cells[rowIterator, 1].Value.ToString(),
+                        Description = workSheet.Cells[rowIterator, 1].Value.ToString()
                     };
+
+                    if (workSheet.Cells[rowIterator, 5].Value != null) //если заполнено поле применение в файле эксель
+                    {
+                        ctg.Application = workSheet.Cells[rowIterator, 5].Value.ToString().Trim();
+                    }
+
                     string ImgPath = HostingEnvironment.MapPath("~/Uploads/CategoryImages/");
 
                     var imagesnames = Directory.EnumerateFiles(ImgPath, "*.*", SearchOption.AllDirectories);

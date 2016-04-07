@@ -225,6 +225,7 @@ namespace Store.Domain.Concrete
                 foreach (var category in categories)
                 {
                     category.Text = ctg.Text;
+                    category.Application = ctg.Application;
                     if (!String.IsNullOrEmpty(image))
                     {
                         if (!String.IsNullOrEmpty(image))
@@ -258,6 +259,18 @@ namespace Store.Domain.Concrete
                 }
             }
             SaveChanges();
+        }
+
+        public bool UpdateItemPriceFromXls(string article, string price)
+        {
+            Item item = Items.FirstOrDefault(x => x.article == article);
+            if (item != null)
+            {
+                item.Price = Convert.ToInt32(Math.Round(double.Parse(price)*1.15));
+                context.SaveChanges();
+                return true;
+            }
+            else return false;
         }
 
         public void DeleteExtraPhoto(int Id, int PhotoId)
@@ -303,6 +316,74 @@ namespace Store.Domain.Concrete
                          Path.GetDirectoryName(ctg.Photo.url) + "/"
                          + Path.GetFileNameWithoutExtension(ctg.Photo.url) + "-mini"
                          + Path.GetExtension(ctg.Photo.url);
+            }
+            else return null;
+        }
+
+
+        public IEnumerable<Category> FindInDescendantCountries(Category ctg)
+        {
+            IEnumerable<Category> categories = new List<Category>();
+
+            categories = categories.Union(ctg.SubCategories).Where(x => x.Type == "Country");
+
+            return categories;
+        }
+
+        public IEnumerable<Category> FindInDescendantBrands(Category ctg)
+        {
+            IEnumerable<Category> categories = new List<Category>();
+
+            foreach (var sub in ctg.SubCategories)
+            {
+                categories = categories.Union(sub.SubCategories).Where(x => x.Type == "Brand");
+            }
+
+            return categories;
+        }
+
+        public IEnumerable<Category> GetChildCollectionsAvoidLowerSubs(Category ctg)
+        {
+            if (ctg.SubCategories.Count() > 0)
+            {
+                IEnumerable<Category> collections = new List<Category>();
+                if (ctg.SubCategories.Any(x => x.Type == "Country" || x.Type == "application" || x.Type == "Brand"))
+                {
+                    foreach (var sub in ctg.SubCategories)
+                    {
+                        collections = collections.Union(GetChildCollectionsAvoidLowerSubs(sub));
+                    }
+                }
+                else
+                {
+                    collections = collections.Union(ctg.SubCategories);
+                }
+                return collections.Distinct();
+            }
+            return new List<Category>();
+        }
+
+        public IEnumerable<Category> GetDescendantCollections(Category ctg)
+        {
+            if (ctg.SubCategories.Count() > 0)
+            {
+                IEnumerable<Category> collections = ctg.SubCategories.Where(x => x.Type == "Collection");
+                foreach (var sub in ctg.SubCategories)
+                {
+                    collections = collections.Union(GetDescendantCollections(sub));
+                }
+                return collections.Distinct();
+            }
+            return new List<Category>();
+        }
+
+        public IEnumerable<Category> GetBrandsByCountry(string country)
+        {
+            Category countryctg = Categories.FirstOrDefault(x => x.Type == "Country"
+                && x.Description == country);
+            if (countryctg.SubCategories.Count() > 0)
+            {
+                return new List<Category>(countryctg.SubCategories.Where(x => x.Type == "Brand"));
             }
             else return null;
         }

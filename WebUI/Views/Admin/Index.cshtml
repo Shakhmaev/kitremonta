@@ -14,8 +14,15 @@
                 <div class="col-xs-12">
                     @using (Html.BeginForm("UploadXls", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
                     {
-                        <input type="file" id="ImgExtraFiles" accept="xls,xlsx" name="Sheet" size="40" style="margin: 10px;"
-                               onchange='$("#upload-file-info2").html($(this).val().toString());'>
+                        <input type="file" id="ImgExtraFiles" accept="xls,xlsx" name="Sheet" size="40" style="margin: 10px;">
+                        <input type="submit" class="btn btn-default btn-sm" value="Загрузить" />
+                    }
+                </div>
+                <div class="col-xs-12" style="margin-top:20px;">
+                    <h2>Цены КМ</h2>
+                    @using (Html.BeginForm("UploadKMPriceXls", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        <input type="file" id="ImgExtraFiles" accept="xls,xlsx" name="Sheet" size="40" style="margin: 10px;">
                         <input type="submit" class="btn btn-default btn-sm" value="Загрузить" />
                     }
                 </div>

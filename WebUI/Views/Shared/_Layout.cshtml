@@ -7,12 +7,14 @@
     <link href="~/Content/bootstrap.css" rel="stylesheet" />
     <link href="~/Content/bootstrap-theme.css" rel="stylesheet" />
     <link href="~/Content/font-awesome.min.css" rel="stylesheet" />
-    <link href="~/Content/Styles/Styles1.css" rel="stylesheet" />
     <link href="~/Content/Styles/ionicons.min.css" rel="stylesheet" />
     <link href="~/Content/Styles/style.css" rel="stylesheet" />
     <link href="~/Content/Styles/lity.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="//www.fuelcdn.com/fuelux/3.13.0/css/fuelux.min.css">
-    <link href="~/Content/Styles/jCarouselStyles.css" rel="stylesheet" />
+    <link href="~/Content/Styles/Styles1.css" rel="stylesheet" />
+    <link href="~/Content/slick/slick.css" rel="stylesheet" />
+    <link href="~/Content/slick/slick-theme.css" rel="stylesheet" />
+    <link href='https://fonts.googleapis.com/css?family=Play&subset=latin,cyrillic-ext' rel='stylesheet' type='text/css'>
     <script type="text/javascript" src="~/Scripts/jquery-2.2.0.min.js"></script>
     <script type="text/javascript" src="~/Scripts/jquery-ui-1.11.4.min.js"></script>
     <script type="text/javascript" src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
@@ -20,12 +22,6 @@
     <script type="text/javascript" src="~/Scripts/common.js"></script>
     <script type="text/javascript" src="~/Scripts/megamenu.js"></script>
     <script src="//www.fuelcdn.com/fuelux/3.13.0/js/fuelux.min.js"></script>
-    <script type="text/javascript" src="~/Scripts/jcarousel.core.js"></script>
-    <script type="text/javascript" src="~/Scripts/jcarousel.core_plugin.js"></script>
-    <script type="text/javascript" src="~/Scripts/jcarousel.autoscroll.js"></script>
-    <script type="text/javascript" src="~/Scripts/jcarousel.control.js"></script>
-    <script type="text/javascript" src="~/Scripts/jcarousel.pagination.js"></script>
-    <script type="text/javascript" src="~/Scripts/jcarousel.responsive.js"></script>
     <script type="text/javascript" src="~/Scripts/lity.min.js"></script>
     @if (User.IsInRole("Admin"))
     {
@@ -80,7 +76,7 @@
                         <span class="sr-only">Поиск</span>
                         <span class="fa fa-search fa-lg menubutton"></span>
                     </button>
-                    <a href="@Url.Action("Index","Item")"><i class="fa fa-home fa-lg fa-2x navbar-brand">КИТ ремонта</i></a>
+                    <a href="@Url.Action("Index","Item")" class="navbar-brand"><i class="fa fa-home fa-lg fa-2x"></i>КИТ ремонта</a>
                 </div>
 
                 <!-- Collect the nav links, forms, and other content for toggling -->
@@ -90,7 +86,7 @@
                         <div class="form-group">
                             <input type="text" class="form-control" placeholder="Введите текст поиска" name="search">
                         </div>
-                        <input type="submit" class="btn btn-default" value="Поиск">
+                        <input type="submit" class="btn btn-kit" value="Поиск">
                     }
                     <div class="hidden-xs">
                         @Html.Action("Login", "Nav")

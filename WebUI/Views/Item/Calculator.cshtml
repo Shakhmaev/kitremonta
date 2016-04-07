@@ -12,7 +12,7 @@
     <p style="margin-bottom:0px;">В упаковке @Model.InPack</p>
     <div class="fuelux">
         <span class="text-info">Мне надо: </span>
-        <div class="spinbox" data-initialize="spinbox" id="spin_@Model.ItemID">
+        <div class="spinbox" id="spin_@Model.ItemID">
             <input type="text" class="form-control input-mini spinbox-input" min="0" value="0">
             <div class="spinbox-buttons btn-group btn-group-vertical">
                 <button type="button" class="btn btn-default spinbox-up btn-xs">
@@ -63,6 +63,8 @@
 </div>
 
 <script type="text/javascript">
+    $(".spinbox#spin_@Model.ItemID").spinbox();
+
     $("#calc_" +@Model.ItemID +" select").change(function (event) {
         $("#calc_" +@Model.ItemID +" input[name='unit']").val($("#calc_" +@Model.ItemID +" select option:selected").val());
         $("#spin_" +@Model.ItemID +"").trigger('changed.fu.spinbox', [$("#spin_" +@Model.ItemID +"").spinbox('value')]);
@@ -84,14 +86,14 @@
         var m2 = parseFloat(strm2);
 
         if (select.length > 0) {
-            if ($("#calc_"+@Model.ItemID+" select").val() == "sht") //если выбраны штуки
+            if ($("#calc_" +@Model.ItemID +" select").val() == "sht") //если выбраны штуки
             {
                 var packs = Math.ceil(value / parseFloat(@Model.sht));
                 $("#calc_" +@Model.ItemID +" .packs > .badge").text(packs);
                 $("#calc_" +@Model.ItemID + " [name='Quantity']").val(packs);
 
                 if ('@Model.PriceForM2' == "True") {
-                    $("#calc_"+@Model.ItemID+" .summ > .badge").text(Math.round(parseFloat(@Model.Price) * packs
+                    $("#calc_" +@Model.ItemID +" .summ > .badge").text(Math.round(parseFloat(@Model.Price) * packs
                         * m2));
                     $("#calc_" +@Model.ItemID + " [name='Quantity']").val($("#spin_" +@Model.ItemID +"").spinbox("value"));
                 }
@@ -103,7 +105,8 @@
             else {
                 var packs = Math.ceil(parseFloat(value / m2));
                 $("#calc_" +@Model.ItemID + " [name='Quantity']").val(packs);
-                $("#calc_"+@Model.ItemID+" .packs > .badge").text(packs);
+                $("#calc_" +@Model.ItemID +" .packs > .badge").text(packs);
+
                 if ('@Model.PriceForM2' == "true") {
                     $("#calc_" +@Model.ItemID +" .summ > .badge").text(Math.round(parseFloat(@Model.Price) * packs
                         * m2));
@@ -114,13 +117,13 @@
             }
         }
         else {
-            if ($("#calc_"+@Model.ItemID+" input[name='unit']").val() == "sht") {
+            if ($("#calc_" +@Model.ItemID +" input[name='unit']").val() == "sht") {
                 var packs = Math.ceil(value / parseFloat(@Model.sht));
                 $("#calc_" +@Model.ItemID + " [name='Quantity']").val(packs);
-                $("#calc_"+@Model.ItemID+" .packs > .badge").text(packs);
+                $("#calc_" +@Model.ItemID +" .packs > .badge").text(packs);
 
                 if ('@Model.PriceForM2' == "True") {
-                    $("#calc_"+@Model.ItemID+" .summ > .badge").html(Math.round(parseFloat(@Model.Price) * packs
+                    $("#calc_" +@Model.ItemID +" .summ > .badge").html(Math.round(parseFloat(@Model.Price) * packs
                         * m2));
                     $("#calc_" +@Model.ItemID + " [name='Quantity']").val($("#spin_" +@Model.ItemID +"").spinbox("value"));
                 }
@@ -133,15 +136,15 @@
                 var packs = Math.ceil(value / m2);
 
                 $("#calc_" +@Model.ItemID + " [name='Quantity']").val(packs);
-                $("#calc_"+@Model.ItemID+" .packs > .badge").text(packs);
+                $("#calc_" +@Model.ItemID +" .packs > .badge").text(packs);
 
 
                 if ('@Model.PriceForM2' == "true") {
-                    $("#calc_"+@Model.ItemID+" .summ > .badge").html(Math.round(parseFloat(@Model.Price) * packs
+                    $("#calc_" +@Model.ItemID +" .summ > .badge").html(Math.round(parseFloat(@Model.Price) * packs
                         * m2));
                 }
                 else {
-                    $("#calc_"+@Model.ItemID+" .summ > .badge").html(Math.round(parseFloat(@Model.Price) * parseFloat(@Model.SizeInM2)
+                    $("#calc_" +@Model.ItemID +" .summ > .badge").html(Math.round(parseFloat(@Model.Price) * parseFloat(@Model.SizeInM2)
                         * m2 * packs));
                 }
             }

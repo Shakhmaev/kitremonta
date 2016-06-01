@@ -51,10 +51,11 @@ namespace Store.WebUI.Controllers
             if (ModelState.IsValid && VerifyRecaptcha())
             {
                 model.cart = carts.GetCart(cartid.id);
-                orderProc.Process(model);
+                Order order = orderProc.Process(model);
                 carts.Clear(cartid.id);
                 var hub = GlobalHost.ConnectionManager.GetHubContext<NotifyHub>();
-                hub.Clients.Group("Admins").notify("ПРИШЁЛ НОВЫЙ ЗАКАЗ!");
+                hub.Clients.Group("Admins").notify("Пришёл новый заказ!");
+                (hub as NotifyHub).NewOrder();
                 await SendEmailToAdmins();
                 return View("OrderResult");
             }
@@ -158,6 +159,20 @@ namespace Store.WebUI.Controllers
 
             [JsonProperty("error-codes")]
             public List<string> ErrorCodes { get; set; }
+        }
+
+        
+        public void AddNewCall(string number)
+        {
+            var hub = GlobalHost.ConnectionManager.GetHubContext<NotifyHub>();
+            hub.Clients.Group("Admins").notify("Перезвоните клиенту!");
+            (hub as NotifyHub).AddCallToAdminInfo(number);
+        }
+
+        public void RemoveCall(string number)
+        {
+            var hub = GlobalHost.ConnectionManager.GetHubContext<NotifyHub>();
+            (hub as NotifyHub).RemoveCallFromAdminInfo(number);
         }
 	}
 }

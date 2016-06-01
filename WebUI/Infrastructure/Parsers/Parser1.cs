@@ -56,28 +56,28 @@ namespace Store.WebUI.Infrastructure.Parsers
 
                     for (int rowIterator = 2; rowIterator <= noOfRow; rowIterator++)
                     {
-                        if (workSheet.Cells[rowIterator, 7].Value == null) break;
+                        if (workSheet.Cells[rowIterator, 6].Value == null) break;
                         Item item = new Item
                         {
                             Brand = workSheet.Cells[rowIterator, 3].Value.ToString(),
-                            Type = workSheet.Cells[rowIterator, 1].Value.ToString(),
-                            Name = workSheet.Cells[rowIterator, 7].Value.ToString(),
+                            Type = workSheet.Cells[rowIterator, 1].Value.ToString().Split(',').Last(),
+                            Name = workSheet.Cells[rowIterator, 6].Value.ToString(),
                             IsHot = false,
-                            Price = Convert.ToInt32(workSheet.Cells[rowIterator, 8].Value),
-                            CountInPack = workSheet.Cells[rowIterator, 11].Value.ToString(),
-                            Country = workSheet.Cells[rowIterator, 3].Value.ToString(),
-                            Purpose = workSheet.Cells[rowIterator, 12].Value.ToString().ToLower(),
-                            Surface = workSheet.Cells[rowIterator, 13].Value.ToString().ToLower(),
-                            Picture = workSheet.Cells[rowIterator, 14].Value.ToString().ToLower(),
-                            Color = workSheet.Cells[rowIterator, 15].Value.ToString().ToLower(),
-                            Size = workSheet.Cells[rowIterator, 16].Value.ToString(),
-                            Weight = workSheet.Cells[rowIterator, 18].Value.ToString()
+                            Price = Convert.ToInt32(workSheet.Cells[rowIterator, 7].Value),
+                            CountInPack = workSheet.Cells[rowIterator, 9].Value.ToString(),
+                            Country = workSheet.Cells[rowIterator, 2].Value.ToString(),
+                            Purpose = workSheet.Cells[rowIterator, 10].Value.ToString().ToLower(),
+                            Surface = workSheet.Cells[rowIterator, 11].Value.ToString().ToLower(),
+                            Picture = workSheet.Cells[rowIterator, 12].Value.ToString().ToLower(),
+                            Color = workSheet.Cells[rowIterator, 13].Value.ToString().ToLower(),
+                            Size = workSheet.Cells[rowIterator, 14].Value.ToString(),
+                            Weight = workSheet.Cells[rowIterator, 16].Value.ToString()
                         };
 
-                        item.article = workSheet.Cells[rowIterator, 6].Value != null ? workSheet.Cells[rowIterator, 6].Value.ToString() : "-";
+                        item.article = workSheet.Cells[rowIterator, 5].Value != null ? workSheet.Cells[rowIterator, 5].Value.ToString() : item.Brand.Substring(0,2) + "-" + Guid.NewGuid().ToString("N");
 
 
-                        var pru = workSheet.Cells[rowIterator, 9].Value.ToString();
+                        var pru = workSheet.Cells[rowIterator, 8].Value.ToString();
                         item.PriceUnit = pru.Contains("шт") ? "шт" : "м2";
 
                         string inpack = item.CountInPack.Replace('.', ',');
@@ -112,7 +112,7 @@ namespace Store.WebUI.Infrastructure.Parsers
                         item.ItemType = "keram";
 
                         //string oip = workSheet.Cells[rowIterator, 10].Value.ToString();
-                        if (workSheet.Cells[rowIterator, 11].Value.ToString().Contains("м2"))    //if (oip == "+")
+                        if (workSheet.Cells[rowIterator, 8].Value.ToString().Contains("м2"))
                         {
                             item.OnlyInPacks = true;
                         }
@@ -121,20 +121,21 @@ namespace Store.WebUI.Infrastructure.Parsers
                             item.OnlyInPacks = false;
                         }
 
-                        item.Application = workSheet.Cells[rowIterator, 2].Value.ToString();
-
-                        string[] hierarchy = new string[] { workSheet.Cells[rowIterator, 1].Value.ToString(), //тип
-                        workSheet.Cells[rowIterator, 3].Value.ToString(), //страна
-                        workSheet.Cells[rowIterator, 4].Value.ToString(), //производитель
+                        string[] hierarchy = new string[] 
+                        {
+                            workSheet.Cells[rowIterator, 2].Value.ToString(), //страна
+                            workSheet.Cells[rowIterator, 3].Value.ToString(), //производитель
                         };
 
-                        string[] hierarchyarray = workSheet.Cells[rowIterator, 5].Value.ToString().Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+                        hierarchy = workSheet.Cells[rowIterator, 1].Value.ToString().Split(',').Union(hierarchy).ToArray();
+
+                        string[] hierarchyCollections = workSheet.Cells[rowIterator, 4].Value.ToString().Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
                         List<string[]> hierarchylist = new List<string[]>();
                         List<string[]> translitnameslist = new List<string[]>();
 
-                        for (int i = 0; i < hierarchyarray.Length; i++)
+                        for (int i = 0; i < hierarchyCollections.Length; i++)
                         {
-                            string[] splitting = hierarchyarray[i].Split(',');
+                            string[] splitting = hierarchyCollections[i].Split(',');
                             splitting = hierarchy.Union(splitting).ToArray();
                             string[] translits = new string[splitting.Length];
                             for (int j = 0; j < splitting.Count(); j++)
@@ -157,55 +158,67 @@ namespace Store.WebUI.Infrastructure.Parsers
 
                         //string[] imgsames = workSheet.Cells[rowIterator,16].Value.
 
-                        string[] str = workSheet.Cells[rowIterator, 17].Value.ToString().Split(',').ToArray();
 
-
-                        //var imagesphys = new string[] { };
-
-                        var imagesphys = new List<string>();
-
-                        foreach (var st in str)
+                        if (workSheet.Cells[rowIterator, 15].Value != null)
                         {
-                            imagesphys = imagesphys.Union(imagesnames.Where(x => x.ToLower().Contains(st.ToLower())
-                                && !x.ToLower().Contains("-mini"))).ToList();
+                            string[] str = workSheet.Cells[rowIterator, 15].Value.ToString().Split(',').ToArray();
 
-                            foreach (var image in imagesphys.Skip(1).Where(x => !x.ToLower().Contains("-mini")))
+                            //var imagesphys = new string[] { };
+
+                            var imagesphys = new List<string>();
+
+                            List<string> ToDelete = new List<string>();
+
+                            foreach (var st in str)
                             {
-                                if (Regex.IsMatch(Path.GetFileNameWithoutExtension(image), @"_\d+$"))
+                                if (String.IsNullOrEmpty(st)) continue;
+
+                                imagesphys = imagesphys.Union(imagesnames.Where(x => x.ToLower().Contains(st.ToLower())
+                                    && !x.ToLower().Contains("-mini"))).ToList();
+
+                                foreach (var image in imagesphys.Skip(1).Where(x => !x.ToLower().Contains("-mini")))
                                 {
-                                    imagesphys.Remove(image);
-                                    File.Delete(image);
+                                    if (Regex.IsMatch(Path.GetFileNameWithoutExtension(image), @"_\d+$"))
+                                    {
+                                        ToDelete.Add(image);
+                                    }
                                 }
                             }
-                        }
 
-
-                        if (imagesphys.Count > 0)
-                        {
-                            Image img = Image.FromFile(imagesphys[0]);
-
-                            Image miniimg = MakeMini(img, 300, 200);
-
-                            string path = Path.GetDirectoryName(imagesphys[0]);
-                            string fname = Path.GetFileNameWithoutExtension(imagesphys[0]);
-                            string ext = Path.GetExtension(imagesphys[0]);
-                            string fullname = path + "\\" + fname + "-mini" + ext;
-                            if (!File.Exists(fullname))
+                            foreach (var image in ToDelete)
                             {
-                                miniimg.Save(fullname);
+                                imagesphys.Remove(image);
+                                File.Delete(image);
                             }
 
+
+                            if (imagesphys.Count > 0)
+                            {
+                                Image img = Image.FromFile(imagesphys[0]);
+
+                                Image miniimg = MakeMini(img, 300, 200);
+
+                                string path = Path.GetDirectoryName(imagesphys[0]);
+                                string fname = Path.GetFileNameWithoutExtension(imagesphys[0]);
+                                string ext = Path.GetExtension(imagesphys[0]);
+                                string fullname = path + "\\" + fname + "-mini" + ext;
+                                if (!File.Exists(fullname))
+                                {
+                                    miniimg.Save(fullname);
+                                }
+
+                            }
+
+                            List<string> images = new List<string>();
+
+                            for (int i = 0; i < imagesphys.Count; i++)
+                            {
+                                images.Add(imagesphys.ElementAt(i).Replace(ImgPath, String.Empty));
+                            }
+
+                            repos.SaveOrUpdateItemFromXlsOne(item, hierarchylist, translitnameslist, images);
                         }
-
-                        List<string> images = new List<string>();
-
-                        for (int i = 0; i < imagesphys.Count; i++)
-                        {
-                            images.Add(imagesphys.ElementAt(i).Replace(ImgPath, String.Empty));
-                        }
-
-                        repos.SaveOrUpdateItemFromXlsOne(item, hierarchylist, translitnameslist, images);
-
+                        else repos.SaveOrUpdateItemFromXlsOne(item, hierarchylist, translitnameslist, new List<string>());
                     }
                     pack.Dispose();
                 }
@@ -246,7 +259,7 @@ namespace Store.WebUI.Infrastructure.Parsers
             using (Graphics gr = Graphics.FromImage(dest))
             {
                 gr.FillRectangle(Brushes.White, 0, 0, width, height);  // Очищаем экран
-                gr.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                gr.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear;
 
                 float srcwidth = source.Width;
                 float srcheight = source.Height;

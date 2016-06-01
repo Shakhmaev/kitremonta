@@ -10,8 +10,10 @@ namespace Store.Domain.Abstract
 {
     public interface IOrderProcessor
     {
-        void Process(OrderDetails details);
+        Order Process(OrderDetails details);
         IEnumerable<Order> GetUncompletedOrders();
+        Order GetOrder(int orderId);
+        bool UpdateOrder(int orderId, Order orderNew);
         void CompleteOrder(int OrderId);
         void ChangeStatus(int OrderId, string status);
     }

@@ -86,7 +86,7 @@ namespace Store.WebUI.Infrastructure.Parsers
 
                     if (!String.IsNullOrEmpty(image))
                         {
-                            Image miniimg = Parser1.MakeMini(Image.FromFile(image), 300, 200);
+                            Image miniimg = ScaleImage(Image.FromFile(image),200,200);
 
                             string path = Path.GetDirectoryName(image);
                             string fname = Path.GetFileNameWithoutExtension(image);
@@ -113,6 +113,42 @@ namespace Store.WebUI.Infrastructure.Parsers
                 pack.Dispose();
             }
 
+        }
+
+        private static Image ScaleImage(Image source, int width, int height)
+        {
+            Image dest = new Bitmap(width, height);
+            using (Graphics gr = Graphics.FromImage(dest))
+            {
+                gr.FillRectangle(Brushes.White, 0, 0, width, height);  // Очищаем экран
+                gr.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
+
+                float srcwidth = source.Width;
+                float srcheight = source.Height;
+                if (width > srcwidth) width = (int)srcwidth;
+                if (height > srcheight) height = (int)srcheight;
+                float dstwidth = width;
+                float dstheight = height;
+
+                if (srcwidth <= dstwidth && srcheight <= dstheight)  // Исходное изображение меньше целевого
+                {
+                    float left = (srcwidth - srcwidth) / 2;
+                    float top = (srcheight - srcheight) / 2;
+                    gr.DrawImage(source, left, top, srcwidth, srcheight);
+                }
+                else if (srcwidth / srcheight > dstwidth / dstheight)  // Пропорции исходного изображения более широкие
+                {
+                    float newwidth = srcwidth / srcheight * dstheight;
+                    gr.DrawImage(source, -(((float)newwidth - dstwidth) / 2.0f), 0, newwidth, dstheight);
+                }
+                else  // Пропорции исходного изображения более узкие
+                {
+                    float newheight = srcheight / srcwidth * dstwidth;
+                    gr.DrawImage(source, 0, -(((float)newheight - dstheight) / 2.0f), dstwidth, newheight);
+                }
+
+                return dest;
+            }
         }
     }
 }

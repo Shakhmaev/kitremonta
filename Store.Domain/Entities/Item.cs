@@ -54,11 +54,6 @@ namespace Store.Domain.Entities
         [Required(ErrorMessage = "Пожалуйста, введите назначение")]
         public string Purpose { get; set; }
 
-
-        [Display(Name = "Применение")]
-        [Required(ErrorMessage = "Пожалуйста, введите применение")]
-        public string Application { get; set; }
-
         [Display(Name = "Рисунок")]
         [Required(ErrorMessage = "Пожалуйста, введите тип рисунка")]
         public string Picture { get; set; }
@@ -117,6 +112,7 @@ namespace Store.Domain.Entities
         public byte[] ImageData { get; set; }
 
         public string ImageMimeType { get; set; }
+        public virtual ICollection<Supplier> Suppliers { get; set; }
         public virtual ICollection<Category> ParentCategories { get; set; }
         [HiddenInput]
         public virtual ICollection<Photo> Photos { get; set; }
@@ -128,6 +124,13 @@ namespace Store.Domain.Entities
 
             }
         }
+    }
+
+    public class Supplier
+    {
+        public int SupplierId { get; set; }
+        public string Name { get; set; }
+        public virtual ICollection<Item> Items { get; set; }
     }
 
     public class Photo

@@ -180,21 +180,22 @@ function js(args) {
         $.ajax({
             url: args.url1,
             success: function (data) {
-                console.log(data);
-                var x = data.length;
+                var x = JSON.parse(data).length;
                 console.log(JSON.parse(data));
                 $("#img_00").parent().wrap('<div class="col-xs-6 col-lg-3 image">');
                 $("#img_00").addClass("image");
-                $.each(JSON.parse(data), function (i, s) {
-                    $("#gallery_01").append(
-                        '<div class="col-xs-6 col-lg-3 image">' +
-                            '<a href="#" data-image="' + s + '" data-zoom-image="' + s + '">' +
-                                '<img id="img_0'+(i+1)+'" src="' + s + '">' +
-                            '</a>' +
-                        '</div>'
-                            );
+                if (x > 1) {
+                    $.each(JSON.parse(data), function (i, s) {
+                        $("#gallery_01").append(
+                            '<div class="col-xs-6 col-lg-3 image">' +
+                                '<a href="#" data-image="' + s + '" data-zoom-image="' + s + '">' +
+                                    '<img id="img_0' + (i + 1) + '" src="' + s + '">' +
+                                '</a>' +
+                            '</div>'
+                                );
 
-                })
+                    })
+                }
                 initzoom();
             }
         });

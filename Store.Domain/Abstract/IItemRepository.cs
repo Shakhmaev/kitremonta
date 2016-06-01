@@ -20,12 +20,14 @@ namespace Store.Domain.Abstract
 
         IEnumerable<Category> Categories { get; }
 
+        IEnumerable<Supplier> Suppliers { get; }
+
         void SaveItem(Item item);
         Category SubCategoryGetOrCreate(Category category);
         void SaveOrUpdateItemFromXlsOne(Item item, List<string[]> hierarchy, List<string[]> Names, IEnumerable<string> images);
 
         void UpdateCategoryFromXls(Category ctg, string image, List<string> extraImages);
-        bool UpdateItemPriceFromXls(string article, string price);
+        bool UpdateItemPriceFromXls(string article, string price, string supplier = "unknown");
         Item DeleteItem(int Id);
 
         void SaveChanges();
@@ -41,7 +43,7 @@ namespace Store.Domain.Abstract
 
         IEnumerable<Category> GetDescendantCollections(Category ctg);
 
-        IEnumerable<Category> GetChildCollectionsAvoidLowerSubs(Category ctg);
+        List<Category> GetChildCollectionsAvoidLowerSubs(Category ctg);
 
         IEnumerable<Category> FindInDescendantBrands(Category ctg);
 

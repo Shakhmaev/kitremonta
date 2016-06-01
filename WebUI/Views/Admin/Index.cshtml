@@ -4,12 +4,8 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="panel panel-default withbackgr">
-    <div class="panel-heading">
-        <h3>Здравствуй, @User.Identity.Name</h3>
-    </div>
+
     <div class="panel-body">
-        <div class="container">
             <div class="row jumbotron">
                 <div class="col-xs-12">
                     @using (Html.BeginForm("UploadXls", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
@@ -21,6 +17,14 @@
                 <div class="col-xs-12" style="margin-top:20px;">
                     <h2>Цены КМ</h2>
                     @using (Html.BeginForm("UploadKMPriceXls", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        <input type="file" id="ImgExtraFiles" accept="xls,xlsx" name="Sheet" size="40" style="margin: 10px;">
+                        <input type="submit" class="btn btn-default btn-sm" value="Загрузить" />
+                    }
+                </div>
+                <div class="col-xs-12" style="margin-top:20px;">
+                    <h2>Цены Линкер стопы</h2>
+                    @using (Html.BeginForm("UploadLincerStopsPriceXls", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
                     {
                         <input type="file" id="ImgExtraFiles" accept="xls,xlsx" name="Sheet" size="40" style="margin: 10px;">
                         <input type="submit" class="btn btn-default btn-sm" value="Загрузить" />
@@ -42,7 +46,5 @@
                     <a class="btn btn-danger" href="@Url.Action("Orders","Admin")">Перейти к заказам</a>
                 </div>
             </div>
-        </div>
 
-    </div>
 </div>

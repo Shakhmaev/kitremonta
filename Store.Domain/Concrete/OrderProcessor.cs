@@ -11,7 +11,7 @@ namespace Store.Domain.Concrete
     public class OrderProcessor : IOrderProcessor
     {
         private OrderDbContext context = new OrderDbContext();
-        public void Process(OrderDetails details)
+        public Order Process(OrderDetails details)
         {
             Order order = new Order();
             order.Status = "Новый";
@@ -35,6 +35,7 @@ namespace Store.Domain.Concrete
             order.time = DateTime.Now;
             context.Orders.Add(order);
             context.SaveChanges();
+            return order;
         }
         public IEnumerable<Order> GetUncompletedOrders()
         {
@@ -55,6 +56,33 @@ namespace Store.Domain.Concrete
             {
                 order.Status = status;
             }
+        }
+        public Order GetOrder(int orderId)
+        {
+            var order = context.Orders.FirstOrDefault(x => x.Id == orderId);
+            if (order != null)
+            {
+                return order;
+            }
+            return null;
+        }
+
+        public bool UpdateOrder(int orderId, Order orderNew)
+        {
+            var order = context.Orders.FirstOrDefault(x => x.Id == orderId);
+            if (order != null)
+            {
+                order.Client = orderNew.Client;
+                order.Completed = orderNew.Completed;
+                order.Email = orderNew.Email;
+                //order.Items = orderNew.Items; //не изменять заказанные вещи
+                order.Phone = orderNew.Phone;
+                order.Status = orderNew.Status;
+                //order.time = orderNew.time; //не изменять время
+                context.SaveChanges();
+                return true;
+            }
+            return false;
         }
     }
 }

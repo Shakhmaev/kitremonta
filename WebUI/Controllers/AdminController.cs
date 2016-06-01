@@ -101,6 +101,43 @@ namespace Store.WebUI.Controllers
             return View(proc.GetUncompletedOrders());
         }
 
+        public JsonResult RefreshOrderList()
+        {
+            var orders = proc.GetUncompletedOrders();
+            List<int> ids = new List<int>();
+            foreach (var ord in orders){
+                ids.Add(ord.Id);
+            }
+            return Json(ids,JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public ViewResult OrderDetails(int orderId)
+        {
+            var order = proc.GetOrder(orderId);
+            if (order != null)
+            {
+                return View(order);
+            }
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult OrderDetails(Order order)
+        {
+            bool upd = proc.UpdateOrder(order.Id, order);
+            if (upd)
+            {
+                TempData["message"] = string.Format("Изменения в заказе \"{0}\" были сохранены", order.Id);
+                return RedirectToAction("Orders");
+            }
+            else
+            {
+                TempData["message"] = string.Format("Ошибка, проверьте данные", order.Id);
+                return View(order);
+            }
+        }
+
         public ViewResult Edit(int Id)
         {
             Item item = repository.Items.FirstOrDefault(i => i.Id == Id);
@@ -259,6 +296,25 @@ namespace Store.WebUI.Controllers
                 List<string> msgs = p.Parse();
                 string str = "Количество ненайденных = " + msgs.Count;
                 
+                foreach (var msg in msgs)
+                {
+                    str = String.Concat(str, msg + "\r\n");
+                }
+                TempData["message"] = string.Format("Файл был загружен и обработан. {0} ", str);
+            }
+            return RedirectToAction("Index");
+        }
+
+        public ActionResult UploadLincerStopsPriceXls()
+        {
+            if (Request != null)
+            {
+                HttpPostedFileBase file = Request.Files["Sheet"];
+
+                ParserStops p = new ParserStops(file, repository);
+                List<string> msgs = p.Parse();
+                string str = "Количество ненайденных = " + msgs.Count;
+
                 foreach (var msg in msgs)
                 {
                     str = String.Concat(str, msg + "\r\n");

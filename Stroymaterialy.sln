@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.UnitTests", "Store.Un
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelChecker", "ExcelChecker\ExcelChecker.csproj", "{245EF59A-28E7-4703-A40F-A4B6A8D91430}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoScaler", "PhotoScaler\PhotoScaler.csproj", "{151FFC3A-1791-4507-9906-EB6D413004DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{245EF59A-28E7-4703-A40F-A4B6A8D91430}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{245EF59A-28E7-4703-A40F-A4B6A8D91430}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{245EF59A-28E7-4703-A40F-A4B6A8D91430}.Release|Any CPU.Build.0 = Release|Any CPU
+		{151FFC3A-1791-4507-9906-EB6D413004DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{151FFC3A-1791-4507-9906-EB6D413004DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{151FFC3A-1791-4507-9906-EB6D413004DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{151FFC3A-1791-4507-9906-EB6D413004DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

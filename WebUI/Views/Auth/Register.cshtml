@@ -1,13 +1,13 @@
 ﻿@model Store.WebUI.Models.RegisterModel
 @{
-    ViewBag.Title = "Register";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Регистрация";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 
 <div class="parent-center">
     <div class="center-block">
-        <div class="panel panel-default">
+        <div class="auth panel panel-default">
             <div class="panel-heading">
                 <h2>Регистрация</h2>
             </div>
@@ -20,6 +20,9 @@
                 <br />
                 <p>
                     <button type="submit" class="btn btn-success">Зарегистрироваться</button>
+                </p>
+                <p>
+                    <button type="button" class="btn btn-success"><a href="@Url.Action("Index","Item")" class="no-style">На главную</a></button>
                 </p>
             }
         </div>

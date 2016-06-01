@@ -19,29 +19,46 @@ namespace Store.Domain.Concrete
             context = cont;
         }
 
+        
         public IEnumerable<Item> Items
         {
+            [OutputCache(Duration = int.MaxValue)]
             get { return context.Items; }
         }
-     
+
+        
         public IEnumerable<IdentityRole> Roles
         {
+            [OutputCache(Duration = int.MaxValue)]
             get { return context.Roles; }
         }
 
+        
         public IEnumerable<AppUser> Users
         {
+            [OutputCache(Duration = int.MaxValue)]
             get { return context.Users; }
         }
 
+        
         public IEnumerable<Category> Categories
         {
+            [OutputCache(Duration = int.MaxValue)]
             get { return context.Categories; }
         }
 
+        
         public IEnumerable<Photo> Photos
         {
+            [OutputCache(Duration = int.MaxValue)]
             get { return context.Photos; }
+        }
+
+        
+        public IEnumerable<Supplier> Suppliers
+        {
+            [OutputCache(Duration = int.MaxValue)]
+            get { return context.Suppliers; }
         }
 
         public void SaveItem(Item item)
@@ -112,81 +129,83 @@ namespace Store.Domain.Concrete
             to.m2 = from.m2;
             to.ItemType = from.ItemType;
             to.PriceForM2 = from.PriceForM2;
-            to.Application = from.Application;
             to.Weight = from.Weight;
         }
 
         public void SaveOrUpdateItemFromXlsOne(Item item, List<string[]> hierarchy, List<string[]> Names, IEnumerable<string> images)
         {
             Category current = null;
-            var it = context.Items.FirstOrDefault(x => x.article==item.article);
-            if (it != null) //update item
+            Item it = null;
+            for (int i = 0; i < hierarchy.Count; i++)
             {
-                MapItem(ref item, ref it);
-                
-                if (images.Count() > 0)
+                for (int j = 0; j < hierarchy[i].Count(); j++)
                 {
-                    foreach (var img in images)
+                    Category category = new Category
                     {
-                        if (it.Photos.Any(x => x.url == img)) { }
-                        else it.Photos.Add(new Photo { url = img });
+                        Name = Names[i][j],
+                        Description = hierarchy[i][j]
+                    };
+                    if (current != null)
+                    {
+                        category.ParentID = current.CategoryId;
                     }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < hierarchy.Count; i++)
-                {
-                    for (int j = 0; j < hierarchy[i].Count(); j++)
+                    var cat = SubCategoryGetOrCreate(category);
+                    if (j == hierarchy[i].Count() - 1)
                     {
-                        string type = "";
-                        switch (j)
+                        if (item.Id > 0) 
                         {
-                            case 0: type = "show_collections"; break;
-                            case 1: type = "Country"; break;
-                            case 2: type = "Brand"; break;
-                            default: type = "Collection"; break;
-                        }
-                        Category category = new Category
-                        {
-                            Name = Names[i][j],
-                            Description = hierarchy[i][j],
-                            Type = type
-                        };
-                        if (current != null)
-                        {
-                            category.ParentID = current.CategoryId;
-                        }
-                        var cat = SubCategoryGetOrCreate(category);
-                        if (j == hierarchy[i].Count() - 1)
-                        {
-                            if (item.Id > 0) { } //если этот товар уже есть не добавляем фото
-                            else
+                            if (images.Count() > 0)
                             {
-                                if (images.Count() > 0)
+                                foreach (var img in images)
                                 {
-                                    item.Photos = new List<Photo>();
-                                    foreach (var img in images)
-                                    {
-                                        item.Photos.Add(new Photo { url = img });
-                                    }
-                                }
-                                it = context.Items.FirstOrDefault(x => x.article == item.article);
-                                if (it != null)
-                                {
-                                    item = it;
+                                    if (item.Photos.Any(x => x.url == img)) { }
+                                    else item.Photos.Add(new Photo { url = img });
                                 }
                             }
+                        } 
+                        else
+                        {
+                            if (images.Count() > 0)
+                            {
+                                item.Photos = new List<Photo>();
+                                foreach (var img in images)
+                                {
+                                    item.Photos.Add(new Photo { url = img });
+                                }
+                            }
+                            it = context.Items.FirstOrDefault(x => x.article == item.article);
+                            if (it != null)
+                            {
+                                item = it;
+                            }
+                        }
+                        if (!cat.items.Contains(item))
+                        {
                             cat.items.Add(item); //добавляем товар в категорию
                         }
-                        current = cat;
                     }
-                    current = null;
+                    current = cat;
                 }
+                current = null;
             }
             SaveChanges();
         }
 
+
+        public Supplier SupplierGetOrCreate(string name)
+        {
+            Supplier supp = Suppliers.FirstOrDefault(x => x.Name == name);
+            if (supp == null)
+            {
+                context.Suppliers.Add(new Supplier()
+                {
+                    Name = name
+                });
+                SaveChanges();
+                supp = Suppliers.FirstOrDefault(x => x.Name == name);
+            }
+            return supp;
+        }
         public Category SubCategoryGetOrCreate(Category category)
         {
             Category categ = null;
@@ -198,7 +217,7 @@ namespace Store.Domain.Concrete
             {
                 if (category.ParentID > 0)
                 {
-                    var categs = context.Categories.Where(x => x.Name == category.Name && x.ParentID != category.ParentID);
+                    var categs = context.Categories.Where(x => x.Name.Contains(category.Name) && x.ParentID != category.ParentID);
                     if (categs.Count() > 0) // если с одним именем больше одного, тогда сделать имя уникальным
                     {
                         category.Name = category.Name + "_" + (categs.Count()+1);
@@ -261,13 +280,18 @@ namespace Store.Domain.Concrete
             SaveChanges();
         }
 
-        public bool UpdateItemPriceFromXls(string article, string price)
+        public bool UpdateItemPriceFromXls(string article, string price, string supplier = "unknown")
         {
             Item item = Items.FirstOrDefault(x => x.article == article);
             if (item != null)
             {
                 item.Price = Convert.ToInt32(Math.Round(double.Parse(price)*1.15));
                 context.SaveChanges();
+                if (supplier != "unknown")
+                {
+                    Supplier sup = SupplierGetOrCreate(supplier);
+                    sup.Items.Add(item);
+                }
                 return true;
             }
             else return false;
@@ -342,23 +366,26 @@ namespace Store.Domain.Concrete
             return categories;
         }
 
-        public IEnumerable<Category> GetChildCollectionsAvoidLowerSubs(Category ctg)
+        public List<Category> GetChildCollectionsAvoidLowerSubs(Category ctg)
         {
             if (ctg.SubCategories.Count() > 0)
             {
-                IEnumerable<Category> collections = new List<Category>();
-                if (ctg.SubCategories.Any(x => x.Type == "Country" || x.Type == "application" || x.Type == "Brand"))
+                List<Category> collections = new List<Category>();
+                foreach (var category in ctg.SubCategories)
                 {
-                    foreach (var sub in ctg.SubCategories)
+                    if (category.Type == "show_collections" || category.Type=="Collection")
                     {
-                        collections = collections.Union(GetChildCollectionsAvoidLowerSubs(sub));
+                        collections.Add(category);
+                    }
+                    else if (category.Type == "Country" || category.Type == "Brand")
+                    {
+                        foreach (var sub in category.SubCategories)
+                        {
+                            collections = collections.Union(GetChildCollectionsAvoidLowerSubs(sub)).ToList();
+                        }
                     }
                 }
-                else
-                {
-                    collections = collections.Union(ctg.SubCategories);
-                }
-                return collections.Distinct();
+                return collections.Distinct().ToList();
             }
             return new List<Category>();
         }
@@ -380,7 +407,7 @@ namespace Store.Domain.Concrete
         public IEnumerable<Category> GetBrandsByCountry(string country)
         {
             Category countryctg = Categories.FirstOrDefault(x => x.Type == "Country"
-                && x.Description == country);
+                && x.Name == country);
             if (countryctg.SubCategories.Count() > 0)
             {
                 return new List<Category>(countryctg.SubCategories.Where(x => x.Type == "Brand"));

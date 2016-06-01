@@ -16,15 +16,11 @@
     <title>@ViewBag.Title</title>
     @RenderSection("HScripts", false)
 </head>
-<body>
+<body class="admin-body">
     <div>
     @if (User.IsInRole("Admin"))
     {
-        <div class="container-fluid pull-right">
-            <a class="btn" href="@Url.Action("Index","Item")">На сайт</a>
-
-                <a class="btn btn-primary" href="@Url.Action("Index","Admin")">Вернуться к панели</a>
-        </div>
+        
     }
     
         @if (TempData["message"] != null)
@@ -33,11 +29,33 @@
                 @TempData["message"]
             </div>
         }
-        @RenderBody()
+        
+            <div class="admin panel panel-info">
+                    <div class="panel-heading" style="padding:20px;">Здравствуй, @User.Identity.Name</div>
+             </div>
+                
+                <!--Админ меню-->
+                <div class="col-sm-3">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            <h2>Меню</h2>
+                        </div>
+                        <div class="list-group">
+                            <a href="@Url.Action("Items","Admin")" class="list-group-item">Список товаров</a>
+                            <a href="@Url.Action("Categories","Admin")" class="list-group-item">Список категорий</a>
+                            <a href="@Url.Action("Orders","Admin")" class="list-group-item">Список заказов</a>
+                            <a href="@Url.Action("Index","Admin")" class="list-group-item">Панель администратора</a>
+                            <a href="@Url.Action("Index","Item")" class="list-group-item">На сайт</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-9">
+                    @RenderBody()
+                </div>
 
-    </div>
+            </div>
     <div class="AdminNotification text-center" id="notification" style="visibility:hidden"></div>
-@RenderSection("BScripts", false)
+    @RenderSection("BScripts", false)
     <script type="text/javascript">
     $(function () {
 

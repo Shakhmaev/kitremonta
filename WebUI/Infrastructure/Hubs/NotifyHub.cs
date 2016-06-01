@@ -17,5 +17,20 @@ namespace Store.WebUI.Infrastructure.Hubs
         {
             Groups.Add(Context.ConnectionId, "Admins");
         }
+
+        public void NewOrder()
+        {
+            Clients.Group("Admins").neworder();
+        }
+
+        public void AddCallToAdminInfo(string number)
+        {
+            Clients.Group("Admins").addcall(number);
+        }
+
+        public void RemoveCallFromAdminInfo(string number)
+        {
+            Clients.Group("Admins").removecall(number);
+        }
     }
 }

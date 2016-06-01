@@ -78,7 +78,7 @@
 
     <div class="container-fluid">
         <div style="border-top:2px solid #222222; margin-top:10px;">
-            @if (Model.currentctg != null && Model.currentctg.Text != null && Model.currentctg.Type!="show_collections")
+            @if (Model.currentctg != null && Model.currentctg.Text != null && Model.currentctg.Type!="show_collections" && Model.currentctg.ExtraPhotos.Count>0)
             {
                 <text><strong><p>Коллекция в интерьере и варианты оформления</p></strong></text>
                 foreach (var phto in Model.currentctg.ExtraPhotos)
@@ -94,17 +94,22 @@
     </div>
 
     <div class="container-fluid">
+        @if (@Model.Categories.Count() > 0) { 
         <div class="container-fluid list-descendants">
             <div class="col-xs-12" style="text-align:center;"><h3>@Model.categoryTypeMessage</h3></div>
             @foreach (var ctg in Model.Categories)
             {
-                <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 subctgs" style="text-align:center; border: 0.1px solid #808080;">
-                    <a href="@Url.Action("List", "Item", new { category = ctg.Name })"><p>@ctg.Description</p>
-                        <p><img class="img-thumbnail" style="max-height:250px;" src="@Html.Action("GetCategoryImageMini","ImageView",new { id = ctg.CategoryId})" /></p>
+                <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 subctgs" style="text-align:center; ">
+                    <a href="@Url.Action("List", "Item", new { category = ctg.Name })">
+                        <div class="category-img">
+                            <p>@ctg.Description</p>
+                            <p><img style="max-height:200px;" src="@Html.Action("GetCategoryImageMini","ImageView",new { id = ctg.CategoryId})" /></p>
+                        </div>
                     </a>
                 </div>
             }
         </div>
+        }
         <div class="col-xs-12">
             <h2>Товары в разделе @(Model.currentctg!=null?Model.currentctg.Description:"")</h2>
         </div>

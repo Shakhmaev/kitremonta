@@ -44,12 +44,9 @@ Screen style's
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 
 .menu-container {
-    margin-right: -1px;
-    margin-left:-1px;
     background: #0097A7;
     z-index:3;
     position:relative;
-    border:1px solid black;
 }
 
 .menu-container *{

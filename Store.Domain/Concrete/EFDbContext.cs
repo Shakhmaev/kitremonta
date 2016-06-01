@@ -12,6 +12,7 @@ namespace Store.Domain.Concrete
         public DbSet<Category> Categories { get; set; }
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartLine> Lines { get; set; }
+        public DbSet<Supplier> Suppliers { get; set; }
         public EFDbContext()
             : base("EFDbContext")
         {

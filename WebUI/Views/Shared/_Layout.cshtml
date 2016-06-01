@@ -14,7 +14,6 @@
     <link href="~/Content/Styles/Styles1.css" rel="stylesheet" />
     <link href="~/Content/slick/slick.css" rel="stylesheet" />
     <link href="~/Content/slick/slick-theme.css" rel="stylesheet" />
-    <link href='https://fonts.googleapis.com/css?family=Play&subset=latin,cyrillic-ext' rel='stylesheet' type='text/css'>
     <script type="text/javascript" src="~/Scripts/jquery-2.2.0.min.js"></script>
     <script type="text/javascript" src="~/Scripts/jquery-ui-1.11.4.min.js"></script>
     <script type="text/javascript" src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
@@ -103,7 +102,7 @@
                 <div class="col-xs-12">
                     <a href="@Url.Action("Index","Item")">
                         <div class="logo">
-                            <img src="@Url.Content("/Content/Styles/Img/logo.png")" />
+                            <img src="@Url.Content("/Content/Styles/Img/kitlogo.png")" />
 
                         </div>
                     </a>
@@ -197,8 +196,13 @@
 
     @if (User.IsInRole("Admin"))
     {
+        @RenderPage("_InfoPanel.cshtml");
         <div class="AdminNotification text-center" id="notification" style="visibility:hidden"></div>
+      
         <script type="text/javascript">
+            $(document).on('click', ".adminnotification", function () {
+                $(".adminnotification").hide();
+            });
             $(function () {
                 var NotifySound = document.createElement('audio');
                 NotifySound.setAttribute('src', '@Url.Content("~/Content/Sound/notify.mp3")');
@@ -213,10 +217,35 @@
                     NotifySound.play();
                 };
 
+                hub.client.neworder = function () {
+                    refreshOrderList();
+                }
+                hub.client.addcall = function (number) {
+
+                }
+
                 $.connection.hub.start().done(function () {
                     hub.server.registerAdmin();
+                    refreshOrderList();
                 });
             });
+
+            refreshOrderList = function () {
+                $.ajax({
+                    url: '@Url.Action("RefreshOrderList","Admin")',
+                    dataType: 'json',
+                    beforeSend: function () { $(".infopanel .orders").html("<img src=" + '/Content/Styles/Img/load.gif' + ">"); },
+                    success: function (data) {
+                        $(".infopanel .orders").html("");
+                        $(data).each(function (k, v) {
+                            $(".infopanel .orders").append("<a href='@Url.Action("OrderDetails", "Admin")?orderId="+v+"'>Новый заказ номер " + v + "</a></br>");
+                        });
+                    },
+                    error: function () {
+                        alert('error');
+                    }
+                });
+            }
         </script>
     }
     @RenderSection("Scripts", false)

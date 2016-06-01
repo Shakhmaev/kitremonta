@@ -13,7 +13,7 @@
     <mvcSiteMapNode title="Вход" action="Login" controller="Auth" visibility="XmlSiteMapResult, !*" metaRobotsValues="noindex" />
     <mvcSiteMapNode title="Регистрация" action="Register" controller="Auth" visibility="XmlSiteMapResult, !*" metaRobotsValues="noindex" />
     <!--Menu-->
-    <mvcSiteMapNode title="Керамическая плитка" action="List" controller="Item" category="keramicheskaya-plitka" visibility="MenuHelper, !*" >
+    <mvcSiteMapNode title="Керамическая плитка / керамогранит" action="List" controller="Item" class="node-br" category="keramicheskaya-plitka" visibility="MenuHelper, !*" >
       <mvcSiteMapNode title="Керамогранит" action="List" controller="Item" category="keramicheskij-granit" visibility="MenuHelper, !*" />
       <mvcSiteMapNode title="Для ванной" action="List" controller="Item" category="keramicheskaya-plitka" application="для ванной" visibility="MenuHelper, !*" />
 

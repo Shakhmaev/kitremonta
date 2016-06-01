@@ -11,8 +11,7 @@
         @Html.Action("LoadSummary", "Item", new { category = "All", filters = Model.filters, page = 1, search = Model.search })
     </div>
 <script type="text/javascript">
-
-function initsum(pg) {
+    function initsum(pg) {
         var conf = {
             url: '@Url.Action("LoadSummary", "Item")',
             high: 10000000,
@@ -20,20 +19,24 @@ function initsum(pg) {
             ps: 20,
             page: pg,
             sort: 'name',
-            brands: 'All'
-            }
-            if (pg != undefined) {
-            if (pg === -3) {
-            conf.page = parseInt($("li.active a.linkbtn").attr("id")) - 1;
-            }
-            else if (pg === -2) {
-            conf.page = parseInt($("li.active a.linkbtn").attr("id")) + 1;
-            }
-            else conf.page = pg;
-            }
-            else {
-            conf.page = $(".linkbtn").attr("id");
-            }
-            return conf;
-}
+            brands: 'All',
+            purposes: 'All',
+            countries: 'All',
+            applications: 'All',
+        }
+        conf.loadimg = '@Url.Content("~/Content/Styles/Img/load.gif")';
+        if (pg != undefined) {
+        if (pg === -3) {
+        conf.page = parseInt($("li.active a.linkbtn").attr("id")) - 1;
+        }
+        else if (pg === -2) {
+        conf.page = parseInt($("li.active a.linkbtn").attr("id")) + 1;
+        }
+        else conf.page = pg;
+        }
+        else {
+        conf.page = $(".linkbtn").attr("id");
+        }
+        return conf;
+    }
     </script>

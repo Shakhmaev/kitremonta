@@ -13,6 +13,7 @@ using System.IO;
 using System.Text;
 using System.Web.Script.Serialization;
 using System.Text.RegularExpressions;
+using System.Web.UI;
 
 namespace Store.WebUI.Controllers
 {
@@ -26,6 +27,9 @@ namespace Store.WebUI.Controllers
             repository = repo;
         }
 
+
+
+        [OutputCache(Duration = 1800)]
         public ViewResult Index()
         {
             IndexViewModel model;
@@ -80,22 +84,16 @@ namespace Store.WebUI.Controllers
                 {
                     case "Brand":
                     case "show_collections":
+                    case "Collection":
                         {
                             model.categoryTypeMessage = "Коллекции";
                             model.Categories = repository.GetChildCollectionsAvoidLowerSubs(ctg);
                             break;
                         }
-                    case "Collection":
-                    case "show_items":
-                        {
-                            model.categoryTypeMessage = "";
-                            model.Categories = new List<Category>();
-                            break;
-                        }
                     case "Country":
                         {
                             model.categoryTypeMessage = "Бренды";
-                            model.Categories = repository.GetBrandsByCountry(ctg.Description);
+                            model.Categories = repository.GetBrandsByCountry(ctg.Name);
                             break;
                         }
                     default: 
@@ -254,7 +252,7 @@ namespace Store.WebUI.Controllers
 
 
             //вначале плитка, потом всё остальное
-            var firstgoing = items.Where(x => (x.Purpose == "для стен" || x.Purpose == "для пола") && x.Price > 0);
+            var firstgoing = items.Where(x => (x.Purpose.Contains("для стен") || x.Purpose.Contains("для пола")) && x.Price > 0);
 
             items = firstgoing.Union(items.Except(firstgoing));
             //-
@@ -283,26 +281,41 @@ namespace Store.WebUI.Controllers
         private List<KeyValuePair<string, IEnumerable<Category>>> GetSideCollection()
         {
             ISiteMap map = MvcSiteMapProvider.SiteMaps.Current;
-            foreach (var ct in repository.Categories.Where(x => x.ParentID == null))
-            {
-                ISiteMapNode node = map.FindSiteMapNodeFromCurrentContext();
-                ISiteMapNode ctnode = map.FindSiteMapNodeFromKey(ct.CategoryId.ToString());
-                if (node
-                .IsDescendantOf(ctnode) ||
-                    node == ctnode)
-                {
-                    return new List<KeyValuePair<string, IEnumerable<Category>>>(){
-                        new KeyValuePair<string,IEnumerable<Category>>("Countries",
-                            new List<Category>(repository.FindInDescendantCountries(ct))),
-                        new KeyValuePair<string,IEnumerable<Category>>("Brands",
-                            new List<Category>(repository.FindInDescendantBrands(ct))),
-                        new KeyValuePair<string,IEnumerable<Category>>("RootCategory",
-                            new List<Category>(){ ct })
-                        };
+            ISiteMapNode node = map.FindSiteMapNodeFromCurrentContext();
+            var ctgs = repository.Categories.Where(x => x.Type == "show_collections");
 
+            Category ctg = ClosestRootParent(ctgs,node);
+            
+            return new List<KeyValuePair<string, IEnumerable<Category>>>(){
+                new KeyValuePair<string,IEnumerable<Category>>("Countries",
+                    new List<Category>(repository.FindInDescendantCountries(ctg))),
+                new KeyValuePair<string,IEnumerable<Category>>("Brands",
+                    new List<Category>(repository.FindInDescendantBrands(ctg))),
+                new KeyValuePair<string,IEnumerable<Category>>("RootCategory",
+                    new List<Category>(){ ctg })
+                };
+
+        }
+
+        private Category ClosestRootParent(IEnumerable<Category> categories, ISiteMapNode node)
+        {
+            ISiteMap map = MvcSiteMapProvider.SiteMaps.Current;
+            Category parent = null;
+            foreach (var ct in categories)
+            {
+                if (ct.SubCategories.Any(x => x.Type == "show_collections" 
+                    && (node.IsDescendantOf(map.FindSiteMapNodeFromKey(x.CategoryId.ToString())) 
+                    || node == map.FindSiteMapNodeFromKey(x.CategoryId.ToString()))))
+                {
+                    parent = ClosestRootParent(ct.SubCategories, node);
+                }
+                else if (node.IsDescendantOf(map.FindSiteMapNodeFromKey(ct.CategoryId.ToString())) 
+                    || node == map.FindSiteMapNodeFromKey(ct.CategoryId.ToString()))
+                {
+                    parent = ct;
                 }
             }
-            return null;
+            return parent;
         }
 
         private IEnumerable<Item> GetItems(Category category)
@@ -329,6 +342,7 @@ namespace Store.WebUI.Controllers
             return RedirectToAction("AddToCart", "Cart", new { Id });
         }
 
+        [OutputCache(Duration = int.MaxValue, Location=OutputCacheLocation.Client)]
         public string GetImage(int Id)
         {
             Item item = repository.Items.FirstOrDefault(i => i.Id == Id);
@@ -403,6 +417,7 @@ namespace Store.WebUI.Controllers
                 SelectedBrands = new List<string> { "All" },
                 SelectedCountries = new List<string> { "All" },
                 SelectedPurposes = new List<string> { "All" },
+                SelectedApplications = new List<string> { "All" },
                 SortBy = "name",
                 PageSize = 20,
                 HigherPrice = int.MaxValue,
@@ -427,7 +442,18 @@ namespace Store.WebUI.Controllers
             }
             return Json(list, JsonRequestBehavior.AllowGet);
         }
+
+        public JsonResult GetNeighbourItems(int id)
+        {
+            List<string[]> list = new List<string[]>();
+            foreach (var item in repository.Items.FirstOrDefault(x => x.Id == id).ParentCategories.SelectMany(x => x.items).Where(x => x.Id != id).Take(10))
+            {
+                list.Add(new string[] { Url.Action("ItemDetails", "Item", new { id = item.Id }),
+                    Url.Content(GetMiniImage(item.Id)), 
+                    item.Name, item.CurrentPrice.ToString()
+                });
+            }
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
 	}
 }
-
-//TODO: керамическая плитка / керамогранит (совпадения в адресах)

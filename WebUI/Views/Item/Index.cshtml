@@ -12,7 +12,7 @@
     </script>
 }
 
-    <div class="center-block"><h2>Коллекции из "Каремическая плитка"</h2></div>
+    <div class="center-block" id="collectionstext"><h2></h2></div>
         @Html.Partial("_carousel")
 
 
@@ -82,26 +82,32 @@
         @Html.MvcSiteMap().SiteMap()
     </div>
 
-    <div class="divline"><h2>Почему у нас?</h2></div>
+    <div class="divline"><h2>Почему у нас покупают</h2></div>
     <div class="container-fluid">
         <div class="row whyus">
-            <div class="col-xs-12 col-sm-4">
+            <div class="col-xs-12 col-sm-3">
                 <div class="circle container">
-                    <p class="fa fa-thumbs-up fa-lg fa-4x"></p>
+                    <p class="fa fa-thumbs-up fa-3x"></p>
                 </div>
                 <p class="circle-p">Качество проверенное временем</p>
             </div>
-            <div class="col-xs-12 col-sm-4">
+            <div class="col-xs-12 col-sm-3">
                 <div class="circle container">
-                    <p class="fa fa-money fa-lg fa-4x"></p>
+                    <p class="fa fa-money fa-3x"></p>
                 </div>
                 <p class="circle-p">Очень привлекательные цены</p>
             </div>
-            <div class="col-xs-12 col-sm-4">
+            <div class="col-xs-12 col-sm-3">
                 <div class="circle container">
-                    <p class="fa fa-list-alt fa-lg fa-4x"></p>
+                    <p class="fa fa-list-alt fa-3x"></p>
                 </div>
-                <p class="circle-p">Множество супер предложений</p>
+                <p class="circle-p">Огромное количество супер предложений</p>
+            </div>
+            <div class="col-xs-12 col-sm-3">
+                <div class="circle container">
+                    <p class="fa fa-male fa-3x"></p>
+                </div>
+                <p class="circle-p">Нас выбрали более тысячи клиентов и остались довольны выбором</p>
             </div>
         </div>
     </div>
@@ -113,7 +119,7 @@
         $.ajax({
             url: '@Url.Action("ItemSummary")' + '?id=' + $(v).attr('data-itemid'),
             beforesend: function () {
-                $(v).html("<img src=" + '/Content/Styles/Img/load.gif' + "/>");
+                $(v).html("<img src=" + '/Content/Styles/Img/load.gif' + ">");
             },
             success: function (data) {
                 $(v).html(data);
@@ -132,7 +138,8 @@
             beforeSend: function () {
                 $(".jcarousel-wrapper").show('slow');
             },
-            success: function (data){
+            success: function (data) {
+                $("#collectionstext>h2").html("Коллекции из раздела \"Керамическая плитка\"")
                 reloadCarousel(data);
             }
         });

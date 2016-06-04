@@ -42,6 +42,7 @@ namespace Store.WebUI.Infrastructure
             DynamicNode node = new DynamicNode(Convert.ToString(subcateg.CategoryId),
                     Convert.ToString(subcateg.Parent.CategoryId), subcateg.Description, subcateg.Description);
             node.RouteValues.Add("category", subcateg.Name);
+            if (subcateg.Type == "Collection") node.Attributes["visibility"] = "!SiteMapHelper,*";
             yield return node;
             foreach (var sub in subcateg.SubCategories)
             {

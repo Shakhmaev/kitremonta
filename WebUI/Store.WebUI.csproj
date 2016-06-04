@@ -33,9 +33,11 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework">
@@ -8747,6 +8749,7 @@
     <Compile Include="Infrastructure\Parsers\Parser1.cs" />
     <Compile Include="Infrastructure\Parsers\ParserStops.cs" />
     <Compile Include="Infrastructure\Parsers\Translitter.cs" />
+    <Compile Include="Infrastructure\VisibilityProvider.cs" />
     <Compile Include="Models\AdminItemsViewModel.cs" />
     <Compile Include="Models\AdminNewViewModel.cs" />
     <Compile Include="Models\CalculatorViewModel.cs" />

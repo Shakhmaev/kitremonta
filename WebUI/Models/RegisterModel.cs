@@ -8,9 +8,9 @@ namespace Store.WebUI.Models
 {
     public class RegisterModel
     {
-        [Required(ErrorMessage="Поле \"Имя\" обязательно")]
-        [Display(Name="Имя")]
-        [StringLength(15, ErrorMessage="Можно ввести до 15 символов в поле ")]
+        [Required(ErrorMessage="Поле \"Логин\" обязательно")]
+        [Display(Name="Логин")]
+        [StringLength(15, ErrorMessage="Можно ввести до 15 символов в поле \"логин\"")]
         [DataType(DataType.Text)]
         public string Name { get; set; }
 
@@ -28,6 +28,7 @@ namespace Store.WebUI.Models
         [Required(ErrorMessage="Введите подтверждение пароля")]
         [Display(Name="Подтверждение пароля")]
         [Compare("Password")]
+        [DataType(DataType.Password)]
         public string ConfirmPassword { get; set; }
 
     }

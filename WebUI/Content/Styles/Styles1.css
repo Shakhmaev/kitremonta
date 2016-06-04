@@ -1004,6 +1004,11 @@ ul.dropdown-cart > li.divider {
 div.logo {
     float:left;
 }
+
+div.header-phones {
+    float:left;
+}
+
 div.logo > img{
     width:500px;
     max-width:100%;

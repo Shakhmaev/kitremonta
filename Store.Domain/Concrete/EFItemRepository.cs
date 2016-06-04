@@ -217,12 +217,15 @@ namespace Store.Domain.Concrete
             {
                 if (category.ParentID > 0)
                 {
-                    var categs = context.Categories.Where(x => x.Name.Contains(category.Name) && x.ParentID != category.ParentID);
-                    if (categs.Count() > 0) // если с одним именем больше одного, тогда сделать имя уникальным
+                    categ = Categories.FirstOrDefault(x => x.Name == category.Name && x.ParentID == category.ParentID);
+                    if (categ == null)
                     {
-                        category.Name = category.Name + "_" + (categs.Count()+1);
+                        var categs = context.Categories.Where(x => x.Name.Contains(category.Name) && x.ParentID != category.ParentID);
+                        if (categs.Count() > 0) // если с одним именем больше одного, тогда сделать имя уникальным
+                        {
+                            category.Name = category.Name + "_" + (categs.Count() + 1);
+                        }
                     }
-                    categ = Categories.FirstOrDefault(x=>x.Name == category.Name && x.ParentID == category.ParentID);
                 }
                 else categ = context.Categories.FirstOrDefault(x => x.Name == category.Name);
             }

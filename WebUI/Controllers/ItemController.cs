@@ -36,7 +36,7 @@ namespace Store.WebUI.Controllers
             model = new IndexViewModel
             {
                 DiscountItems = repository.Items.Where(x=>x.DiscountPercent>0).Take(12),
-                LastItems = repository.Items.Reverse().Take(12)
+                LastItems = repository.Items.Reverse().Where(x=>x.Price>0).Take(12)
             };
 
             return View(model);
@@ -96,7 +96,7 @@ namespace Store.WebUI.Controllers
                             model.Categories = repository.GetBrandsByCountry(ctg.Name);
                             break;
                         }
-                    default: 
+                    default: model.Categories = new List<Category>();
                         break;
                 } 
                 model.Side = GetSideCollection();
@@ -386,6 +386,7 @@ namespace Store.WebUI.Controllers
             return PartialView(model);
         }
 
+        [OutputCache(Duration = int.MaxValue, Location = OutputCacheLocation.Client)]
         public string GetMiniImage(int Id)
         {
             Item item = repository.Items.FirstOrDefault(i => i.Id == Id);

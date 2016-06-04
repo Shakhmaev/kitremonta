@@ -13,11 +13,13 @@ using System.Web.Script.Serialization;
 using OfficeOpenXml;
 using Store.WebUI.Infrastructure.Parsers;
 using System.Net;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Store.WebUI.Controllers
 {   
     [Authorize(Roles="Admin")]
-    public class AdminController : Controller
+    public class AdminController : AsyncController
     {
         IItemRepository repository;
         IOrderProcessor proc;
@@ -28,7 +30,7 @@ namespace Store.WebUI.Controllers
             proc = processor;
         }
 
-        public ViewResult Index()
+        public async Task<ViewResult> Index()
         {
             return View();
         }
@@ -286,14 +288,16 @@ namespace Store.WebUI.Controllers
             return RedirectToAction("Index");
         }
 
-        public ActionResult UploadKMPriceXls()
+        
+        public async Task<ActionResult> UploadKMPriceXls(CancellationToken cancellation)
         {
             if (Request != null)
             {
                 HttpPostedFileBase file = Request.Files["Sheet"];
 
                 ParserKMdealer p = new ParserKMdealer(file, repository);
-                List<string> msgs = p.Parse();
+                List<string> msgs = new List<string>();
+                msgs = await p.Parse();
                 string str = "Количество ненайденных = " + msgs.Count;
                 
                 foreach (var msg in msgs)
@@ -304,6 +308,7 @@ namespace Store.WebUI.Controllers
             }
             return RedirectToAction("Index");
         }
+
 
         public ActionResult UploadLincerStopsPriceXls()
         {

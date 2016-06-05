@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNet.Identity;
+﻿using Hangfire;
+using Microsoft.AspNet.Identity;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
 using Owin;
@@ -17,6 +18,10 @@ namespace Store.WebUI
             });
             app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
             app.MapSignalR();
+
+            GlobalConfiguration.Configuration.UseSqlServerStorage("EFDbContext");
+            app.UseHangfireDashboard();
+            app.UseHangfireServer();
         }
     }
 }

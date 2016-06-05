@@ -16,11 +16,8 @@
                 </div>
                 <div class="col-xs-12" style="margin-top:20px;">
                     <h2>Цены КМ</h2>
-                    @using (Html.BeginForm("UploadKMPriceXls", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
-                    {
-                        <input type="file" id="ImgExtraFiles" accept="xls,xlsx" name="Sheet" size="40" style="margin: 10px;">
-                        <input type="submit" class="btn btn-default btn-sm" value="Загрузить" />
-                    }
+                        <input type="file" id="kmprices" accept="xls,xlsx" name="Sheet" size="40" style="margin: 10px;">
+                        <input id="uploadkm" type="submit" class="btn btn-default btn-sm" value="Загрузить" />
                 </div>
                 <div class="col-xs-12" style="margin-top:20px;">
                     <h2>Цены Линкер стопы</h2>
@@ -48,3 +45,36 @@
             </div>
 
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var hub = $.connection.notifyHub;
+
+        hub.client.addmsg = function (message) {
+            alert(message);
+        };
+
+        $.connection.hub.start().done(function () {
+            
+        });
+    });
+
+    $('#uploadkm').click(function () {
+        var formdata = new FormData();
+        var fileInput = document.getElementById('kmprices');
+        formdata.append(fileInput.name, fileInput.files[0]);
+
+        if (formdata != null) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '@Url.Action("UploadKMPriceXls")');
+            xhr.send(formdata);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    alert("Файл обрабатывается, ожидайте сообщения");
+                }
+            }
+        }
+        return false;
+    });
+</script>

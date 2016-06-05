@@ -15,10 +15,14 @@ using Store.WebUI.Infrastructure.Parsers;
 using System.Net;
 using System.Threading.Tasks;
 using System.Threading;
+using Hangfire;
+using Microsoft.AspNet.SignalR;
+using Store.WebUI.Infrastructure.Hubs;
+using System.Runtime.Remoting.Contexts;
 
 namespace Store.WebUI.Controllers
 {   
-    [Authorize(Roles="Admin")]
+    [System.Web.Mvc.Authorize(Roles="Admin")]
     public class AdminController : AsyncController
     {
         IItemRepository repository;
@@ -289,24 +293,29 @@ namespace Store.WebUI.Controllers
         }
 
         
-        public async Task<ActionResult> UploadKMPriceXls(CancellationToken cancellation)
+        public void UploadKMPriceXls(HttpPostedFileBase Sheet)
         {
-            if (Request != null)
+            if (Sheet != null)
             {
-                HttpPostedFileBase file = Request.Files["Sheet"];
-
-                ParserKMdealer p = new ParserKMdealer(file, repository);
-                List<string> msgs = new List<string>();
-                msgs = await p.Parse();
-                string str = "Количество ненайденных = " + msgs.Count;
-                
-                foreach (var msg in msgs)
-                {
-                    str = String.Concat(str, msg + "\r\n");
-                }
-                TempData["message"] = string.Format("Файл был загружен и обработан. {0} ", str);
+                BackgroundJob.Enqueue(() => ParseKMPriceJob(Sheet));
             }
-            return RedirectToAction("Index");
+        }
+
+        public void ParseKMPriceJob(HttpPostedFileBase file)
+        {
+            ParserKMdealer p = new ParserKMdealer(file, repository);
+            List<string> msgs = new List<string>();
+            msgs = p.Parse();
+
+            string str = "Количество ненайденных = " + msgs.Count;
+
+            foreach (var msg in msgs)
+            {
+                str = String.Concat(str, msg + "</br>");
+            }
+
+            var hub = GlobalHost.ConnectionManager.GetHubContext<NotifyHub>();
+            (hub as NotifyHub).SendChatMessage((hub as NotifyHub).GetName(), str);
         }
 
 

@@ -197,7 +197,7 @@ namespace Store.WebUI.Controllers
 
         public ActionResult UploadMainPhoto()
         {
-            HttpPostedFileBase image = Request.Files[0];
+            /*HttpPostedFileBase image = Request.Files[0];
             int Id = Convert.ToInt32(Request.Params.GetValues("id")[0]);
             Item item = repository.Items.FirstOrDefault(i => i.Id == Id);
 
@@ -206,7 +206,8 @@ namespace Store.WebUI.Controllers
             image.InputStream.Read(item.ImageData, 0, image.ContentLength);
 
             repository.SaveItem(item);
-            return RedirectToAction("GetImage", "Item", new { id = Id });
+            return RedirectToAction("GetImage", "Item", new { id = Id });*/
+            return null;
         }
 
         public void UploadExtraPhoto()

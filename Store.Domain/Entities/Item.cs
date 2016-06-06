@@ -37,39 +37,12 @@ namespace Store.Domain.Entities
         [Display(Name = "Страна")]
         [Required(ErrorMessage = "Пожалуйста, введите страну")]
         public string Country { get; set; }
-
-        [Display(Name = "Тип")]
-        [Required(ErrorMessage = "Пожалуйста, введите тип")]
         public string Type { get; set; }
 
-        [Display(Name = "Цвет")]
-        [Required(ErrorMessage = "Пожалуйста, введите цвет")]
-        public string Color { get; set; }
-
-        [Display(Name = "Поверхность")]
-        [Required(ErrorMessage = "Пожалуйста, введите тип поверхности")]
-        public string Surface { get; set; }
-
-        [Display(Name = "Назначение")]
-        [Required(ErrorMessage = "Пожалуйста, введите назначение")]
-        public string Purpose { get; set; }
-
-        [Display(Name = "Рисунок")]
-        [Required(ErrorMessage = "Пожалуйста, введите тип рисунка")]
-        public string Picture { get; set; }
-
-        [Display(Name = "Размер")]
-        [Required(ErrorMessage = "Пожалуйста, введите размер")]
-        public string Size { get; set; }
-
-
-        [Display(Name = "Только упаковками")]
-        [Required(ErrorMessage = "Укажите, товар продается только упаковками?")]
-        public bool OnlyInPacks { get; set; }
-
-        [Display(Name = "Кол-во в упаковке")]
-        [Required(ErrorMessage = "Пожалуйста, введите количество")]
-        public string CountInPack { get; set; }
+        [Display(Name = "Тип")]
+        [HiddenInput]
+        [Required(ErrorMessage = "Пожалуйста, введите тип")]
+        public string ItemType { get; set; }
 
         [Display(Name = "Ед. изм. цены")]
         [Required(ErrorMessage = "Пожалуйста, введите единицу измерения")]
@@ -78,22 +51,7 @@ namespace Store.Domain.Entities
         [Required]
         [Range(0, int.MaxValue, ErrorMessage = "Пожалуйста, введите положительное значение для цены")]
         public int Price { get; set; }
-
-        [HiddenInput]
-        [Required]
-        public string ItemType { get; set; }
-        [HiddenInput]
-        public double m2 { get; set; }
-        [HiddenInput]
-        public int sht { get; set; }
-        [HiddenInput]
-        public bool PriceForM2 { get; set; }
-        [HiddenInput]
-        public double SizeInM2 { get; set; }
-
-        public string Weight { get; set; }
         
-
         [Display(Name = "Скидка (%)")]
         [Range(0, 100, ErrorMessage = "Пожалуйста, введите правильное значение в процентах")]
         public int DiscountPercent { get; set; }
@@ -109,9 +67,8 @@ namespace Store.Domain.Entities
         [Required]
         public bool IsHot { get; set; }
 
-        public byte[] ImageData { get; set; }
-
-        public string ImageMimeType { get; set; }
+        public virtual ICollection<Property> props { get; set; }
+        public virtual ICollection<PropValue> propValues { get; set; }
         public virtual ICollection<Supplier> Suppliers { get; set; }
         public virtual ICollection<Category> ParentCategories { get; set; }
         [HiddenInput]
@@ -124,6 +81,26 @@ namespace Store.Domain.Entities
 
             }
         }
+    }
+
+    public class Property
+    {
+        [Required]
+        public int Id { get; set; }
+        [Required]
+        public string PropName { get; set; }
+        public bool IsInFilter { get; set; }
+        [Required]
+        public virtual ICollection<PropValue> Values { get; set; }
+    }
+
+    public class PropValue
+    {
+        [Required]
+        public int Id { get; set; }
+        public string Val { get; set; }
+        public virtual ICollection<Item> Items { get; set; }
+        public virtual Property Prop { get; set; }
     }
 
     public class Supplier

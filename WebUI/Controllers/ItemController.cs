@@ -14,6 +14,7 @@ using System.Text;
 using System.Web.Script.Serialization;
 using System.Text.RegularExpressions;
 using System.Web.UI;
+using System.Threading.Tasks;
 
 namespace Store.WebUI.Controllers
 {
@@ -48,19 +49,21 @@ namespace Store.WebUI.Controllers
             return PartialView("ItemSummary",item);
         }
 
-        public ViewResult List(string category, int page = 1, int PageSize = 12, string application = "all")
+        public async Task<ViewResult> List(string category, int page = 1, int PageSize = 12, string application = "all")
         {
             ItemsListViewModel model = new ItemsListViewModel();
             model.Side = new List<KeyValuePair<string, IEnumerable<Category>>>();
+
+            List<IEnumerable<string>> FilterList = new List<IEnumerable<string>>();
+
             IEnumerable<string> Brands = new List<string>();
             IEnumerable<string> Countries = new List<string>();
-            IEnumerable<string> Purposes = new List<string>();
             IEnumerable<string> Applications = new List<string>();
 
             if (category != (string)null)
             {
                 var ctg = repository.Categories.FirstOrDefault(x => x.Name == category);
-                var items = GetItems(ctg);
+                var items = await GetItems(ctg);
                 if (items.Count() == 0)
                 {
                     model.HigherPrice = 0;
@@ -72,7 +75,15 @@ namespace Store.WebUI.Controllers
                     model.LowerPrice = items.Min(x => x.CurrentPrice);
                     Brands = items.Select(x => x.Brand).Distinct();
                     Countries = items.Select(x => x.Country).Distinct();
-                    Purposes = items.Select(x => x.Purpose).Distinct();
+                    var props = items.SelectMany(x => x.props.Where(p => p.IsInFilter));
+                    var propValues = items.SelectMany(x => x.propValues);
+
+                    foreach (var prop in props)
+                    {
+                        var values = propValues.Where(k=>k.Prop == prop).Select(x=>x.Val).Distinct();
+                        FilterList.Add(new List<string>(values));
+                    }
+
                     foreach (var ctgdesc in repository.GetDescendantCollections(ctg))
                     {
                         if (ctgdesc.Application!=null)
@@ -108,7 +119,16 @@ namespace Store.WebUI.Controllers
                 model.LowerPrice = repository.Items.Min(x => x.CurrentPrice);
                 Brands = repository.Items.Select(x => x.Brand).Distinct();
                 Countries = repository.Items.Select(x => x.Country).Distinct();
-                Purposes = repository.Items.Select(x => x.Purpose).Distinct();
+
+                var props = repository.Items.SelectMany(x => x.props.Where(p => p.IsInFilter));
+                var propValues = repository.Items.SelectMany(x => x.propValues);
+
+                foreach (var prop in props)
+                {
+                    var values = propValues.Where(k => k.Prop == prop).Select(x => x.Val).Distinct();
+                    FilterList.Add(new List<string>(values));
+                }
+
                 foreach (var ctg in repository.Categories)
                 {
                     if (ctg.Application != null) 
@@ -128,13 +148,11 @@ namespace Store.WebUI.Controllers
 
             model.filters.SelectedCountries = new List<string>();
 
-            model.filters.AllPurposes = Purposes;
-
-            model.filters.SelectedPurposes = new List<string>();
-
             model.filters.AllApplications = Applications;
 
             model.filters.SelectedApplications = new List<string>();
+
+            //ToDo: написать для properties тоже самое как выше
 
             if (application != "all")
             {
@@ -146,7 +164,8 @@ namespace Store.WebUI.Controllers
             return View(model);
         }
 
-        public PartialViewResult LoadSummary(string category, ItemsListFiltersModel filters, int page = 1, string search = "all")
+
+        public async Task<PartialViewResult> LoadSummary(string category, ItemsListFiltersModel filters, int page = 1, string search = "all")
         {
             FilteredListViewModel fmodel = new FilteredListViewModel();
 
@@ -160,7 +179,7 @@ namespace Store.WebUI.Controllers
             }
             else
             {
-                items = GetItems(categ);
+                items = await GetItems(categ);
             }
 
             if (search != "all")
@@ -185,15 +204,6 @@ namespace Store.WebUI.Controllers
 
                 }
                 else items = items.Where(x => filters.SelectedCountries.Contains(x.Country));
-            }
-
-            if (filters.SelectedPurposes.Count() > 0)
-            {
-                if (filters.SelectedPurposes.First() == "All")
-                {
-
-                }
-                else items = items.Where(x => filters.SelectedPurposes.Contains(x.Purpose));
             }
 
             if (filters.SelectedApplications.Count() > 0)
@@ -252,9 +262,13 @@ namespace Store.WebUI.Controllers
 
 
             //вначале плитка, потом всё остальное
-            var firstgoing = items.Where(x => (x.Purpose.Contains("для стен") || x.Purpose.Contains("для пола")) && x.Price > 0);
+            if (items.Any(x=>x.ItemType=="keram"))
+            {
 
-            items = firstgoing.Union(items.Except(firstgoing));
+                var firstgoing = items.Where(x => x.propValues.Where(p => p.Prop.PropName == "Purpose" && p.Val.Contains("для стен") || p.Val.Contains("для пола")) != null && x.Price > 0);
+            
+                items = firstgoing.Union(items.Except(firstgoing));
+            }
             //-
 
             items = items
@@ -318,13 +332,13 @@ namespace Store.WebUI.Controllers
             return parent;
         }
 
-        private IEnumerable<Item> GetItems(Category category)
+        private async Task<IEnumerable<Item>> GetItems(Category category)
         {
             IEnumerable<Item> items = category.items;
 
             foreach (var sub in category.SubCategories)
             {
-                items = items.Union(GetItems(sub));
+                items = items.Union(await GetItems(sub));
             }
 
             return items;
@@ -367,21 +381,21 @@ namespace Store.WebUI.Controllers
             Item item = repository.Items.FirstOrDefault(x => x.Id == itemId);
             CalculatorViewModel model = new CalculatorViewModel();
 
-            model.m2 = item.m2;
+            model.m2 = double.Parse(item.propValues.FirstOrDefault(x => x.Prop.PropName == "m2").Val);
 
-            model.sht = item.sht;
+            model.sht = int.Parse(item.propValues.FirstOrDefault(x => x.Prop.PropName == "sht").Val);
 
-            model.InPack = item.CountInPack;
+            model.InPack = item.propValues.FirstOrDefault(x => x.Prop.PropName == "CountInPack").Val;
 
-            model.SizeInM2 = item.SizeInM2;
+            model.SizeInM2 = double.Parse(item.propValues.FirstOrDefault(x => x.Prop.PropName == "SizeInM2").Val);
 
-            model.PriceForM2 = item.PriceForM2;
+            model.PriceForM2 = bool.Parse(item.propValues.FirstOrDefault(x => x.Prop.PropName == "PriceForM2").Val);
 
             model.ItemID = item.Id;
 
             model.Price = item.Price;
 
-            model.OnlyInPacks = item.OnlyInPacks;
+            model.OnlyInPacks = bool.Parse(item.propValues.FirstOrDefault(x => x.Prop.PropName == "OnlyInPacks").Val);
 
             return PartialView(model);
         }

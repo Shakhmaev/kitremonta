@@ -61,6 +61,18 @@ namespace Store.Domain.Concrete
             get { return context.Suppliers; }
         }
 
+        public IEnumerable<Property> Properties
+        {
+            [OutputCache(Duration = int.MaxValue)]
+            get { return context.Properties; }
+        }
+
+        public IEnumerable<PropValue> PropValues
+        {
+            [OutputCache(Duration = int.MaxValue)]
+            get { return context.PropValues; }
+        }
+
         public void SaveItem(Item item)
         {
             if (item.Id==0)
@@ -79,11 +91,6 @@ namespace Store.Domain.Concrete
                     dbEntry.Name = item.Name;
                     dbEntry.Description = item.Description;
                     dbEntry.Price = item.Price;
-                    if (item.ImageData != null)
-                    {
-                        dbEntry.ImageData = item.ImageData;
-                        dbEntry.ImageMimeType = item.ImageMimeType;
-                    }
                     dbEntry.IsHot = item.IsHot;
 
                     foreach (var ctg in dbEntry.ParentCategories)
@@ -111,31 +118,24 @@ namespace Store.Domain.Concrete
         public void MapItem(ref Item from, ref Item to)
         {
             to.Brand = from.Brand;
-            to.Color = from.Color;
-            to.CountInPack = from.CountInPack;
             to.Country = from.Country;
             to.Price = from.Price;
             to.PriceUnit = from.PriceUnit;
-            to.Purpose = from.Purpose;
-            to.Size = from.Size;
-            to.Surface = from.Surface;
             to.Type = from.Type;
             to.Name = from.Name;
             to.article = from.article;
-            to.OnlyInPacks = from.OnlyInPacks;
-            to.Picture = from.Picture;
-            to.SizeInM2 = from.SizeInM2;
-            to.sht = from.sht;
-            to.m2 = from.m2;
             to.ItemType = from.ItemType;
-            to.PriceForM2 = from.PriceForM2;
-            to.Weight = from.Weight;
         }
 
         public void SaveOrUpdateItemFromXlsOne(Item item, List<string[]> hierarchy, List<string[]> Names, IEnumerable<string> images)
         {
             Category current = null;
             Item it = null;
+            foreach (var prop in item.props)
+            {
+                var pr = PropertyGetOrCreate(prop);
+            }
+
             for (int i = 0; i < hierarchy.Count; i++)
             {
                 for (int j = 0; j < hierarchy[i].Count(); j++)
@@ -189,8 +189,53 @@ namespace Store.Domain.Concrete
                 current = null;
             }
             SaveChanges();
+
+            AddPropsAndValuesToItem(item.props, item);
         }
 
+        public Property PropertyGetOrCreate(Property prop)
+        {
+            var property = Properties.FirstOrDefault(x => x.PropName == prop.PropName);
+            if (property == null)
+            {
+                property = new Property() { PropName = prop.PropName,
+                    Values = new List<PropValue>(), IsInFilter = prop.IsInFilter };
+
+                property = context.Properties.Add(property);
+                context.SaveChanges();
+            }
+            return property;
+        }
+
+        public void AddPropsAndValuesToItem(IEnumerable<Property> props, Item item)
+        {
+            foreach (var prop in props)
+            {
+                if (prop.Values.Count > 0)
+                {
+                    var pr = PropertyGetOrCreate(prop);
+                    foreach (var pv in prop.Values)
+                    {
+                        if (pr.Values.FirstOrDefault(x=>x.Val==pv.Val && x.Items.Any(i=>i.article==item.article))==null)
+                        {
+                            pv.Items.Add(item);
+                            pr.Values.Add(pv);
+                        }
+                    }
+                }
+            }
+        }
+
+        public PropValue PropValueGetOrCreate(PropValue pv)
+        {
+            var propValue = context.PropValues.FirstOrDefault(x => x.Prop.PropName == pv.Prop.PropName && x.Val == pv.Val);
+            if (propValue == null)
+            {
+                propValue = context.PropValues.Add(pv);
+                context.SaveChanges();
+            }
+            return propValue;
+        }
 
         public Supplier SupplierGetOrCreate(string name)
         {

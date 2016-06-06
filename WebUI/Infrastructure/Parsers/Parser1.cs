@@ -63,16 +63,20 @@ namespace Store.WebUI.Infrastructure.Parsers
                             Type = workSheet.Cells[rowIterator, 1].Value.ToString().Split(',').Last(),
                             Name = workSheet.Cells[rowIterator, 6].Value.ToString(),
                             IsHot = false,
-                            Price = Convert.ToInt32(workSheet.Cells[rowIterator, 7].Value),
-                            CountInPack = workSheet.Cells[rowIterator, 9].Value.ToString(),
                             Country = workSheet.Cells[rowIterator, 2].Value.ToString(),
-                            Purpose = workSheet.Cells[rowIterator, 10].Value.ToString().ToLower(),
-                            Surface = workSheet.Cells[rowIterator, 11].Value.ToString().ToLower(),
-                            Picture = workSheet.Cells[rowIterator, 12].Value.ToString().ToLower(),
-                            Color = workSheet.Cells[rowIterator, 13].Value.ToString().ToLower(),
-                            Size = workSheet.Cells[rowIterator, 14].Value.ToString(),
-                            Weight = workSheet.Cells[rowIterator, 16].Value.ToString()
+                            Price = Convert.ToInt32(workSheet.Cells[rowIterator, 7].Value)
                         };
+
+                        item.props = new List<Property>();
+                        item.propValues = new List<PropValue>();
+                        
+
+                        SetPropValue("CountInPack",workSheet.Cells[rowIterator, 9].Value.ToString(),ref item,false);
+                        SetPropValue("Purpose",workSheet.Cells[rowIterator, 10].Value.ToString(),ref item, true);
+                        SetPropValue("Surface",workSheet.Cells[rowIterator, 11].Value.ToString(),ref item, true);
+                        SetPropValue("Picture",workSheet.Cells[rowIterator, 12].Value.ToString(),ref item, true);
+                        SetPropValue("Color",workSheet.Cells[rowIterator, 13].Value.ToString(),ref item, true);
+                        SetPropValue("Weight",workSheet.Cells[rowIterator, 16].Value.ToString(),ref item, false);
 
                         item.article = workSheet.Cells[rowIterator, 5].Value != null ? workSheet.Cells[rowIterator, 5].Value.ToString() : item.Brand.Substring(0,2) + "-" + Guid.NewGuid().ToString("N");
 
@@ -80,7 +84,7 @@ namespace Store.WebUI.Infrastructure.Parsers
                         var pru = workSheet.Cells[rowIterator, 8].Value.ToString();
                         item.PriceUnit = pru.Contains("шт") ? "шт" : "м2";
 
-                        string inpack = item.CountInPack.Replace('.', ',');
+                        string inpack = item.props.FirstOrDefault(x=>x.PropName=="CountInPack").Values.ElementAt(0).Val.Replace('.', ',');
                         Regex reginpack = new Regex(@"^([0-9]+[,]*[0-9]*)*(.+[/\\]\s*)*([0-9]*)(.*)*");
                         Match m = reginpack.Match(inpack);
 
@@ -90,35 +94,36 @@ namespace Store.WebUI.Infrastructure.Parsers
                         {
                             bool m2p = double.TryParse(m.Groups[1].ToString(), out m2); ;
                             bool shtp = int.TryParse(m.Groups[3].ToString(), out sht);
-                            if (m2p) item.m2 = m2; else item.m2 = 0;
-                            if (shtp) item.sht = sht; else item.sht = 0;
+                            if (m2p) SetPropValue("m2", m2.ToString(), ref item, false); else SetPropValue("m2", "0", ref item, false);
+                            if (shtp) SetPropValue("sht", sht.ToString(), ref item, false); else SetPropValue("sht", "0", ref item, false);
                         }
                         else
                         {
                             int.TryParse(m.Groups[1].ToString(), out sht);
-                            item.sht = sht;
+                            SetPropValue("sht", sht.ToString(), ref item, false);
                         }
 
                         Regex sizeregx = new Regex(@"^([0-9]+[,]*[0-9]*)[xXхХ×*]([0-9]+[,]*[0-9]*)");
-                        m = sizeregx.Match(item.Size.Replace('.', ','));
+                        m = sizeregx.Match(item.props.FirstOrDefault(x => x.PropName == "Size").Values.ElementAt(0).Val.Replace('.', ','));
                         if (m.Success)
                         {
-                            item.SizeInM2 = (double)((double.Parse(m.Groups[1].Value) * double.Parse(m.Groups[2].Value)) / 10000);
+                            SetPropValue("SizeInM2", ((double.Parse(m.Groups[1].Value) * double.Parse(m.Groups[2].Value)) / 10000).ToString(), ref item, false);
                         }
-                        item.Size = Regex.Replace(item.Size,"[xXхХ×*]","x");
 
-                        item.PriceForM2 = item.PriceUnit.ToLower().Contains("м2") ? true : false;
+                        SetPropValue("Size", Regex.Replace(Regex.Replace(workSheet.Cells[rowIterator, 14].Value.ToString(), "[xXхХ×*]", "x"),@"\s",""), ref item, true); //удаляем все пробелы и заменяем х на обычный
+
+                        if (item.PriceUnit.ToLower().Contains("м2")) SetPropValue("PriceForM2", true.ToString(), ref item, false); else SetPropValue("PriceForM2", false.ToString(), ref item, false);
 
                         item.ItemType = "keram";
 
                         //string oip = workSheet.Cells[rowIterator, 10].Value.ToString();
                         if (workSheet.Cells[rowIterator, 8].Value.ToString().Contains("м2"))
                         {
-                            item.OnlyInPacks = true;
+                            SetPropValue("OnlyInPacks", true.ToString(), ref item, false);
                         }
                         else
                         {
-                            item.OnlyInPacks = false;
+                            SetPropValue("OnlyInPacks", false.ToString(), ref item, false);
                         }
 
                         string[] hierarchy = new string[] 
@@ -228,6 +233,16 @@ namespace Store.WebUI.Infrastructure.Parsers
                 }
             }
             return messages;
+        }
+
+        public void SetPropValue(string PropName, string value, ref Item item, bool inFilter)
+        {
+            Property prop = new Property() { PropName = PropName, IsInFilter = inFilter };
+            prop.Values = new List<PropValue>();
+            var propVal = new PropValue() { Val = value, Items = new List<Item>() };
+            prop.Values.Add(propVal);
+            item.propValues.Add(propVal);
+            item.props.Add(prop);
         }
 
         public static Image MakeMini(Image img, int x1, int y1) {

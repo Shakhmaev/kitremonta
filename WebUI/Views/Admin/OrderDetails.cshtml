@@ -1,0 +1,89 @@
+﻿@model Store.Domain.Entities.Order
+
+@{
+    ViewBag.Title = "Заказ";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+@if (Model != null) { 
+    <h2>Заказ номер @Model.Id</h2>
+
+    using (Html.BeginForm("OrderDetails", "Admin", FormMethod.Post))
+    {
+        @Html.HiddenFor(m => m.Id);
+        <table class="table table-striped table-condensed table-bordered table-responsive table-hover">
+            <tr>
+        	    <td class="text-center">Клиент</td>
+        	    <td class="text-center">@Html.TextBoxFor(m => m.Client)</td>
+            </tr>
+            <tr>
+        	    <td class="text-center">Телефон</td>
+        	    <td class="text-center">@Html.TextBoxFor(m => m.Phone)</td>
+            </tr>
+            <tr>
+        	    <td class="text-center">E-mail</td>
+        	    <td class="text-center">@Html.TextBoxFor(m => m.Email)</td>
+            </tr>
+            <tr>
+        	    <td class="text-center">Сумма</td>
+        	    <td class="text-center">@Html.DisplayFor(m=>m.Sum)</td>
+            </tr>
+            <tr>
+        	    <td class="text-center">Статус</td>
+        	    <td class="text-center">@Html.DropDownListFor(
+                 x => x.Status,
+                 new SelectList(new List<SelectListItem>(){
+                 new SelectListItem(){ Text="Новый", Value="Новый"}, new SelectListItem(){ Text="Выполнен", Value="Выполнен"},  new SelectListItem(){ Text="Обрабатывается", Value="Обрабатывается"}}, "Value", "Text", Model.Status))
+                </td>
+            </tr>
+            <tr>
+        	    <td class="text-center">Товары</td>
+        	    <td class="text-center">
+                    <table class="table">
+                        <tr>
+                            <th>Id</th>
+                            <th>Имя</th>
+                            <th>Количество</th>
+                            <th>Цена</th>
+                        </tr>
+                        @foreach (var i in Model.Items)
+                        {
+                            <tr>
+                                <td class="text-center">@i.Id</td>
+                                <td class="text-left">@i.Name</td>
+                                <td class="text-center">@i.Quantity</td>
+                                <td class="text-center">@i.Price</td>
+                            </tr>
+                        }
+                    </table>
+                </td>
+
+            </tr>
+            <tr>
+                <td class="text-center">Дата заказа</td>
+                <td class="text-center">@Html.DisplayFor(m=>m.time)</td>
+            </tr>
+
+            
+        </table>
+        for (int i = 0; i < Model.Items.Count; i++)
+		{
+            @Html.HiddenFor(x => x.Items.ElementAt(i).Brand, new { @Name = string.Format("Items[{0}].Brand", i) });
+            @Html.HiddenFor(x => x.Items.ElementAt(i).Id, new { @Name = string.Format("Items[{0}].Id", i) });
+            @Html.HiddenFor(x => x.Items.ElementAt(i).Name, new { @Name = string.Format("Items[{0}].Name", i) });
+            @Html.HiddenFor(x => x.Items.ElementAt(i).Price, new { @Name = string.Format("Items[{0}].Price", i) });
+            @Html.HiddenFor(x => x.Items.ElementAt(i).Quantity, new { @Name = string.Format("Items[{0}].Quantity", i) });
+        }
+
+        <button type="submit">Сохранить</button>
+    }
+
+}
+else
+{
+    <div class="well">Такого заказа не существует</div>
+}
+
+
+

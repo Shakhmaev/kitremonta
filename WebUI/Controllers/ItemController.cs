@@ -54,7 +54,12 @@ namespace Store.WebUI.Controllers
             ItemsListViewModel model = new ItemsListViewModel();
             model.Side = new List<KeyValuePair<string, IEnumerable<Category>>>();
 
-            List<IEnumerable<string>> FilterList = new List<IEnumerable<string>>();
+            IEnumerable<Property> props = new List<Property>();
+
+            IEnumerable<PropValue> propValues = new List<PropValue>();
+
+            Dictionary<string, IEnumerable<string>> FilterList = new Dictionary<string, IEnumerable<string>>();
+            Dictionary<string, IEnumerable<string>> FilterSelectedList = new Dictionary<string, IEnumerable<string>>();
 
             IEnumerable<string> Brands = new List<string>();
             IEnumerable<string> Countries = new List<string>();
@@ -75,14 +80,9 @@ namespace Store.WebUI.Controllers
                     model.LowerPrice = items.Min(x => x.CurrentPrice);
                     Brands = items.Select(x => x.Brand).Distinct();
                     Countries = items.Select(x => x.Country).Distinct();
-                    var props = items.SelectMany(x => x.props.Where(p => p.IsInFilter));
-                    var propValues = items.SelectMany(x => x.propValues);
+                    props = items.SelectMany(x => x.props.Where(p => p.IsInFilter)).Distinct();
+                    propValues = items.SelectMany(x => x.propValues).Distinct();
 
-                    foreach (var prop in props)
-                    {
-                        var values = propValues.Where(k=>k.Prop == prop).Select(x=>x.Val).Distinct();
-                        FilterList.Add(new List<string>(values));
-                    }
 
                     foreach (var ctgdesc in repository.GetDescendantCollections(ctg))
                     {
@@ -120,14 +120,8 @@ namespace Store.WebUI.Controllers
                 Brands = repository.Items.Select(x => x.Brand).Distinct();
                 Countries = repository.Items.Select(x => x.Country).Distinct();
 
-                var props = repository.Items.SelectMany(x => x.props.Where(p => p.IsInFilter));
-                var propValues = repository.Items.SelectMany(x => x.propValues);
-
-                foreach (var prop in props)
-                {
-                    var values = propValues.Where(k => k.Prop == prop).Select(x => x.Val).Distinct();
-                    FilterList.Add(new List<string>(values));
-                }
+                props = repository.Items.SelectMany(x => x.props.Where(p => p.IsInFilter)).Distinct();
+                propValues = repository.Items.SelectMany(x => x.propValues).Distinct();
 
                 foreach (var ctg in repository.Categories)
                 {
@@ -138,7 +132,21 @@ namespace Store.WebUI.Controllers
                 model.Categories = repository.Categories.Where(x => x.ParentID == null);
                 model.categoryTypeMessage = "Разделы";
             }
+
+            foreach (var prop in props)
+            {
+                var values = propValues.Where(k => k.Prop == prop).Select(x => x.Val).Distinct();
+                values = values.ToList();
+                (values as List<string>).Sort();
+                (values as List<string>).Insert(0, prop.DisplayName);
+                FilterList.Add(prop.PropName, new List<string>(values));
+            }
+
             model.filters = new ItemsListFiltersModel(model.HigherPrice, model.LowerPrice, PageSize, "pricelowtohigh");
+
+            model.filters.FiltersList = FilterList;
+
+            model.filters.FiltersSelectedList = FilterSelectedList;
 
             model.filters.AllBrands = Brands;
 
@@ -184,7 +192,7 @@ namespace Store.WebUI.Controllers
 
             if (search != "all")
             {
-                items = items.Where(x => x.Name.ToLower().Contains(search.ToLower()));
+                items = items.Where(x => x.Name.ToLower().Contains(search.ToLower()) || x.article.ToLower().Contains(search.ToLower()));
             }
 
 
@@ -219,6 +227,13 @@ namespace Store.WebUI.Controllers
                     items = parents.SelectMany(x => x.items).Distinct();
                 }
             }
+
+            foreach (var filter in filters.FiltersSelectedList)
+            {
+                if (filter.Value.First() == "All") { }
+                else items = items.Where(x=>x.propValues.Where(f=>f.Prop.PropName==filter.Key && filter.Value.Contains(f.Val)).Count()>0);
+            }
+
 
             if (filters.WithDiscount)
             {
@@ -381,21 +396,21 @@ namespace Store.WebUI.Controllers
             Item item = repository.Items.FirstOrDefault(x => x.Id == itemId);
             CalculatorViewModel model = new CalculatorViewModel();
 
-            model.m2 = double.Parse(item.propValues.FirstOrDefault(x => x.Prop.PropName == "m2").Val);
+            model.m2 = double.Parse(item.GetPropertyValue("m2"));
 
-            model.sht = int.Parse(item.propValues.FirstOrDefault(x => x.Prop.PropName == "sht").Val);
+            model.sht = int.Parse(item.GetPropertyValue("sht"));
 
-            model.InPack = item.propValues.FirstOrDefault(x => x.Prop.PropName == "CountInPack").Val;
+            model.InPack = item.GetPropertyValue("CountInPack");
 
-            model.SizeInM2 = double.Parse(item.propValues.FirstOrDefault(x => x.Prop.PropName == "SizeInM2").Val);
+            model.SizeInM2 = double.Parse(item.GetPropertyValue("SizeInM2"));
 
-            model.PriceForM2 = bool.Parse(item.propValues.FirstOrDefault(x => x.Prop.PropName == "PriceForM2").Val);
+            model.PriceForM2 = bool.Parse(item.GetPropertyValue("PriceForM2"));
 
             model.ItemID = item.Id;
 
             model.Price = item.Price;
 
-            model.OnlyInPacks = bool.Parse(item.propValues.FirstOrDefault(x => x.Prop.PropName == "OnlyInPacks").Val);
+            model.OnlyInPacks = bool.Parse(item.GetPropertyValue("OnlyInPacks"));
 
             return PartialView(model);
         }
@@ -431,8 +446,9 @@ namespace Store.WebUI.Controllers
             {
                 SelectedBrands = new List<string> { "All" },
                 SelectedCountries = new List<string> { "All" },
-                SelectedPurposes = new List<string> { "All" },
                 SelectedApplications = new List<string> { "All" },
+                FiltersList = new Dictionary<string,IEnumerable<string>>(),
+                FiltersSelectedList = new Dictionary<string,IEnumerable<string>>(),
                 SortBy = "name",
                 PageSize = 20,
                 HigherPrice = int.MaxValue,
@@ -463,10 +479,14 @@ namespace Store.WebUI.Controllers
             List<string[]> list = new List<string[]>();
             foreach (var item in repository.Items.FirstOrDefault(x => x.Id == id).ParentCategories.SelectMany(x => x.items).Where(x => x.Id != id).Take(10))
             {
-                list.Add(new string[] { Url.Action("ItemDetails", "Item", new { id = item.Id }),
-                    Url.Content(GetMiniImage(item.Id)), 
-                    item.Name, item.CurrentPrice.ToString()
-                });
+                try
+                {
+                    list.Add(new string[] { Url.Action("ItemDetails", "Item", new { id = item.Id }),
+                        Url.Content(GetMiniImage(item.Id)), 
+                        item.Name, item.CurrentPrice.ToString()
+                    });
+                }
+                catch { }
             }
             return Json(list, JsonRequestBehavior.AllowGet);
         }

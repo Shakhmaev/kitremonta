@@ -66,12 +66,10 @@
                             <li>Артикул: @Model.article</li>
                             <li>Страна: @Model.Country</li>
                             <li>Производитель: @Model.Brand</li>
-                            <li>Назначение: @Model.Purpose</li>
-                            <li>Размеры: @Model.Size</li>
-                            <li>Поверхность: @Model.Surface</li>
-                            <li>Цвет: @Model.Color</li>
-                            <li>Рисунок: @Model.Picture</li>
-                            <li>В одной упаковке: @Model.CountInPack</li>
+                            @foreach (var prop in Model.props.Where(x=>x.IsInFilter))
+                            {
+                                <li>@prop.DisplayName: @Model.GetPropertyValue(prop.PropName)</li>
+                            }
                             <li>
                                 Входит в коллекции:
                                 <ul>

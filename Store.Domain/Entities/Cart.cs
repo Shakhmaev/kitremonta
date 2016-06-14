@@ -20,7 +20,9 @@ namespace Store.Domain.Entities
             {
                 if (line.Item.ItemType == "keram")
                 {
-                    sum += (int) (line.Item.OnlyInPacks == true ? line.Quantity * line.Item.Price * line.Item.m2 : line.Quantity * line.Item.Price);
+                    sum += (int)(bool.Parse(line.Item.propValues.FirstOrDefault(x => x.Prop.PropName == "OnlyInPacks").Val) == true ? 
+                        line.Quantity * line.Item.Price * 
+                        double.Parse(line.Item.propValues.FirstOrDefault(x => x.Prop.PropName == "m2").Val) : line.Quantity * line.Item.Price);
                 }
                 else
                 {

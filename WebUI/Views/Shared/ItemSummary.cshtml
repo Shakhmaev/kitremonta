@@ -74,23 +74,25 @@
         </a>
     </div>
 
-    @using (Ajax.BeginForm(Model.ItemType == "keram" ? "AddToCart" : "AddToCartQuantity", "Cart", new AjaxOptions
-                    {
-                        HttpMethod = "POST",
-                        OnBegin = "AddedItemPopUp('/Content/Styles/Img/load.gif')",
-                        OnComplete = Model.ItemType == "keram" == true ? "AddItemToCart" : null,
-                        UpdateTargetId = "PopupWrapper",
-                        OnSuccess = Model.ItemType == "keram" == true ? "SetPicId(" + Model.Id + ",'" + Html.Action("GetImage", "Item", new { Model.Id }) + "','.well')" : null,
-                    }))
-    {
-        @Html.Action("Calculator", new { itemId = Model.Id })
+    @if (Model.Price > 0) { 
+        using (Ajax.BeginForm(Model.ItemType == "keram" ? "AddToCart" : "AddToCartQuantity", "Cart", null, new AjaxOptions
+                        {
+                            HttpMethod = "POST",
+                            OnBegin = "AddedItemPopUp('/Content/Styles/Img/load.gif')",
+                            OnComplete = Model.ItemType == "keram" == true ? "AddItemToCart" : null,
+                            UpdateTargetId = "PopupWrapper",
+                            OnSuccess = Model.ItemType == "keram" == true ? "SetPicId(" + Model.Id + ",'" + Html.Action("GetImage", "Item", new { Model.Id }) + "','.well')" : null,
+                        }, new { @class="item-sum-form" }))
+        {
+            @Html.Action("Calculator", new { itemId = Model.Id })
 
-        <div class="pull-right">
-            @Html.HiddenFor(x => x.Id)
-            <button type="submit" class="btn btn-success" value="В корзину">
-                <i class="fa fa-cart-plus fa-lg"></i> В корзину
-            </button>
-        </div>
+            <div class="pull-right">
+                @Html.HiddenFor(x => x.Id)
+                <button type="submit" class="btn btn-success" value="В корзину">
+                    <i class="fa fa-cart-plus fa-lg"></i> В корзину
+                </button>
+            </div>
+        }
     }
 </div>
 </div>

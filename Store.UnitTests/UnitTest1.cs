@@ -1,14 +1,16 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Store.WebUI.Infrastructure.Parsers;
 
 namespace Store.UnitTests
 {
     [TestClass]
-    public class UnitTest1
+    public class EFItemRepositoryTester
     {
         [TestMethod]
-        public void TestMethod1()
+        public void TestParse()
         {
+
         }
     }
 }

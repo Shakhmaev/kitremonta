@@ -81,6 +81,18 @@ namespace Store.Domain.Entities
 
             }
         }
+
+        public string GetPropertyValue(string PropName)
+        {
+            return this.propValues.FirstOrDefault(x => x.Prop.PropName == PropName).Val;
+        }
+
+        public bool IsEqualTo(Item item)
+        {
+            if (this.Brand == item.Brand && this.Country == item.Country && this.ItemType == item.ItemType &&
+                this.Name == item.Name && this.Type == item.Type && this.Description == item.Description) return true;
+            else return false;
+        }
     }
 
     public class Property
@@ -89,7 +101,10 @@ namespace Store.Domain.Entities
         public int Id { get; set; }
         [Required]
         public string PropName { get; set; }
+        public string DisplayName { get;set; }
         public bool IsInFilter { get; set; }
+        [Required]
+        public virtual ICollection<Item> Items { get; set; }
         [Required]
         public virtual ICollection<PropValue> Values { get; set; }
     }

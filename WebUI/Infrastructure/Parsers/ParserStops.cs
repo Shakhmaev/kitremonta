@@ -105,7 +105,7 @@ namespace Store.WebUI.Infrastructure.Parsers
                                 {
                                     name = _Nexp.Replace(name, "$1");
                                 }
-                                bool success = UpdatePrice(collection,purpose,price,sizes,nameadditions);
+                                bool success = UpdatePriceForKeram(collection,purpose,price,sizes,nameadditions);
                                 if (!success)
                                 {
                                     errors.Add("name: " + collection + " " + name );
@@ -150,13 +150,13 @@ namespace Store.WebUI.Infrastructure.Parsers
             return errors;
         }
 
-        private bool UpdatePrice(string collection, string purpose, string price, List<string> sizes, List<string> additions)
+        private bool UpdatePriceForKeram(string collection, string purpose, string price, List<string> sizes, List<string> additions)
         {
             var ctgs = repos.Categories.Where(x => x.Description == collection);
             List<Item> items = new List<Item>();
             foreach (var ctg in ctgs)
             {
-                items = items.Union(ctg.items.Where(x=>x.Purpose == purpose)).ToList();
+                items = items.Union(ctg.items.Where(x=>x.GetPropertyValue("Purpose") == purpose)).ToList();
             }
 
             if (items.Count > 0)
@@ -176,7 +176,7 @@ namespace Store.WebUI.Infrastructure.Parsers
                         {
                             Match m = sizeregx.Match(size.Replace('.', ','));
                             double SizeInM2 = (double)((double.Parse(m.Groups[1].Value) * double.Parse(m.Groups[2].Value)) / 10000);
-                            foreach (var item in items.Where(x => x.SizeInM2 == SizeInM2))
+                            foreach (var item in items.Where(x => double.Parse(x.GetPropertyValue("SizeInM2")) == SizeInM2))
                             {
                                 item.Price = int.Parse(price);
                             }

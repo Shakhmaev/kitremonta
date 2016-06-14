@@ -1,4 +1,4 @@
-﻿@import url(https://fonts.googleapis.com/css?family=Play:400,700&subset=latin,cyrillic);
+﻿
 body {
     background-color:#E0F7FA;
     font-family: 'Play', sans-serif;
@@ -114,7 +114,7 @@ html {
     position:fixed;
     z-index:1002;
       top: 0;
-      width: 100%;
+      width: 95%;
   }
 
 .path-container {
@@ -204,7 +204,7 @@ html {
 
 .categories > ul > li > ul > li a {
     color: #242729;
-    padding: .2em 0;
+    padding: .3em 0;
     width: 95%;
     display: block;
     border-bottom: 5px solid #00838F;
@@ -213,7 +213,6 @@ html {
 .categories > ul > li > ul > li a:hover {
     color:white;
     border-radius:5px;
-    padding-left:10px;
     background:#0097A7;
 }
 
@@ -560,7 +559,12 @@ A.itemLink:hover h4
     text-align:center;
     position:relative;
     margin-top:20px;
+    margin-bottom:12px;
     margin-right:0px;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
 }
 
 .cart-mini:hover{
@@ -581,7 +585,7 @@ A.itemLink:hover h4
 }
 
 .well:hover {
-    box-shadow: 0 0 10px black;
+    box-shadow: 0 0 50px black;
 }
 
 .well {
@@ -856,8 +860,25 @@ div.ItemDiv {
    box-shadow:none;
 }
 
-.item-sum-img .img-thumbnail:hover{
+/*.item-sum-img .img-thumbnail:hover{
     background-color:#336666;
+}*/
+
+.item-sum-form {
+    display:none;
+}
+
+.block {
+    height:404px;
+    overflow:visible;
+}
+
+.block:hover {
+    z-index:1;
+}
+
+.block *:hover .item-sum-form {
+    display:block;
 }
 
 .details > .row {
@@ -1021,6 +1042,11 @@ div.logo > img{
 
 .InfoLine {
     margin-bottom: 20px;
+}
+
+.infoline-affixed {
+    height:1px;
+    background-color:white;
 }
 
 .nav .open > a, .nav .open > a:hover, .nav .open > a:focus {
@@ -1368,6 +1394,14 @@ opacity:1;
 
 @media (max-width:768px) {
 
+    .block {
+        height:316px;
+    }
+
+    .block *:hover .item-sum-form {
+        display:none;
+    }
+
     .container.content{
         margin-right:1px;
         margin-left:1px;
@@ -1452,7 +1486,7 @@ opacity:1;
 @media (min-width:768px){
     .container.content {
         width:95%;
-        max-width:1200px;
+        max-width:1500px;
     }
 }
 
@@ -1472,6 +1506,10 @@ opacity:1;
 }
 
 @media (min-width: 0px) and (max-width: 455px){
+
+    .block {
+        height:299px;
+    }
 
     .details-list {
         margin-left:0px;

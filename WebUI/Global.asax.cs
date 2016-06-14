@@ -10,6 +10,7 @@ using Store.WebUI.App_Start;
 using Store.Domain.Abstract;
 using Ninject;
 using Store.WebUI.Models;
+using System.Web.Optimization;
 
 namespace Store.WebUI
 {
@@ -21,6 +22,8 @@ namespace Store.WebUI
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             ModelBinders.Binders.Add(typeof(CartIdWrapper), new CartIdBinder());
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
+
+            BundleConfig.RegisterBundles(BundleTable.Bundles);
         }
 
         /*private static double USDCourse = 0;

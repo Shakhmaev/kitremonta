@@ -144,15 +144,26 @@
             new SelectList(Model.filters.AllCountries), new { id = "countries", multiple = "multiple" })
                 </div>
                 <div class="col-sm-2 col-lg-12 col-xs-4">
-                    <h4>Тип</h4>
-                    @Html.ListBoxFor(model => model.filters.SelectedPurposes,
-            new SelectList(Model.filters.AllPurposes), new { id = "purposes", multiple = "multiple" })
-                </div>
-                <div class="col-sm-2 col-lg-12 col-xs-4">
                     <h4>Применение</h4>
                     @Html.ListBoxFor(model => model.filters.SelectedApplications,
             new SelectList(Model.filters.AllApplications), new { id = "applications", multiple = "multiple" })
                 </div>
+
+                @for (int i = 0; i < Model.filters.FiltersList.Count; i++)
+                {
+                    
+                    <div class="col-sm-2 col-lg-12 col-xs-4">
+                        <h4>@Model.filters.FiltersList.ElementAt(i).Value.ElementAt(0)</h4>
+                       @Html.ListBoxFor(x => x.filters.FiltersSelectedList.ElementAt(i).Value,
+                            new SelectList(Model.filters.FiltersList.ElementAt(i).Value.Skip(1)),
+                            new
+                            {
+                                @Name = string.Format("filters.FiltersList.ElementAt({0}).Value", i),
+                                id = Model.filters.FiltersList.ElementAt(i).Key,
+                                multiple = "true"
+                            })
+                    </div>
+                }
                 <div class="col-lg-12 col-sm-12 col-xs-12">
                     <h4>Сортировать по</h4>
                     @Html.DropDownList("sort",
@@ -176,104 +187,112 @@
 
 @section Scripts {
     <script type="text/javascript">
+        var names = JSON.parse('@Html.Raw(Json.Encode(Model.filters.FiltersList.Select(x => x.Key)))');
 
-    var args = {
-        higher: '@Model.HigherPrice',
-        lower: '@Model.LowerPrice'
-    };
-    initslider(args);
+        initSelects();
 
-    loadsummary(initsum(1));
-    loadsummary.begin();
+        var args = {
+            higher: '@Model.HigherPrice',
+            lower: '@Model.LowerPrice'
+        };
+        initslider(args);
 
-    function initsum(pg) {
-        var br = $('#brands option:selected').map(function (a, item) { return item.value; })
-        delete br.prevObject;
-        delete br.context;
-        var brands = new Array();
-        for (var i = 0; i < br.length; i++) {
-            brands[i] = br[i];
-        }
-        if (brands.length == 0) {
-            brands[0] = "All";
-        }
+        loadsummary(initsum(1));
+        loadsummary.begin();
 
-        var cntrs = $('#countries option:selected').map(function (a, item) { return item.value; })
-        delete cntrs.prevObject;
-        delete cntrs.context;
-        var countries = new Array();
-        for (var i = 0; i < cntrs.length; i++) {
-            countries[i] = cntrs[i];
-        }
-        if (countries.length == 0) {
-            countries[0] = "All";
-        }
-
-        var prps = $('#purposes option:selected').map(function (a, item) { return item.value; })
-        delete prps.prevObject;
-        delete prps.context;
-        var purposes = new Array();
-        for (var i = 0; i < prps.length; i++) {
-            purposes[i] = prps[i];
-        }
-        if (purposes.length == 0) {
-            purposes[0] = "All";
-        }
-
-        var apps = $('#applications option:selected').map(function (a, item) { return item.value; })
-        delete apps.prevObject;
-        delete apps.context;
-        var applications = new Array();
-        for (var i = 0; i < apps.length; i++) {
-            applications[i] = apps[i];
-        }
-        if (applications.length == 0) {
-            applications[0] = "All";
-        }
-
-        var conf = {
-            url: '@Url.Action("LoadSummary","Item")',
-            high: $("#higherCurrent").data("higher"),
-            low: $("#lowerCurrent").data("lower"),
-            ps: $("#filters_PageSize").val(),
-            page: pg,
-            sort: $("[name=sort]").val(),
-            brands: brands,
-            purposes: purposes,
-            countries: countries,
-            applications: applications
-        }
-        if (pg != undefined) {
-            if (pg === -3) {
-                conf.page = parseInt($("li.active a.linkbtn").attr("id")) - 1;
+        function initsum(pg) {
+            var br = $('#brands option:selected').map(function (a, item) { return item.value; })
+            delete br.prevObject;
+            delete br.context;
+            var brands = new Array();
+            for (var i = 0; i < br.length; i++) {
+                brands[i] = br[i];
             }
-            else if (pg === -2) {
-                conf.page = parseInt($("li.active a.linkbtn").attr("id")) + 1;
+            if (brands.length == 0) {
+                brands[0] = "All";
             }
-            else conf.page = pg;
-        }
-        else {
-            conf.page = $(".linkbtn").attr("id");
-        }
 
-        if ('@Model.CurrentCategory' != "") {
-            conf.category = '@Model.CurrentCategory';
+            var cntrs = $('#countries option:selected').map(function (a, item) { return item.value; })
+            delete cntrs.prevObject;
+            delete cntrs.context;
+            var countries = new Array();
+            for (var i = 0; i < cntrs.length; i++) {
+                countries[i] = cntrs[i];
+            }
+            if (countries.length == 0) {
+                countries[0] = "All";
+            }
+
+            var apps = $('#applications option:selected').map(function (a, item) { return item.value; })
+            delete apps.prevObject;
+            delete apps.context;
+            var applications = new Array();
+            for (var i = 0; i < apps.length; i++) {
+                applications[i] = apps[i];
+            }
+            if (applications.length == 0) {
+                applications[0] = "All";
+            }
+
+            var FiltersList = new Object();
+            for (var i = 0; i < names.length; i++) {
+                var obj = $('#'+ names[i] +' option:selected').map(function (a, item) { return item.value; })
+                delete obj.prevObject;
+                delete obj.context;
+                var arr = new Array();
+                for (var j = 0; j < obj.length; j++) {
+                    arr[j] = obj[j];
+                }
+                if (arr.length == 0) {
+                    arr[0] = "All";
+                }
+                FiltersList[new Object(names[i],names[i])] = arr;
+            }
+
+            var conf = {
+                url: '@Url.Action("LoadSummary","Item")',
+                high: $("#higherCurrent").data("higher"),
+                low: $("#lowerCurrent").data("lower"),
+                ps: $("#filters_PageSize").val(),
+                page: pg,
+                sort: $("[name=sort]").val(),
+                brands: brands,
+                countries: countries,
+                applications: applications,
+                filtersselectedlist: FiltersList,
+                filterslist: JSON.parse('@Html.Raw(Json.Encode(Model.filters.FiltersList))')
+            }
+            if (pg != undefined) {
+                if (pg === -3) {
+                    conf.page = parseInt($("li.active a.linkbtn").attr("id")) - 1;
+                }
+                else if (pg === -2) {
+                    conf.page = parseInt($("li.active a.linkbtn").attr("id")) + 1;
+                }
+                else conf.page = pg;
+            }
+            else {
+                conf.page = $(".linkbtn").attr("id");
+            }
+
+            if ('@Model.CurrentCategory' != "") {
+                conf.category = '@Model.CurrentCategory';
+            }
+
+            if ($("#filters_WithDiscount").is(":checked")) {
+                conf.discount = true;
+            }
+            else conf.discount = false;
+
+            if ($("#filters_Hot").is(":checked")) {
+                conf.hot = true;
+            }
+            else conf.hot = false;
+
+            conf.loadimg = '@Url.Content("~/Content/Styles/Img/load.gif")';
+
+            return conf;
         }
-
-        if ($("#filters_WithDiscount").is(":checked")) {
-            conf.discount = true;
-        }
-        else conf.discount = false;
-
-        if ($("#filters_Hot").is(":checked")) {
-            conf.hot = true;
-        }
-        else conf.hot = false;
-
-        conf.loadimg = '@Url.Content("~/Content/Styles/Img/load.gif")';
-
-        return conf;
-    }
 
         $("#brands").multiselect({
             numberDisplayed: 1,
@@ -300,5 +319,16 @@
             nSelectedText: ' выбрано',
             allSelectedText: 'Всё выбрано'
         });
+
+        function initSelects() {
+            for (var i = 0; i < names.length ; i++) {
+                $("#"+names[i]).multiselect({
+                    numberDisplayed: 1,
+                    nonSelectedText: 'Все',
+                    nSelectedText: ' выбрано',
+                    allSelectedText: 'Всё выбрано'
+                });
+            }
+        }
     </script>
 }

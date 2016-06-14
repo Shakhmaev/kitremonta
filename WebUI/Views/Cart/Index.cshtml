@@ -1,7 +1,7 @@
 ﻿@model Store.WebUI.Models.CartIndexViewModel
 
 @{
-    ViewBag.Title = "Карзина покупок";
+    ViewBag.Title = "Корзина покупок";
 }
 
 <div class="withbackgr">
@@ -34,8 +34,8 @@
                                 <script type="text/javascript">
     $("document").ready(function () {
         var thistr = $("tr[id=" +@line.Item.Id +"]");
-        $("#spin_" +@line.Item.Id + "").spinbox('value', parseFloat('@(line.Item.OnlyInPacks==true?
-                                            (double)line.Quantity*line.Item.m2:line.Quantity)'.replace(',', '.')).toFixed(2));
+        $("#spin_" +@line.Item.Id + "").spinbox('value', parseFloat('@(bool.Parse(line.Item.GetPropertyValue("OnlyInPacks"))==true?
+                                            (double)line.Quantity*double.Parse(line.Item.GetPropertyValue("m2")):line.Quantity)'.replace(',', '.')).toFixed(2));
         $("#spin_" +@line.Item.Id +"").trigger('changed.fu.spinbox', [$("#spin_" +@line.Item.Id +"").spinbox('value')]);
 
         $(document).on("badgesChanged", function (e, arg) {
@@ -49,7 +49,7 @@
                     totalval = totalval - itemsumval;
                     var change = Math.floor(packs.find(".badge").text() * 
                         parseInt(@line.Item.Price) * 
-                        parseFloat('@line.Item.m2'.replace(',', '.')));
+                        parseFloat('@line.Item.GetPropertyValue("m2")'.replace(',', '.')));
                     itemsum.text(change+" руб")
                     total.text(totalval + change + " руб");
                 }
@@ -86,7 +86,7 @@
                         </td>
                         <td class="text-right">@line.Item.Price.ToString("# руб") / @line.Item.PriceUnit</td>
                         <td id="itemsum" class="text-right cart-summ">
-                            @(Math.Floor(((line.Quantity * line.Item.Price) * (line.Item.PriceForM2 == true ? line.Item.m2 : 1))).ToString("# руб"))
+                            @(Math.Floor(((line.Quantity * line.Item.Price) * (bool.Parse(line.Item.GetPropertyValue("PriceForM2")) == true ? double.Parse(line.Item.GetPropertyValue("m2")) : 1))).ToString("# руб"))
                         </td>
                         <td>
                             @using (Html.BeginForm("RemoveFromCart", "Cart"))

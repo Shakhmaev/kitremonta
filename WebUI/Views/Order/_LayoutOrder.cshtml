@@ -1,22 +1,15 @@
-﻿<!DOCTYPE html>
+﻿@using System.Web.Optimization
+<!DOCTYPE html>
 
 <html>
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="~/Content/themes/base/all.css" rel="stylesheet" />
-    <link href="~/Content/bootstrap.css" rel="stylesheet" />
-    <link href="~/Content/bootstrap-theme.css" rel="stylesheet" />
-    <link href="~/Content/Styles/ErrorStyles.css" rel="stylesheet" />
-    <link href="~/Content/font-awesome.min.css" rel="stylesheet" />
-    <link href="~/Content/Styles/Styles1.css" rel="stylesheet" />
-    <link href="~/Content/Styles/ionicons.min.css" rel="stylesheet" />
-    <link href="~/Content/Styles/style.css" rel="stylesheet" />
-    <script type="text/javascript" src="~/Scripts/jquery-2.2.0.min.js"></script>
-    <script type="text/javascript" src="~/Scripts/jquery-ui-1.11.4.min.js"></script>
-    <script src="~/Scripts/jquery.validate.min.js"></script>
-    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
-    <script type="text/javascript" src="~/Scripts/megamenu.js"></script>
+    @Styles.Render("~/Content/Styles/font")
+    @Styles.Render("~/Content/Styles/custom")
+    @Styles.Render("~/Content/themes/base/css")
+    @Scripts.Render("~/Scripts/jquery")
+    @Scripts.Render("~/Scripts/custom")
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <title>@ViewBag.Title</title>
 
@@ -25,7 +18,7 @@
     <div class="topline">
         Вы можете заказать товары прямо по телефону, звоните!
         <i class="fa fa-phone"></i>
-        +7 (911) 815-12-19 &nbsp;&nbsp;
+        8 (812) 981-97-00 &nbsp;&nbsp;
     </div>
 
     <div class="container content">

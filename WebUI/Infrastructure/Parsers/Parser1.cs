@@ -1,4 +1,5 @@
-﻿using OfficeOpenXml;
+﻿using Ninject;
+using OfficeOpenXml;
 using Store.Domain.Abstract;
 using Store.Domain.Entities;
 using System;
@@ -18,9 +19,20 @@ namespace Store.WebUI.Infrastructure.Parsers
         ExcelPackage pack;
         string path;
         ExcelWorksheet workSheet;
+
+        [Inject]
         IItemRepository repos;
         Translitter translit = new Translitter();
         Regex CatMatch = new Regex(@"^(\s*([\w-\s]+?)\s*$)");
+
+        public Parser1(string filePath)
+        {
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                FileInfo fi = new FileInfo(filePath);
+                pack = new ExcelPackage(fi);
+            }
+        }
         public Parser1(HttpPostedFileBase file, IItemRepository repo)
         {
             repos = repo;
@@ -59,11 +71,11 @@ namespace Store.WebUI.Infrastructure.Parsers
                         if (workSheet.Cells[rowIterator, 6].Value == null) break;
                         Item item = new Item
                         {
-                            Brand = workSheet.Cells[rowIterator, 3].Value.ToString(),
-                            Type = workSheet.Cells[rowIterator, 1].Value.ToString().Split(',').Last(),
-                            Name = workSheet.Cells[rowIterator, 6].Value.ToString(),
+                            Brand = ToLowerCapitalizeFirstTrim(workSheet.Cells[rowIterator, 3].Value.ToString()),
+                            Type = ToLowerCapitalizeFirstTrim(workSheet.Cells[rowIterator, 1].Value.ToString().Split(',').Last()),
+                            Name = ToLowerCapitalizeFirstTrim(workSheet.Cells[rowIterator, 6].Value.ToString()),
                             IsHot = false,
-                            Country = workSheet.Cells[rowIterator, 2].Value.ToString(),
+                            Country = ToLowerCapitalizeFirstTrim(workSheet.Cells[rowIterator, 2].Value.ToString()),
                             Price = Convert.ToInt32(workSheet.Cells[rowIterator, 7].Value)
                         };
 
@@ -71,12 +83,12 @@ namespace Store.WebUI.Infrastructure.Parsers
                         item.propValues = new List<PropValue>();
                         
 
-                        SetPropValue("CountInPack",workSheet.Cells[rowIterator, 9].Value.ToString(),ref item,false);
-                        SetPropValue("Purpose",workSheet.Cells[rowIterator, 10].Value.ToString(),ref item, true);
-                        SetPropValue("Surface",workSheet.Cells[rowIterator, 11].Value.ToString(),ref item, true);
-                        SetPropValue("Picture",workSheet.Cells[rowIterator, 12].Value.ToString(),ref item, true);
-                        SetPropValue("Color",workSheet.Cells[rowIterator, 13].Value.ToString(),ref item, true);
-                        SetPropValue("Weight",workSheet.Cells[rowIterator, 16].Value.ToString(),ref item, false);
+                        SetPropValue("CountInPack",ToLowerCapitalizeFirstTrim(workSheet.Cells[rowIterator, 9].Value.ToString()),ref item,false);
+                        SetPropValue("Purpose",ToLowerCapitalizeFirstTrim(workSheet.Cells[rowIterator, 10].Value.ToString()),ref item, true);
+                        SetPropValue("Surface",ToLowerCapitalizeFirstTrim(workSheet.Cells[rowIterator, 11].Value.ToString()),ref item, true);
+                        SetPropValue("Picture",ToLowerCapitalizeFirstTrim(workSheet.Cells[rowIterator, 12].Value.ToString()),ref item, true);
+                        SetPropValue("Color",ToLowerCapitalizeFirstTrim(workSheet.Cells[rowIterator, 13].Value.ToString()),ref item, true);
+                        SetPropValue("Weight",ToLowerCapitalizeFirstTrim(workSheet.Cells[rowIterator, 16].Value.ToString()), ref item, false);
 
                         item.article = workSheet.Cells[rowIterator, 5].Value != null ? workSheet.Cells[rowIterator, 5].Value.ToString() : item.Brand.Substring(0,2) + "-" + Guid.NewGuid().ToString("N");
 
@@ -100,19 +112,22 @@ namespace Store.WebUI.Infrastructure.Parsers
                         else
                         {
                             int.TryParse(m.Groups[1].ToString(), out sht);
+                            SetPropValue("m2", "0", ref item, false);
                             SetPropValue("sht", sht.ToString(), ref item, false);
                         }
 
+                        SetPropValue("Size", Regex.Replace(Regex.Replace(workSheet.Cells[rowIterator, 14].Value.ToString(), "[xXхХ×*]", "x"), @"\s", "").Replace(".",","), ref item, true); //удаляем все пробелы и заменяем х на обычный
+
                         Regex sizeregx = new Regex(@"^([0-9]+[,]*[0-9]*)[xXхХ×*]([0-9]+[,]*[0-9]*)");
-                        m = sizeregx.Match(item.props.FirstOrDefault(x => x.PropName == "Size").Values.ElementAt(0).Val.Replace('.', ','));
+                        m = sizeregx.Match(item.props.FirstOrDefault(x => x.PropName == "Size").Values.ElementAt(0).Val);
                         if (m.Success)
                         {
                             SetPropValue("SizeInM2", ((double.Parse(m.Groups[1].Value) * double.Parse(m.Groups[2].Value)) / 10000).ToString(), ref item, false);
                         }
+                        else SetPropValue("SizeInM2", "0", ref item, false);
 
-                        SetPropValue("Size", Regex.Replace(Regex.Replace(workSheet.Cells[rowIterator, 14].Value.ToString(), "[xXхХ×*]", "x"),@"\s",""), ref item, true); //удаляем все пробелы и заменяем х на обычный
-
-                        if (item.PriceUnit.ToLower().Contains("м2")) SetPropValue("PriceForM2", true.ToString(), ref item, false); else SetPropValue("PriceForM2", false.ToString(), ref item, false);
+                        if (item.PriceUnit.ToLower().Contains("м2")) SetPropValue("PriceForM2", true.ToString(), ref item, false); 
+                        else SetPropValue("PriceForM2", false.ToString(), ref item, false);
 
                         item.ItemType = "keram";
 
@@ -233,6 +248,13 @@ namespace Store.WebUI.Infrastructure.Parsers
                 }
             }
             return messages;
+        }
+
+        public string ToLowerCapitalizeFirstTrim(string str)
+        {
+            str = str.ToLower().Trim();
+            str = String.Concat(str.First().ToString().ToUpper(), str.Substring(1));
+            return str;
         }
 
         public void SetPropValue(string PropName, string value, ref Item item, bool inFilter)

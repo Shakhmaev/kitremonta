@@ -17,10 +17,10 @@ namespace Store.WebUI.Models
         public IEnumerable<string> SelectedBrands { get; set; }
         public IEnumerable<string> AllCountries { get; set; }
         public IEnumerable<string> SelectedCountries { get; set; }
-        public IEnumerable<string> AllPurposes { get; set; }
-        public IEnumerable<string> SelectedPurposes { get; set; }
         public IEnumerable<string> AllApplications { get; set; }
         public IEnumerable<string> SelectedApplications { get; set; }
+        public Dictionary<string, IEnumerable<string>> FiltersList { get; set; }
+        public Dictionary<string, IEnumerable<string>> FiltersSelectedList { get; set; }
         public ItemsListFiltersModel() { }
         public ItemsListFiltersModel(int high, int low, int ps, string sort)
         {
@@ -29,6 +29,5 @@ namespace Store.WebUI.Models
             PageSize = ps;
             SortBy = sort;
         }
-
     }
 }

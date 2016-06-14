@@ -393,6 +393,11 @@ $(document).ready(function () {
 
     $(document).on('click', ".filter", function (event) {
         event.preventDefault();
+        $("html,body").finish();
+        $("html,body").animate({
+            scrollTop: $(".load").offset().top
+        },
+            "slow");
         var conf = initsum();
         loadsummary(conf);
         loadsummary.begin();
@@ -461,8 +466,9 @@ function loadsummary (conf) {
                     SortBy: conf.sort,
                     SelectedBrands: conf.brands,
                     SelectedCountries: conf.countries,
-                    SelectedPurposes: conf.purposes,
-                    SelectedApplications: conf.applications
+                    SelectedApplications: conf.applications,
+                    FiltersList: conf.filterslist,
+                    FiltersSelectedList: conf.filtersselectedlist
                 },
                 page: conf.page
             },

@@ -41,7 +41,6 @@ namespace Store.WebUI
                 new { controller = "Item", action = "List", category = UrlParameter.Optional }
             );
 
-
             /*routes.MapRoute(
                 name: null,
                 url: "{category}/Page_{page}",

@@ -131,10 +131,12 @@ namespace Store.Domain.Concrete
         {
             Category current = null;
             Item it = null;
-            foreach (var prop in item.props)
-            {
-                var pr = PropertyGetOrCreate(prop);
-            }
+
+            List<Property> properties = item.props.ToList();
+            List<PropValue> propVals = item.propValues.ToList();
+
+            item.props.Clear();
+            item.propValues.Clear();
 
             for (int i = 0; i < hierarchy.Count; i++)
             {
@@ -173,7 +175,8 @@ namespace Store.Domain.Concrete
                                     item.Photos.Add(new Photo { url = img });
                                 }
                             }
-                            it = context.Items.FirstOrDefault(x => x.article == item.article);
+                            it = context.Items.FirstOrDefault(x => x.Brand == item.Brand && x.Country == item.Country && x.ItemType == item.ItemType &&
+                                x.Name == item.Name && x.Type == item.Type && x.Description == item.Description);
                             if (it != null)
                             {
                                 item = it;
@@ -190,7 +193,7 @@ namespace Store.Domain.Concrete
             }
             SaveChanges();
 
-            AddPropsAndValuesToItem(item.props, item);
+            AddPropsAndValuesToItem(properties, item);
         }
 
         public Property PropertyGetOrCreate(Property prop)
@@ -199,7 +202,7 @@ namespace Store.Domain.Concrete
             if (property == null)
             {
                 property = new Property() { PropName = prop.PropName,
-                    Values = new List<PropValue>(), IsInFilter = prop.IsInFilter };
+                    Values = new List<PropValue>(), Items= new List<Item>(), IsInFilter = prop.IsInFilter };
 
                 property = context.Properties.Add(property);
                 context.SaveChanges();
@@ -216,12 +219,23 @@ namespace Store.Domain.Concrete
                     var pr = PropertyGetOrCreate(prop);
                     foreach (var pv in prop.Values)
                     {
-                        if (pr.Values.FirstOrDefault(x=>x.Val==pv.Val && x.Items.Any(i=>i.article==item.article))==null)
+                        var propVal = pr.Values.FirstOrDefault(x => x.Val == pv.Val);
+                        if (propVal != null)
+                        {
+                            if (!propVal.Items.Any(x => x.article == item.article))
+                            {
+                                propVal.Items.Add(item);
+                                pr.Items.Add(item);
+                            }
+                        }
+                        else
                         {
                             pv.Items.Add(item);
                             pr.Values.Add(pv);
+                            pr.Items.Add(item);
                         }
                     }
+                    context.SaveChanges();
                 }
             }
         }
@@ -262,7 +276,8 @@ namespace Store.Domain.Concrete
             {
                 if (category.ParentID > 0)
                 {
-                    categ = Categories.FirstOrDefault(x => x.Name == category.Name && x.ParentID == category.ParentID);
+                    categ = Categories.FirstOrDefault(x => (x.Name == category.Name || x.Name.Contains(category.Name+"_"))
+                        && x.ParentID == category.ParentID); 
                     if (categ == null)
                     {
                         var categs = context.Categories.Where(x => x.Name.Contains(category.Name) && x.ParentID != category.ParentID);
@@ -281,7 +296,7 @@ namespace Store.Domain.Concrete
                 categ.items = new List<Item>();
                 SaveChanges();
             }
-            return context.Categories.First(x => x.Name == categ.Name && x.ParentID == category.ParentID);
+            return context.Categories.First(x => x.Name == categ.Name && x.ParentID == categ.ParentID);
         }
 
         public void UpdateCategoryFromXls(Category ctg, string image, List<string> extraImages)

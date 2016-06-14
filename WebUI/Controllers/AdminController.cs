@@ -280,31 +280,54 @@ namespace Store.WebUI.Controllers
             if (Request != null)
             {
                 HttpPostedFileBase file = Request.Files["Sheet"];
-
-                Parser1 p = new Parser1(file,repository);
-                List<string> msgs = p.Parse();
-                string str = "";
-                foreach (var msg in msgs)
+                string path = "";
+                if ((file != null) && (file.ContentLength > 0) && !string.IsNullOrEmpty(file.FileName))
                 {
-                    str = String.Concat(str, msg + "\n");
+                    path = HttpContext.Server.MapPath("~/Uploads/filef.xlsx");
+                    if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+                    file.SaveAs(path);
+                    BackgroundJob.Enqueue(() => UploadXlsOneJob(path));
                 }
-                TempData["message"] = string.Format("Файл был загружен и обработан. {0} ",str);
             }
             return RedirectToAction("Index");
+        }
+
+        public void UploadXlsOneJob(string path)
+        {
+            Parser1 p = new Parser1(path);
+            List<string> msgs = p.Parse();
+            string str = "";
+            foreach (var msg in msgs)
+            {
+                str = String.Concat(str, msg + "</br>");
+            }
+
+            var hub = GlobalHost.ConnectionManager.GetHubContext<NotifyHub>();
+            (hub as NotifyHub).SendChatMessage((hub as NotifyHub).GetName(), str);
+            TempData["message"] = string.Format("Файл был загружен и обработан. {0} ", str);
         }
 
         
         public void UploadKMPriceXls(HttpPostedFileBase Sheet)
         {
-            if (Sheet != null)
+            if (Request != null)
             {
-                BackgroundJob.Enqueue(() => ParseKMPriceJob(Sheet));
+                HttpPostedFileBase file = Request.Files["Sheet"];
+                string path = "";
+                if ((file != null) && (file.ContentLength > 0) && !string.IsNullOrEmpty(file.FileName))
+                {
+                    path = HttpContext.Server.MapPath("~/Uploads/filef.xlsx");
+                    if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+                    file.SaveAs(path);
+                    BackgroundJob.Enqueue(() => ParseKMPriceJob(path));
+                    
+                }
             }
         }
 
-        public void ParseKMPriceJob(HttpPostedFileBase file)
+        public void ParseKMPriceJob(string path)
         {
-            ParserKMdealer p = new ParserKMdealer(file, repository);
+            ParserKMdealer p = new ParserKMdealer(path);
             List<string> msgs = new List<string>();
             msgs = p.Parse();
 

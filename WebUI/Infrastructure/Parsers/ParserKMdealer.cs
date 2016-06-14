@@ -1,4 +1,5 @@
-﻿using OfficeOpenXml;
+﻿using Ninject;
+using OfficeOpenXml;
 using Store.Domain.Abstract;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,18 @@ namespace Store.WebUI.Infrastructure.Parsers
     {
         ExcelPackage pack;
         string path;
+
+        [Inject]
         IItemRepository repos;
+
+        public ParserKMdealer(string filePath)
+        {
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                FileInfo fi = new FileInfo(filePath);
+                pack = new ExcelPackage(fi);
+            }
+        }
 
         public ParserKMdealer(HttpPostedFileBase file, IItemRepository repo)
         {

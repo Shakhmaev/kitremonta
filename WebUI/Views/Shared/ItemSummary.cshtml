@@ -5,37 +5,8 @@
     {
         <div class="hot"></div>
     }
-    @{
-        ViewBag.lastItems = false;
-        ViewBag.allItems = false;
-        ViewBag.discountItems = false;
-        
-        if (this.ViewData["summaryfor"] == "lastItems")
-        {
-            ViewBag.lastItems = true;
-        }
-        else if (this.ViewData["summaryfor"] == "allItems")
-        {
-            ViewBag.allItems = true;
-        }
-        if (Model.DiscountPercent>0)
-        {
-            ViewBag.discountItems = true;
-        }
-    }
     
-    @if (ViewBag.lastItems)
-    {
-        <text>
-            <div class="well item-sum-block" style="display:none" id="@Model.Id">
-</text>
-    }
-    else
-    {
-        <text>
-            <div class="well item-sum-block" style="display:none" id="@Model.Id">
-        </text>
-    }
+   <div class="well item-sum-block" style="display:none" id="@Model.Id">
 
 <div class="row">
     <div class="col-xs-12 item-sum-img">

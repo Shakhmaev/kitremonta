@@ -2,6 +2,7 @@
 using Microsoft.AspNet.Identity;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
+using Ninject;
 using Owin;
 
 [assembly: OwinStartupAttribute(typeof(Store.WebUI.Startup))]

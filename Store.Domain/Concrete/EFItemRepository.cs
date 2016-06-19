@@ -4,9 +4,11 @@ using Store.Domain.Abstract;
 using System.Web.Mvc;
 using System.Linq;
 using System;
+using System.Data.Entity;
 using System.IO;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Store.Domain.Concrete
 {
@@ -20,72 +22,72 @@ namespace Store.Domain.Concrete
         }
 
         
-        public IEnumerable<Item> Items
+        public IQueryable<Item> Items
         {
             [OutputCache(Duration = int.MaxValue)]
             get { return context.Items; }
         }
 
-        
-        public IEnumerable<IdentityRole> Roles
+
+        public IQueryable<IdentityRole> Roles
         {
             [OutputCache(Duration = int.MaxValue)]
             get { return context.Roles; }
         }
 
-        
-        public IEnumerable<AppUser> Users
+
+        public IQueryable<AppUser> Users
         {
             [OutputCache(Duration = int.MaxValue)]
             get { return context.Users; }
         }
 
-        
-        public IEnumerable<Category> Categories
+
+        public IQueryable<Category> Categories
         {
             [OutputCache(Duration = int.MaxValue)]
             get { return context.Categories; }
         }
 
-        
-        public IEnumerable<Photo> Photos
+
+        public IQueryable<Photo> Photos
         {
             [OutputCache(Duration = int.MaxValue)]
             get { return context.Photos; }
         }
 
-        
-        public IEnumerable<Supplier> Suppliers
+
+        public IQueryable<Supplier> Suppliers
         {
             [OutputCache(Duration = int.MaxValue)]
             get { return context.Suppliers; }
         }
 
-        public IEnumerable<Property> Properties
+        public IQueryable<Property> Properties
         {
             [OutputCache(Duration = int.MaxValue)]
             get { return context.Properties; }
         }
 
-        public IEnumerable<PropValue> PropValues
+        public IQueryable<PropValue> PropValues
         {
             [OutputCache(Duration = int.MaxValue)]
             get { return context.PropValues; }
         }
 
-        public void SaveItem(Item item)
+        public async Task SaveItemAsync(Item item)
         {
             if (item.Id==0)
             {
                 foreach (var ct in item.ParentCategories)
                 {
-                    Category cat = SubCategoryGetOrCreate(ct);
+                    Category cat = await SubCategoryGetOrCreateAsync(ct);
                     cat.items.Add(item);
                 }
             }
             else
             {
-                Item dbEntry = context.Items.Find(item.Id);
+                Item dbEntry = await context.Items.FindAsync(item.Id);
                 if (dbEntry != null)
                 {
                     dbEntry.Name = item.Name;
@@ -95,7 +97,7 @@ namespace Store.Domain.Concrete
 
                     foreach (var ctg in dbEntry.ParentCategories)
                     {
-                        var CatExists = context.Categories.FirstOrDefault(x => x.CategoryId == ctg.CategoryId);
+                        var CatExists = await context.Categories.FirstOrDefaultAsync(x => x.CategoryId == ctg.CategoryId);
                         if (CatExists != null)
                         {
                             ctg.items.Remove(dbEntry);
@@ -103,7 +105,7 @@ namespace Store.Domain.Concrete
                         }
                         else
                         {
-                            Category cat = SubCategoryGetOrCreate(ctg);
+                            Category cat = await SubCategoryGetOrCreateAsync(ctg);
                             cat.items = new List<Item>();
                             ctg.items.Remove(dbEntry);
                             cat.items.Add(dbEntry);
@@ -112,7 +114,7 @@ namespace Store.Domain.Concrete
                     dbEntry.DiscountPercent = item.DiscountPercent;
                 }
             }
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         public void MapItem(ref Item from, ref Item to)
@@ -127,7 +129,7 @@ namespace Store.Domain.Concrete
             to.ItemType = from.ItemType;
         }
 
-        public void SaveOrUpdateItemFromXlsOne(Item item, List<string[]> hierarchy, List<string[]> Names, IEnumerable<string> images)
+        public async Task SaveOrUpdateItemFromXlsOneAsync(Item item, List<string[]> hierarchy, List<string[]> Names, IEnumerable<string> images)
         {
             Category current = null;
             Item it = null;
@@ -151,7 +153,7 @@ namespace Store.Domain.Concrete
                     {
                         category.ParentID = current.CategoryId;
                     }
-                    var cat = SubCategoryGetOrCreate(category);
+                    var cat = SubCategoryGetOrCreateAsync(category);
                     if (j == hierarchy[i].Count() - 1)
                     {
                         if (item.Id > 0) 
@@ -175,28 +177,28 @@ namespace Store.Domain.Concrete
                                     item.Photos.Add(new Photo { url = img });
                                 }
                             }
-                            it = context.Items.FirstOrDefault(x => x.Brand == item.Brand && x.Country == item.Country && x.ItemType == item.ItemType &&
+                            it = await context.Items.FirstOrDefaultAsync(x => x.Brand == item.Brand && x.Country == item.Country && x.ItemType == item.ItemType &&
                                 x.Name == item.Name && x.Type == item.Type && x.Description == item.Description);
                             if (it != null)
                             {
                                 item = it;
                             }
                         }
-                        if (!cat.items.Contains(item))
+                        if (!(await cat).items.Contains(item))
                         {
-                            cat.items.Add(item); //добавляем товар в категорию
+                            (await cat).items.Add(item); //добавляем товар в категорию
                         }
                     }
-                    current = cat;
+                    current = await cat;
                 }
                 current = null;
             }
-            SaveChanges();
+            await SaveChangesAsync();
 
-            AddPropsAndValuesToItem(properties, item);
+            await AddPropsAndValuesToItem(properties, item);
         }
 
-        public Property PropertyGetOrCreate(Property prop)
+        public async Task<Property> PropertyGetOrCreate(Property prop)
         {
             var property = Properties.FirstOrDefault(x => x.PropName == prop.PropName);
             if (property == null)
@@ -205,18 +207,18 @@ namespace Store.Domain.Concrete
                     Values = new List<PropValue>(), Items= new List<Item>(), IsInFilter = prop.IsInFilter };
 
                 property = context.Properties.Add(property);
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
             return property;
         }
 
-        public void AddPropsAndValuesToItem(IEnumerable<Property> props, Item item)
+        public async Task AddPropsAndValuesToItem(IEnumerable<Property> props, Item item)
         {
             foreach (var prop in props)
             {
                 if (prop.Values.Count > 0)
                 {
-                    var pr = PropertyGetOrCreate(prop);
+                    var pr = await PropertyGetOrCreate(prop);
                     foreach (var pv in prop.Values)
                     {
                         var propVal = pr.Values.FirstOrDefault(x => x.Val == pv.Val);
@@ -235,18 +237,18 @@ namespace Store.Domain.Concrete
                             pr.Items.Add(item);
                         }
                     }
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                 }
             }
         }
 
-        public PropValue PropValueGetOrCreate(PropValue pv)
+        public async Task<PropValue> PropValueGetOrCreate(PropValue pv)
         {
             var propValue = context.PropValues.FirstOrDefault(x => x.Prop.PropName == pv.Prop.PropName && x.Val == pv.Val);
             if (propValue == null)
             {
                 propValue = context.PropValues.Add(pv);
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
             return propValue;
         }
@@ -256,16 +258,16 @@ namespace Store.Domain.Concrete
             Supplier supp = Suppliers.FirstOrDefault(x => x.Name == name);
             if (supp == null)
             {
-                context.Suppliers.Add(new Supplier()
+                supp = context.Suppliers.Add(new Supplier()
                 {
                     Name = name
                 });
                 SaveChanges();
-                supp = Suppliers.FirstOrDefault(x => x.Name == name);
             }
             return supp;
         }
-        public Category SubCategoryGetOrCreate(Category category)
+
+        public async Task<Category> SubCategoryGetOrCreateAsync(Category category)
         {
             Category categ = null;
             if (category.CategoryId != 0)
@@ -294,9 +296,9 @@ namespace Store.Domain.Concrete
                 categ = context.Categories.Add(category);
                 categ.Parent = context.Categories.FirstOrDefault(i => i.CategoryId == category.ParentID);
                 categ.items = new List<Item>();
-                SaveChanges();
+                await SaveChangesAsync();
             }
-            return context.Categories.First(x => x.Name == categ.Name && x.ParentID == categ.ParentID);
+            return categ;
         }
 
         public void UpdateCategoryFromXls(Category ctg, string image, List<string> extraImages)
@@ -349,12 +351,12 @@ namespace Store.Domain.Concrete
             if (item != null)
             {
                 item.Price = Convert.ToInt32(Math.Round(double.Parse(price)*1.15));
-                context.SaveChanges();
                 if (supplier != "unknown")
                 {
                     Supplier sup = SupplierGetOrCreate(supplier);
                     sup.Items.Add(item);
                 }
+                SaveChanges();
                 return true;
             }
             else return false;
@@ -371,10 +373,14 @@ namespace Store.Domain.Concrete
         {
             context.SaveChanges();
         }
-
-        public Item DeleteItem(int Id)
+        public async Task SaveChangesAsync()
         {
-            Item dbEntry = context.Items.Find(Id);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task<Item> DeleteItemAsync(int Id)
+        {
+            Item dbEntry = await context.Items.FindAsync(Id);
             if (dbEntry != null)
             {
                 context.Items.Remove(dbEntry);
@@ -408,68 +414,75 @@ namespace Store.Domain.Concrete
         }
 
 
-        public IEnumerable<Category> FindInDescendantCountries(Category ctg)
-        {
-            IEnumerable<Category> categories = new List<Category>();
-
-            categories = categories.Union(ctg.SubCategories).Where(x => x.Type == "Country");
-
-            return categories;
+        public async Task<IEnumerable<Category>> FindInDescendantCountriesAsync(Category ctg)
+        { 
+            return await Task.Run(()=> ctg.SubCategories.Where(x => x.Type == "Country"));
         }
 
-        public IEnumerable<Category> FindInDescendantBrands(Category ctg)
+        public async Task<IEnumerable<Category>> FindInDescendantBrandsAsync(Category ctg)
         {
             IEnumerable<Category> categories = new List<Category>();
 
-            foreach (var sub in ctg.SubCategories)
+            await Task.Run(() =>
             {
-                categories = categories.Union(sub.SubCategories).Where(x => x.Type == "Brand");
-            }
+                foreach (var sub in ctg.SubCategories)
+                {
+                    categories = categories.Union(sub.SubCategories.Where(x => x.Type == "Brand"));
+                }
+            });
 
             return categories;
         }
 
-        public List<Category> GetChildCollectionsAvoidLowerSubs(Category ctg)
+        public async Task<IEnumerable<Category>> GetChildCollectionsAvoidLowerSubsAsync(Category ctg)
         {
             if (ctg.SubCategories.Count() > 0)
             {
-                List<Category> collections = new List<Category>();
+                IEnumerable<Category> collections = new List<Category>();
                 foreach (var category in ctg.SubCategories)
                 {
                     if (category.Type == "show_collections" || category.Type=="Collection")
                     {
-                        collections.Add(category);
+                        (collections as List<Category>).Add(category);
                     }
                     else if (category.Type == "Country" || category.Type == "Brand")
                     {
                         foreach (var sub in category.SubCategories)
                         {
-                            collections = collections.Union(GetChildCollectionsAvoidLowerSubs(sub)).ToList();
+                            var subcols = await GetChildCollectionsAvoidLowerSubsAsync(sub);
+                            foreach (var subcol in subcols)
+                            {
+                                (collections as List<Category>).Add(subcol);
+                            }
                         }
                     }
                 }
-                return collections.Distinct().ToList();
+                    return collections.Distinct();
             }
             return new List<Category>();
         }
 
-        public IEnumerable<Category> GetDescendantCollections(Category ctg)
+        public async Task<IEnumerable<Category>> GetDescendantCollectionsAsync(Category ctg)
         {
             if (ctg.SubCategories.Count() > 0)
             {
-                IEnumerable<Category> collections = ctg.SubCategories.Where(x => x.Type == "Collection");
+                IEnumerable<Category> collections = ctg.SubCategories.Where(x => x.Type == "Collection").ToList();
                 foreach (var sub in ctg.SubCategories)
                 {
-                    collections = collections.Union(GetDescendantCollections(sub));
+                    var subdescs = await GetDescendantCollectionsAsync(sub);
+                    foreach (var sd in subdescs)
+                    {
+                        (collections as List<Category>).Add(sd);
+                    }
                 }
                 return collections.Distinct();
             }
             return new List<Category>();
         }
 
-        public IEnumerable<Category> GetBrandsByCountry(string country)
+        public async Task<IEnumerable<Category>> GetBrandsByCountryAsync(string country)
         {
-            Category countryctg = Categories.FirstOrDefault(x => x.Type == "Country"
+            Category countryctg = await Categories.FirstOrDefaultAsync(x => x.Type == "Country"
                 && x.Name == country);
             if (countryctg.SubCategories.Count() > 0)
             {

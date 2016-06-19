@@ -50,13 +50,14 @@ namespace Store.WebUI.Controllers
             
             if (ModelState.IsValid && VerifyRecaptcha())
             {
+                Task send = SendEmailToAdmins();
                 model.cart = carts.GetCart(cartid.id);
                 Order order = orderProc.Process(model);
                 carts.Clear(cartid.id);
                 var hub = GlobalHost.ConnectionManager.GetHubContext<NotifyHub>();
                 hub.Clients.Group("Admins").notify("Пришёл новый заказ!");
                 (hub as NotifyHub).NewOrder();
-                await SendEmailToAdmins();
+                await send;
                 return View("OrderResult");
             }
             else

@@ -10,27 +10,28 @@ namespace Store.Domain.Abstract
 {
     public interface IItemRepository
     {
-        IEnumerable<Item> Items { get; }
+        IQueryable<Item> Items { get; }
 
-        IEnumerable<AppUser> Users { get; }
+        IQueryable<AppUser> Users { get; }
 
-        IEnumerable<IdentityRole> Roles { get; }
+        IQueryable<IdentityRole> Roles { get; }
 
-        IEnumerable<Photo> Photos { get; }
+        IQueryable<Photo> Photos { get; }
 
-        IEnumerable<Category> Categories { get; }
+        IQueryable<Category> Categories { get; }
 
-        IEnumerable<Supplier> Suppliers { get; }
+        IQueryable<Supplier> Suppliers { get; }
 
-        void SaveItem(Item item);
-        Category SubCategoryGetOrCreate(Category category);
-        void SaveOrUpdateItemFromXlsOne(Item item, List<string[]> hierarchy, List<string[]> Names, IEnumerable<string> images);
+        Task SaveItemAsync(Item item);
+        Task<Category> SubCategoryGetOrCreateAsync(Category category);
+        Task SaveOrUpdateItemFromXlsOneAsync(Item item, List<string[]> hierarchy, List<string[]> Names, IEnumerable<string> images);
 
         void UpdateCategoryFromXls(Category ctg, string image, List<string> extraImages);
         bool UpdateItemPriceFromXls(string article, string price, string supplier = "unknown");
-        Item DeleteItem(int Id);
+        Task<Item> DeleteItemAsync(int Id);
 
         void SaveChanges();
+        Task SaveChangesAsync();
 
         void DeleteExtraPhoto(int Id, int PhotoId);
 
@@ -39,14 +40,14 @@ namespace Store.Domain.Abstract
         string GetCategoryImageMiniUrl(int id);
 
 
-        IEnumerable<Category> GetBrandsByCountry(string country);
+        Task<IEnumerable<Category>> GetBrandsByCountryAsync(string country);
 
-        IEnumerable<Category> GetDescendantCollections(Category ctg);
+        Task<IEnumerable<Category>> GetDescendantCollectionsAsync(Category ctg);
 
-        List<Category> GetChildCollectionsAvoidLowerSubs(Category ctg);
+        Task<IEnumerable<Category>> GetChildCollectionsAvoidLowerSubsAsync(Category ctg);
 
-        IEnumerable<Category> FindInDescendantBrands(Category ctg);
+        Task<IEnumerable<Category>> FindInDescendantBrandsAsync(Category ctg);
 
-        IEnumerable<Category> FindInDescendantCountries(Category ctg);
+        Task<IEnumerable<Category>> FindInDescendantCountriesAsync(Category ctg);
     }
 }

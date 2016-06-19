@@ -16,11 +16,11 @@ namespace Store.WebUI.Infrastructure.Parsers
         ExcelPackage pack;
         string path;
 
-        [Inject]
         IItemRepository repos;
 
-        public ParserKMdealer(string filePath)
+        public ParserKMdealer(string filePath, IItemRepository repo)
         {
+            repos = repo;
             if (!string.IsNullOrEmpty(filePath))
             {
                 FileInfo fi = new FileInfo(filePath);

@@ -19,6 +19,7 @@ namespace Store.WebUI.App_Start
     using System.Web.Routing;
     using Store.Domain.Abstract;
     using Store.Domain.Concrete;
+    using Hangfire;
 
     public static class NinjectWebCommon 
     {
@@ -81,6 +82,7 @@ namespace Store.WebUI.App_Start
         private static void RegisterServices(IKernel kernel)
         {
             System.Web.Mvc.DependencyResolver.SetResolver(new Store.WebUI.Infrastructure.NinjectDependencyResolver(kernel));
+            GlobalConfiguration.Configuration.UseNinjectActivator(kernel);
         }        
     }
 }

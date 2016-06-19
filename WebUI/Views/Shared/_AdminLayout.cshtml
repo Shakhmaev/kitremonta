@@ -1,17 +1,14 @@
-﻿<!DOCTYPE html>
+﻿@using System.Web.Optimization;
+<!DOCTYPE html>
 
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <link href="~/Content/bootstrap.css" rel="stylesheet" />
-    <link href="~/Content/bootstrap-theme.css" rel="stylesheet" />
-    <link href="~/Content/Styles/ErrorStyles.css" rel="stylesheet" />
-    <link href="~/Content/Styles/Styles1.css" rel="stylesheet" />
-    <script src="~/Scripts/jquery-2.2.0.min.js"></script>
-    <script src="~/Scripts/jquery.validate.min.js"></script>
-    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
-    <script src="~/Scripts/common.js"></script>
-    <script src="~/Scripts/jquery.signalR-2.2.0.min.js" type="text/javascript"></script>
+    @Styles.Render("~/Content/Styles/font")
+    @Styles.Render("~/Content/Styles/custom")
+    @Styles.Render("~/Content/themes/base/css")
+    @Scripts.Render("~/Scripts/jquery")
+    @Scripts.Render("~/Scripts/custom")
     <script src="~/signalr/hubs" type="text/javascript"></script>
     <title>@ViewBag.Title</title>
     @RenderSection("HScripts", false)

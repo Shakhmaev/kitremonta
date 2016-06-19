@@ -23,7 +23,7 @@
                     <h2>Цены Линкер стопы</h2>
                     @using (Html.BeginForm("UploadLincerStopsPriceXls", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
                     {
-                        <input type="file" id="ImgExtraFiles" accept="xls,xlsx" name="Sheet" size="40" style="margin: 10px;">
+                        <input type="file" id="lincerstops" accept="xls,xlsx" name="Sheet" size="40" style="margin: 10px;">
                         <input type="submit" class="btn btn-default btn-sm" value="Загрузить" />
                     }
                 </div>
@@ -43,7 +43,6 @@
                     <a class="btn btn-danger" href="@Url.Action("Orders","Admin")">Перейти к заказам</a>
                 </div>
             </div>
-
 </div>
 
 <script type="text/javascript">
@@ -56,7 +55,7 @@
         };
 
         $.connection.hub.start().done(function () {
-            
+
         });
     });
 

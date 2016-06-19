@@ -15,6 +15,7 @@ using System.Web.Script.Serialization;
 using System.Text.RegularExpressions;
 using System.Web.UI;
 using System.Threading.Tasks;
+using System.Data.Entity;
 
 namespace Store.WebUI.Controllers
 {
@@ -37,7 +38,7 @@ namespace Store.WebUI.Controllers
             model = new IndexViewModel
             {
                 DiscountItems = repository.Items.Where(x=>x.DiscountPercent>0).Take(12),
-                LastItems = repository.Items.Reverse().Where(x=>x.Price>0).Take(12)
+                LastItems = ((IEnumerable<Item>)repository.Items).Reverse().Where(x=>x.Price>0).Take(12)
             };
 
             return View(model);
@@ -53,6 +54,7 @@ namespace Store.WebUI.Controllers
         {
             ItemsListViewModel model = new ItemsListViewModel();
             model.Side = new List<KeyValuePair<string, IEnumerable<Category>>>();
+            var side = await GetSideCollection();
 
             IEnumerable<Property> props = new List<Property>();
 
@@ -67,7 +69,8 @@ namespace Store.WebUI.Controllers
 
             if (category != (string)null)
             {
-                var ctg = repository.Categories.FirstOrDefault(x => x.Name == category);
+                var ctg = await repository.Categories.FirstOrDefaultAsync(x => x.Name == category);
+                var descCollects = await repository.GetDescendantCollectionsAsync(ctg);
                 var items = await GetItems(ctg);
                 if (items.Count() == 0)
                 {
@@ -84,7 +87,7 @@ namespace Store.WebUI.Controllers
                     propValues = items.SelectMany(x => x.propValues).Distinct();
 
 
-                    foreach (var ctgdesc in repository.GetDescendantCollections(ctg))
+                    foreach (var ctgdesc in descCollects)
                     {
                         if (ctgdesc.Application!=null)
                             (Applications as List<string>).Add(ctgdesc.Application);
@@ -98,19 +101,19 @@ namespace Store.WebUI.Controllers
                     case "Collection":
                         {
                             model.categoryTypeMessage = "Коллекции";
-                            model.Categories = repository.GetChildCollectionsAvoidLowerSubs(ctg);
+                            model.Categories = (IEnumerable<Category>) await repository.GetChildCollectionsAvoidLowerSubsAsync(ctg);
                             break;
                         }
                     case "Country":
                         {
                             model.categoryTypeMessage = "Бренды";
-                            model.Categories = repository.GetBrandsByCountry(ctg.Name);
+                            model.Categories = await repository.GetBrandsByCountryAsync(ctg.Name);
                             break;
                         }
                     default: model.Categories = new List<Category>();
                         break;
                 } 
-                model.Side = GetSideCollection();
+                model.Side = side;
                 model.currentctg = ctg;
             }
             else
@@ -177,9 +180,9 @@ namespace Store.WebUI.Controllers
         {
             FilteredListViewModel fmodel = new FilteredListViewModel();
 
-            IEnumerable<Item> items;
+            IQueryable<Item> items;
 
-            var categ = repository.Categories.FirstOrDefault(x => x.Name == category);
+            var categ = await repository.Categories.FirstOrDefaultAsync(x => x.Name == category);
 
             if (categ == null)
             {
@@ -307,19 +310,22 @@ namespace Store.WebUI.Controllers
             return PartialView("_LoadSummary",fmodel);
         }
 
-        private List<KeyValuePair<string, IEnumerable<Category>>> GetSideCollection()
+        private async Task<List<KeyValuePair<string, IEnumerable<Category>>>> GetSideCollection()
         {
             ISiteMap map = MvcSiteMapProvider.SiteMaps.Current;
             ISiteMapNode node = map.FindSiteMapNodeFromCurrentContext();
             var ctgs = repository.Categories.Where(x => x.Type == "show_collections");
 
             Category ctg = ClosestRootParent(ctgs,node);
+
+            var desccountries = await repository.FindInDescendantCountriesAsync(ctg);
+            var descbrands = await repository.FindInDescendantBrandsAsync(ctg);
             
             return new List<KeyValuePair<string, IEnumerable<Category>>>(){
                 new KeyValuePair<string,IEnumerable<Category>>("Countries",
-                    new List<Category>(repository.FindInDescendantCountries(ctg))),
+                    new List<Category>(desccountries)),
                 new KeyValuePair<string,IEnumerable<Category>>("Brands",
-                    new List<Category>(repository.FindInDescendantBrands(ctg))),
+                    new List<Category>(descbrands)),
                 new KeyValuePair<string,IEnumerable<Category>>("RootCategory",
                     new List<Category>(){ ctg })
                 };
@@ -347,9 +353,9 @@ namespace Store.WebUI.Controllers
             return parent;
         }
 
-        private async Task<IEnumerable<Item>> GetItems(Category category)
+        private async Task<IQueryable<Item>> GetItems(Category category)
         {
-            IEnumerable<Item> items = category.items;
+            IQueryable<Item> items = category.items.AsQueryable();
 
             foreach (var sub in category.SubCategories)
             {
@@ -359,7 +365,7 @@ namespace Store.WebUI.Controllers
             return items;
         }
         
-         public ViewResult ItemDetails(int id)
+        public ViewResult ItemDetails(int id)
         {
             Item item = repository.Items.Where(x => x.Id == id).FirstOrDefault();
             return View("ItemDetailsView",item);
@@ -458,10 +464,10 @@ namespace Store.WebUI.Controllers
             return View(model);
         }
 
-        public JsonResult GetRandomCollections()
+        public async Task<JsonResult> GetRandomCollections()
         {
             Random r = new Random();
-            var categories = repository.GetDescendantCollections(repository.Categories.FirstOrDefault(x=>x.Description=="Керамическая плитка"))
+            var categories = (await repository.GetDescendantCollectionsAsync(await repository.Categories.FirstOrDefaultAsync(x=>x.Description=="Керамическая плитка")))
                 .Where(x => x.Type == "Collection");
             int sk = r.Next(0,categories.Count()-7);
             var ctgs = categories.Skip(sk).Take(6);
@@ -474,10 +480,10 @@ namespace Store.WebUI.Controllers
             return Json(list, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult GetNeighbourItems(int id)
+        public async Task<JsonResult> GetNeighbourItems(int id)
         {
             List<string[]> list = new List<string[]>();
-            foreach (var item in repository.Items.FirstOrDefault(x => x.Id == id).ParentCategories.SelectMany(x => x.items).Where(x => x.Id != id).Take(10))
+            foreach (var item in (await repository.Items.FirstOrDefaultAsync(x => x.Id == id)).ParentCategories.SelectMany(x => x.items).Where(x => x.Id != id).Take(10))
             {
                 try
                 {

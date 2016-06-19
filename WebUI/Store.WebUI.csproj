@@ -56,6 +56,9 @@
     <Reference Include="Hangfire.Core">
       <HintPath>..\packages\Hangfire.Core.1.5.7\lib\net45\Hangfire.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Hangfire.Ninject">
+      <HintPath>..\packages\HangFire.Ninject.1.2.0\lib\net45\Hangfire.Ninject.dll</HintPath>
+    </Reference>
     <Reference Include="Hangfire.SqlServer">
       <HintPath>..\packages\Hangfire.SqlServer.1.5.7\lib\net45\Hangfire.SqlServer.dll</HintPath>
     </Reference>
@@ -205,6 +208,16 @@
     <Content Include="Content\Styles\Img\knopka.png" />
     <Content Include="Content\Styles\Img\logo.jpg" />
     <Content Include="Content\Styles\Img\logo.png" />
+    <Content Include="Content\Styles\Img\MainCtgs\keramogranit.jpg" />
+    <Content Include="Content\Styles\Img\MainCtgs\kraski.jpg" />
+    <Content Include="Content\Styles\Img\MainCtgs\mebel.jpg" />
+    <Content Include="Content\Styles\Img\MainCtgs\mozaika.jpg" />
+    <Content Include="Content\Styles\Img\MainCtgs\napol.jpg" />
+    <Content Include="Content\Styles\Img\MainCtgs\oboi.jpg" />
+    <Content Include="Content\Styles\Img\MainCtgs\plitka1.jpg" />
+    <Content Include="Content\Styles\Img\MainCtgs\santehnika.jpg" />
+    <Content Include="Content\Styles\Img\MainCtgs\svetilniki.jpg" />
+    <Content Include="Content\Styles\Img\MainCtgs\tepliepoli.jpg" />
     <Content Include="Content\Styles\Img\nail1.png" />
     <Content Include="Content\Styles\Img\nail2.png" />
     <Content Include="Content\Styles\Img\nail3.png" />
@@ -213,6 +226,7 @@
     <Content Include="Content\Styles\Img\nailhead.png" />
     <Content Include="Content\Styles\Img\redux2.png" />
     <Content Include="Content\Styles\Img\strelka.png" />
+    <Content Include="Content\Styles\Img\waves1.png" />
     <Content Include="Content\Styles\ionicons.min.css" />
     <Content Include="Content\Styles\jCarouselStyles.css" />
     <Content Include="Content\Styles\lity.min.css" />

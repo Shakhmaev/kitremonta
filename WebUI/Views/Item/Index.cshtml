@@ -14,6 +14,28 @@
     <div class="center-block" id="collectionstext"><h2></h2></div>
         @Html.Partial("_carousel")
 
+    <div class="jumbotron">
+        <div class="row">
+            <div class="col-xs-6 col-sm-4 col-lg-3 center-block">
+                <a href="@Url.Action("List", "Item", new { category="keramicheskaya-plitka" })">
+                    <img class="img-thumbnail" src="@Url.Content("~/Content/Styles/Img/MainCtgs/plitka1.jpg")" />
+                    <p>Керамическая плитка</p>
+                </a>
+            </div>
+            <div class="col-xs-6 col-sm-4 col-lg-3 center-block">
+                <a href="@Url.Action("List", "Item", new { category="keramicheskij-granit" })">
+                    <img class="img-thumbnail" src="@Url.Content("~/Content/Styles/Img/MainCtgs/keramogranit.jpg")" />
+                    <p>Керамогранит</p>
+                </a>
+            </div>
+            <div class="col-xs-6 col-sm-4 col-lg-3 center-block">
+                <a href="@Url.Action("List", "Item", new { category="mozaika" })">
+                    <img class="img-thumbnail" src="@Url.Content("~/Content/Styles/Img/MainCtgs/mozaika.jpg")" />
+                    <p>Мозаика</p>
+                </a>
+            </div>
+        </div>
+    </div>
 
     <div class="tabbable">
         <!-- Only required for left/right tabs -->
@@ -136,7 +158,7 @@
                 $(".jcarousel-wrapper").show('slow');
             },
             success: function (data) {
-                $("#collectionstext>h2").html("Коллекции из раздела \"Керамическая плитка\"")
+                $("#collectionstext>h2").html("Несколько коллекций из раздела \"Керамическая плитка\"")
                 reloadCarousel(data);
             }
         });

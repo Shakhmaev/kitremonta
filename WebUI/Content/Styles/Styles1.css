@@ -1,6 +1,8 @@
 ﻿
 body {
-    background-color:#E0F7FA;
+    background-image: url('Img/waves1.png');
+    background-repeat:repeat;
+    /*background-color:#E0F7FA;*/
     font-family: 'Play', sans-serif;
 }
 

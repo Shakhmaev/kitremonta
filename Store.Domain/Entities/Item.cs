@@ -63,6 +63,14 @@ namespace Store.Domain.Entities
             }
         }
 
+        public string articleOriginal
+        {
+            get
+            {
+                return article.Remove(0, 3);
+            }
+        }
+
         [Display(Name = "Горячее?")]
         [Required]
         public bool IsHot { get; set; }

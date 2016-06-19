@@ -12,6 +12,20 @@ namespace Store.WebUI.Infrastructure.Hubs
     {
         private readonly static ConnectionMapping<string> _connections =
             new ConnectionMapping<string>();
+
+        private static IHubContext hubContext;
+        /// <summary>Gets the hub context.</summary>
+        /// <value>The hub context.</value>
+        public static IHubContext HubContext
+        {
+            get
+            {
+                if (hubContext == null)
+                    hubContext = GlobalHost.ConnectionManager.GetHubContext<NotifyHub>();
+                return hubContext;
+            }
+        }
+
         public void SendAdminNotify(string message)
         {
             Clients.Group("Admins").notify(message);
@@ -46,6 +60,14 @@ namespace Store.WebUI.Infrastructure.Hubs
             }
         }
 
+        public static void SendServerMessageTo(string who, string message)
+        {
+            foreach (var connectionId in _connections.GetConnections(who))
+            {
+                HubContext.Clients.Client(connectionId).addmsg(message);
+            }
+        }
+
         public string GetName()
         {
             return Context.User.Identity.Name;
@@ -77,8 +99,13 @@ namespace Store.WebUI.Infrastructure.Hubs
             {
                 _connections.Add(name, Context.ConnectionId);
             }
-
+            
             return base.OnReconnected();
+        }
+
+        public static IHubContext GetNotify()
+        {
+            return GlobalHost.ConnectionManager.GetHubContext<NotifyHub>();
         }
     }
 

@@ -9,6 +9,7 @@ using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Hosting;
 
@@ -20,13 +21,13 @@ namespace Store.WebUI.Infrastructure.Parsers
         string path;
         ExcelWorksheet workSheet;
 
-        [Inject]
         IItemRepository repos;
         Translitter translit = new Translitter();
         Regex CatMatch = new Regex(@"^(\s*([\w-\s]+?)\s*$)");
 
-        public Parser1(string filePath)
+        public Parser1(string filePath, IItemRepository repo)
         {
+            repos = repo;
             if (!string.IsNullOrEmpty(filePath))
             {
                 FileInfo fi = new FileInfo(filePath);
@@ -90,7 +91,7 @@ namespace Store.WebUI.Infrastructure.Parsers
                         SetPropValue("Color",ToLowerCapitalizeFirstTrim(workSheet.Cells[rowIterator, 13].Value.ToString()),ref item, true);
                         SetPropValue("Weight",ToLowerCapitalizeFirstTrim(workSheet.Cells[rowIterator, 16].Value.ToString()), ref item, false);
 
-                        item.article = workSheet.Cells[rowIterator, 5].Value != null ? workSheet.Cells[rowIterator, 5].Value.ToString() : item.Brand.Substring(0,2) + "-" + Guid.NewGuid().ToString("N");
+                        item.article = workSheet.Cells[rowIterator, 5].Value != null ? item.Brand.Substring(0,2) + "-" + workSheet.Cells[rowIterator, 5].Value.ToString() : item.Brand.Substring(0,2) + "-" + Guid.NewGuid().ToString("N");
 
 
                         var pru = workSheet.Cells[rowIterator, 8].Value.ToString();
@@ -236,15 +237,15 @@ namespace Store.WebUI.Infrastructure.Parsers
                                 images.Add(imagesphys.ElementAt(i).Replace(ImgPath, String.Empty));
                             }
 
-                            repos.SaveOrUpdateItemFromXlsOne(item, hierarchylist, translitnameslist, images);
+                            repos.SaveOrUpdateItemFromXlsOneAsync(item, hierarchylist, translitnameslist, images);
                         }
-                        else repos.SaveOrUpdateItemFromXlsOne(item, hierarchylist, translitnameslist, new List<string>());
+                        else repos.SaveOrUpdateItemFromXlsOneAsync(item, hierarchylist, translitnameslist, new List<string>());
                     }
                     pack.Dispose();
                 }
                 catch (Exception e)
                 {
-                    messages.Add(e.Message + e.Source);
+                    messages.Add(e.Message + "/r/n" + e.StackTrace);
                 }
             }
             return messages;

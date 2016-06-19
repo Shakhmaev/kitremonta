@@ -19,6 +19,7 @@ using Hangfire;
 using Microsoft.AspNet.SignalR;
 using Store.WebUI.Infrastructure.Hubs;
 using System.Runtime.Remoting.Contexts;
+using System.Data.Entity;
 
 namespace Store.WebUI.Controllers
 {   
@@ -34,7 +35,7 @@ namespace Store.WebUI.Controllers
             proc = processor;
         }
 
-        public async Task<ViewResult> Index()
+        public ViewResult Index()
         {
             return View();
         }
@@ -77,7 +78,7 @@ namespace Store.WebUI.Controllers
             return View(categories.ToList());
         }
 
-        public ActionResult CreateCategory(string name, int parentID)
+        public async Task<ActionResult> CreateCategory(string name, int parentID)
         {
             if (!String.IsNullOrEmpty(name))
             {
@@ -97,7 +98,7 @@ namespace Store.WebUI.Controllers
                     Name = tr.GetTranslit(name),
                     ParentID = parentID
                 };
-                repository.SubCategoryGetOrCreate(ctg);
+                await repository.SubCategoryGetOrCreateAsync(ctg);
             }
             return RedirectToAction("Categories");
         }
@@ -156,7 +157,7 @@ namespace Store.WebUI.Controllers
         }
 
         [HttpPost]
-        public ActionResult Edit(Item item, HttpPostedFileBase image = null)
+        public async Task<ActionResult> Edit(Item item, HttpPostedFileBase image = null)
         {
             if (ModelState.IsValid)
             {
@@ -166,7 +167,7 @@ namespace Store.WebUI.Controllers
                     item.ImageData = new byte[image.ContentLength];
                     image.InputStream.Read(item.ImageData, 0, image.ContentLength);*/
                 }
-                repository.SaveItem(item);
+                await repository.SaveItemAsync(item);
                 TempData["message"] = string.Format("Изменения в товаре \"{0}\" были сохранены", item.Name);
                 return RedirectToAction("Index");
             }
@@ -240,9 +241,9 @@ namespace Store.WebUI.Controllers
             return View("Edit", new Item { ParentCategories = new List<Category>() });
         }
 
-        public ActionResult Delete(int Id)
+        public async Task<ActionResult> Delete(int Id)
         {
-            Item deletedItem = repository.DeleteItem(Id);
+            Item deletedItem = await repository.DeleteItemAsync(Id);
             if (deletedItem != null)
             {
                 TempData["message"] = string.Format("Товар \"{0}\" был удалён", deletedItem.Name);
@@ -286,15 +287,15 @@ namespace Store.WebUI.Controllers
                     path = HttpContext.Server.MapPath("~/Uploads/filef.xlsx");
                     if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
                     file.SaveAs(path);
-                    BackgroundJob.Enqueue(() => UploadXlsOneJob(path));
+                    BackgroundJob.Enqueue(() => UploadXlsOneJob(path, User.Identity.Name));
                 }
             }
             return RedirectToAction("Index");
         }
 
-        public void UploadXlsOneJob(string path)
+        public void UploadXlsOneJob(string path, string name)
         {
-            Parser1 p = new Parser1(path);
+            Parser1 p = new Parser1(path, repository);
             List<string> msgs = p.Parse();
             string str = "";
             foreach (var msg in msgs)
@@ -302,13 +303,11 @@ namespace Store.WebUI.Controllers
                 str = String.Concat(str, msg + "</br>");
             }
 
-            var hub = GlobalHost.ConnectionManager.GetHubContext<NotifyHub>();
-            (hub as NotifyHub).SendChatMessage((hub as NotifyHub).GetName(), str);
-            TempData["message"] = string.Format("Файл был загружен и обработан. {0} ", str);
+            NotifyHub.SendServerMessageTo(name, str);
         }
 
         
-        public void UploadKMPriceXls(HttpPostedFileBase Sheet)
+        public void UploadKMPriceXls()
         {
             if (Request != null)
             {
@@ -319,15 +318,14 @@ namespace Store.WebUI.Controllers
                     path = HttpContext.Server.MapPath("~/Uploads/filef.xlsx");
                     if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
                     file.SaveAs(path);
-                    BackgroundJob.Enqueue(() => ParseKMPriceJob(path));
-                    
+                    BackgroundJob.Enqueue(() => ParseKMPriceJob(path, User.Identity.Name));
                 }
             }
         }
 
-        public void ParseKMPriceJob(string path)
+        public void ParseKMPriceJob(string path, string name)
         {
-            ParserKMdealer p = new ParserKMdealer(path);
+            ParserKMdealer p = new ParserKMdealer(path, repository);
             List<string> msgs = new List<string>();
             msgs = p.Parse();
 
@@ -338,8 +336,7 @@ namespace Store.WebUI.Controllers
                 str = String.Concat(str, msg + "</br>");
             }
 
-            var hub = GlobalHost.ConnectionManager.GetHubContext<NotifyHub>();
-            (hub as NotifyHub).SendChatMessage((hub as NotifyHub).GetName(), str);
+            NotifyHub.SendServerMessageTo(name, str);
         }
 
 
@@ -348,19 +345,36 @@ namespace Store.WebUI.Controllers
             if (Request != null)
             {
                 HttpPostedFileBase file = Request.Files["Sheet"];
-
-                ParserStops p = new ParserStops(file, repository);
-                List<string> msgs = p.Parse();
-                string str = "Количество ненайденных = " + msgs.Count;
-
-                foreach (var msg in msgs)
+                string path = "";
+                if ((file != null) && (file.ContentLength > 0) && !string.IsNullOrEmpty(file.FileName))
                 {
-                    str = String.Concat(str, msg + "\r\n");
+                    path = HttpContext.Server.MapPath("~/Uploads/filef.xlsx");
+                    if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+                    file.SaveAs(path);
+                    BackgroundJob.Enqueue(() => ParseLincerPriceJob(path, User.Identity.Name));
                 }
-                TempData["message"] = string.Format("Файл был загружен и обработан. {0} ", str);
             }
             return RedirectToAction("Index");
         }
+
+        public void ParseLincerPriceJob(string path, string name)
+        {
+            ParserStops p = new ParserStops(path, repository);
+            List<string> msgs = new List<string>();
+            msgs = p.Parse();
+
+            string str = "Количество ненайденных = " + msgs.Count;
+
+            foreach (var msg in msgs)
+            {
+                str = String.Concat(str, msg + "</br>");
+            }
+
+
+            NotifyHub.SendServerMessageTo(name, str);
+        }
+
+
 
         public ActionResult UploadCategoriesXls()
         {

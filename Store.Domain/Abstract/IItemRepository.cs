@@ -24,7 +24,8 @@ namespace Store.Domain.Abstract
 
         Task SaveItemAsync(Item item);
         Task<Category> SubCategoryGetOrCreateAsync(Category category);
-        Task SaveOrUpdateItemFromXlsOneAsync(Item item, List<string[]> hierarchy, List<string[]> Names, IEnumerable<string> images);
+        Category SubCategoryGetOrCreate(Category category);
+        void SaveOrUpdateItemFromXlsOne(Item item, List<string[]> hierarchy, List<string[]> Names, IEnumerable<string> images);
 
         void UpdateCategoryFromXls(Category ctg, string image, List<string> extraImages);
         bool UpdateItemPriceFromXls(string article, string price, string supplier = "unknown");

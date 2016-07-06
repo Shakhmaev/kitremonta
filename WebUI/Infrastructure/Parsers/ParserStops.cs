@@ -100,6 +100,8 @@ namespace Store.WebUI.Infrastructure.Parsers
                                     var row = new KeyValuePair<string,int>(currentBlock.ElementAt(0).Key,currentBlock.ElementAt(0).Value);
                                     string name = row.Key;
                                     string purpose = "";
+                                    string sizescell = workSheet.Cells[rowIterator+row.Value, 2].Value != null ? workSheet.Cells[rowIterator+row.Value, 2].Value.ToString() : "";
+                                    
                                     List<string> nameadditions = new List<string>();
 
                                     foreach (var purp in purposes)
@@ -109,15 +111,22 @@ namespace Store.WebUI.Infrastructure.Parsers
                                             IEnumerable<KeyValuePair<string, int>> dupls = new List<KeyValuePair<string,int>>(currentBlock.Where(x => x.Key.Contains(purp.Key)));
                                             foreach (var dupl in dupls)
                                             {
-                                                currentBlock.Remove(dupl.Key);
+                                                if (workSheet.Cells[rowIterator + dupl.Value, 2].Value != null && 
+                                                    workSheet.Cells[rowIterator + dupl.Value, 2].Value.ToString()==sizescell)
+                                                    currentBlock.Remove(dupl.Key);
                                             }
                                             
                                             purpose = purp.Value;
                                             break;
                                         }
                                     }
+                                    
+                                    if (String.IsNullOrEmpty(purpose))
+                                    {
+                                        currentBlock.Remove(currentBlock.ElementAt(0).Key);
+                                        continue;
+                                    }
 
-                                    string sizescell = workSheet.Cells[rowIterator+row.Value, 2].Value != null ? workSheet.Cells[rowIterator+row.Value, 2].Value.ToString() : "";
                                     List<string> sizes = new List<string>();
                                     if (String.IsNullOrEmpty(sizescell))
                                         sizes.Add("all");
@@ -147,8 +156,10 @@ namespace Store.WebUI.Infrastructure.Parsers
                             }
                         }
                     }
+                     
                     #endregion
                     #region M-kvadrat
+                    
                     if (workSheet.Name.Contains("М-Квадрат"))
                     {
                         Regex articleexp = new Regex(@"\d{6}([/]\d{1})*");
@@ -160,7 +171,7 @@ namespace Store.WebUI.Infrastructure.Parsers
                                 var articles = articleexp.Matches(workSheet.Cells[rowIterator, 1].Value.ToString());
                                 for (int i = 0; i < articles.Count; i++)
                                 {
-                                    bool success = UpdatePriceAsync(articles[i].Value, (int)Math.Ceiling(Double.Parse(price)));
+                                    bool success = UpdatePrice(articles[i].Value, (int)Math.Ceiling(Double.Parse(price)));
                                     if (!success)
                                     {
                                         errors.Add("Article: " + articles[i].Value);
@@ -172,13 +183,14 @@ namespace Store.WebUI.Infrastructure.Parsers
                         }
                     }
                     #endregion
-                    /*#region LB
+                    #region LB
+                    
                     if (workSheet.Name.Contains("ЛБ "))
                     {
                         Regex articleexp = new Regex(@"\d{6}([/]\d{1})*");
-                        IQueryable<Item> lbitems = repos.Items.Where(x => x.Brand == "LB-Ceramics");
-                        //ДОДЕЛАТь
-                        await lbitems.ForEachAsync(async (item) =>
+                        IList<Item> lbitems = repos.Items.Where(x => x.Brand == "LB-Ceramics").ToList();
+
+                        foreach (var item in lbitems)
                         {
                             for (int rowIterator = 10; rowIterator <= noOfRow; rowIterator++)
                             {
@@ -191,7 +203,7 @@ namespace Store.WebUI.Infrastructure.Parsers
                                         var price = workSheet.Cells[rowIterator, 6].Value != null ? workSheet.Cells[rowIterator, 6].Value.ToString() : "";
                                         if (!String.IsNullOrEmpty(price) && numberexp.IsMatch(price))
                                         {
-                                            bool success = await UpdatePriceAsync(item.article, (int)Math.Ceiling(Double.Parse(price)));
+                                            bool success = UpdatePrice(item.article, (int)Math.Ceiling(Double.Parse(price)));
                                             if (!success)
                                             {
                                                 errors.Add("Article: " + item.article);
@@ -202,12 +214,128 @@ namespace Store.WebUI.Infrastructure.Parsers
                                     }
                                 }
                             }
-                        });
+                        };
                     }
+                     
                     #endregion
                     #region Azori
                     if (workSheet.Name.Contains("Азори"))
                     {
+                        brand = "Azori";
+                        Dictionary<string, string> purposes = new Dictionary<string, string>() {
+                                        {"блицовоч","Плитка для стен"},
+                                        {"д/стен","Плитка для стен"},
+                                        {"для пола","Плитка для пола"},
+                                        {"полы","Плитка для пола"},
+                                        {"екор","Декор"},
+                                        {"ордюр","Бордюр"},
+                                        {"Панно","Панно"},
+                                        {"панно","Панно"}
+                                    };
+                        string collection = "";
+                        Dictionary<string, int> currentBlock = new Dictionary<string, int>();
+
+                        for (int rowIterator = 11; rowIterator <= noOfRow; rowIterator++)
+                        {
+                            currentBlock.Clear();
+                            var price = workSheet.Cells[rowIterator, pricecol].Value != null ? workSheet.Cells[rowIterator, pricecol].Value.ToString() : "";
+                            if (String.IsNullOrEmpty(price))
+                            {
+                                if (workSheet.Cells[rowIterator, 1].Value == null) break;
+                                collection = workSheet.Cells[rowIterator, 1].Value.ToString();
+                                price = "1";
+                                int offset = 1;
+                                while (true)
+                                {
+                                    price = workSheet.Cells[rowIterator + offset, pricecol].Value != null ? workSheet.Cells[rowIterator + offset, pricecol].Value.ToString() : "";
+                                    if (!String.IsNullOrEmpty(price))
+                                    {
+                                        currentBlock.Add(workSheet.Cells[rowIterator + offset, 1].Value.ToString() + currentBlock.Count.ToString(), offset);
+                                        offset++;
+                                    }
+                                    else break;
+                                }
+
+
+                                while (currentBlock.Count > 0)
+                                {
+                                    var row = new KeyValuePair<string, int>(currentBlock.ElementAt(0).Key, currentBlock.ElementAt(0).Value);
+                                    string name = row.Key;
+                                    string purpose = "";
+                                    List<string> nameadditions = new List<string>();
+                                    string sizescell = workSheet.Cells[rowIterator + row.Value, 2].Value != null ? workSheet.Cells[rowIterator + row.Value, 2].Value.ToString() : "";
+                                    
+                                    foreach (var purp in purposes)
+                                    {
+                                        if (name.Contains(purp.Key))
+                                        {
+                                            IEnumerable<KeyValuePair<string, int>> dupls = new List<KeyValuePair<string, int>>(currentBlock.Where(x => x.Key.Contains(purp.Key)));
+                                            foreach (var dupl in dupls)
+                                            {
+                                                if (workSheet.Cells[rowIterator + dupl.Value, 2].Value != null && 
+                                                    workSheet.Cells[rowIterator + dupl.Value, 2].Value.ToString()==sizescell)
+                                                    currentBlock.Remove(dupl.Key);
+                                            }
+
+                                            purpose = purp.Value;
+                                            break;
+                                        }
+                                    }
+
+                                    if (String.IsNullOrEmpty(purpose))
+                                    {
+                                        currentBlock.Remove(currentBlock.ElementAt(0).Key);
+                                        continue;
+                                    }
+
+                                    List<string> sizes = new List<string>();
+                                    if (String.IsNullOrEmpty(sizescell))
+                                        sizes.Add("all");
+                                    else
+                                    {
+                                        MatchCollection sizematches = sizeregx.Matches(sizescell);
+                                        for (int i = 0; i < sizematches.Count; i++)
+                                        {
+                                            Match m = sizeregx.Match(sizematches[i].Value.Replace('.', ','));
+                                            List<string> vals = new List<string>();
+                                            for (int j = 1; j <= 2; j++)
+                                            {
+                                                if (m.Groups[j].Value.Length > 2)
+                                                {
+                                                    vals.Add(m.Groups[j].Value.Insert(2, ","));
+                                                }
+                                                else
+                                                {
+                                                    vals.Add(m.Groups[j].Value.Insert(1, ","));
+                                                }
+                                            }
+                                            sizes.Add(vals[0]+"x"+vals[1]);
+                                        }
+                                    }
+
+
+                                    if (_Nexp.IsMatch(name))
+                                    {
+                                        name = _Nexp.Replace(name, "$1");
+                                    }
+                                    bool success = UpdatePriceForKeram(brand, collection, purpose, workSheet.Cells[rowIterator + row.Value, pricecol].Value.ToString(), sizes, nameadditions);
+                                    if (!success)
+                                    {
+                                        errors.Add("name: " + collection + " " + name);
+                                        //workSheet.Cells[rowIterator, 1].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                                        //workSheet.Cells[rowIterator, 1].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Yellow);
+                                    }
+                                }
+                                rowIterator += --offset;
+                            }
+                        }
+                    }
+                    #endregion
+                    #region Euro-Ceramics
+                    /*
+                    if (workSheet.Name.Contains("Евро-Керамика"))
+                    {
+                        brand = "Euro-Ceramics";
                         string collection = "";
 
                         for (int rowIterator = 12; rowIterator <= noOfRow; rowIterator++)
@@ -265,7 +393,7 @@ namespace Store.WebUI.Infrastructure.Parsers
                                 {
                                     name = _Nexp.Replace(name, "$1");
                                 }
-                                bool success = await UpdatePriceForKeramAsync(collection, purpose, price, sizes, nameadditions);
+                                bool success = UpdatePriceForKeram(brand, collection, purpose, price, sizes, nameadditions);
                                 if (!success)
                                 {
                                     errors.Add("name: " + collection + " " + name);
@@ -274,8 +402,8 @@ namespace Store.WebUI.Infrastructure.Parsers
                                 }
                             }
                         }
-                    }
-                    #endregion*/
+                    }*/
+                    #endregion
                     else continue;
 
 
@@ -311,8 +439,8 @@ namespace Store.WebUI.Infrastructure.Parsers
                         foreach (var size in sizes)
                         {
                             Match m = sizeregx.Match(size.Replace('.', ','));
-                            double SizeInM2 = (double)((double.Parse(m.Groups[1].Value) * double.Parse(m.Groups[2].Value)) / 10000);
-                            foreach (var item in items.Where(x => double.Parse(x.GetPropertyValue("SizeInM2")) == SizeInM2))
+                            string SizeInM2 = ((double.Parse(m.Groups[1].Value) * double.Parse(m.Groups[2].Value)) / 10000).ToString();
+                            foreach (var item in items.Where(x => x.GetPropertyValue("SizeInM2") == SizeInM2))
                             {
                                 item.Price = int.Parse(price);
                             }
@@ -332,7 +460,7 @@ namespace Store.WebUI.Infrastructure.Parsers
             return false;
         }
 
-        private bool UpdatePriceAsync(string article, int price)
+        private bool UpdatePrice(string article, int price)
         {
             Item item = repos.Items.FirstOrDefault(x => x.article == article);
             if (item != null)

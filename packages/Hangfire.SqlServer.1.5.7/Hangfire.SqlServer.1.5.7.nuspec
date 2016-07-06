@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Hangfire.SqlServer</id>
+    <version>1.5.7</version>
+    <title>Hangfire SQL Server Storage</title>
+    <authors>Sergey Odinokov</authors>
+    <owners>Sergey Odinokov</owners>
+    <licenseUrl>https://raw.github.com/HangfireIO/Hangfire/master/LICENSE.md</licenseUrl>
+    <projectUrl>http://hangfire.io/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>SQL Server 2008+ (including Express), SQL Server LocalDB and SQL Azure storage support for Hangfire (background job system for ASP.NET applications).</description>
+    <summary />
+    <releaseNotes>http://hangfire.io/blog/
+    
+1.5.7
+* Fixed – Add missing transaction to `KeepAliveQuery` (by @maxhauser).
+    
+1.5.6
+* Fixed – Use keep-alive queries to prevent SQL Azure from killing a connection after 30 minute timeout.
+* Fixed – Convert lock timeout value from double to int.
+    
+1.5.3
+* Fixed – "Cannot release the application lock" exception when using distributed locks.
+    
+1.5.1
+* Fixed – Unable to see enqueued jobs in Dashboard UI when using SQL Server queues.
+    
+1.5.0
+* Added – Ability to specify the schema for SQL Server job storage (by @ryanmwright).
+* Added – `TransactionTimeout` option for configuring the `TransactionScope` timeout.
+* Added – `DashboardJobListLimit` option to prevent full table scans in Dashboard.
+* Changed – `SqlServerDistributedLock` class is now public.
+* Changed – Use `rowlock` table hint in job fetch query to prevent escalation.
+* Changed – Dramatically improved page load times in Dashboard.
+* Changed – Instant re-queue for background jobs even after ungraceful shutdown.
+* Changed – `JobQueue.Queue` and `Server.Id` column length increased to 50 and 100 respectively (by @maleet).</releaseNotes>
+    <copyright>Copyright © 2013-2016 Sergey Odinokov</copyright>
+    <tags>Hangfire SqlServer SqlAzure LocalDB</tags>
+    <dependencies>
+      <dependency id="Hangfire.Core" version="[1.5.7]" />
+    </dependencies>
+  </metadata>
+</package>

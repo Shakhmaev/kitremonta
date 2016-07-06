@@ -129,7 +129,7 @@ namespace Store.Domain.Concrete
             to.ItemType = from.ItemType;
         }
 
-        public async Task SaveOrUpdateItemFromXlsOneAsync(Item item, List<string[]> hierarchy, List<string[]> Names, IEnumerable<string> images)
+        public void SaveOrUpdateItemFromXlsOne(Item item, List<string[]> hierarchy, List<string[]> Names, IEnumerable<string> images)
         {
             Category current = null;
             Item it = null;
@@ -153,7 +153,7 @@ namespace Store.Domain.Concrete
                     {
                         category.ParentID = current.CategoryId;
                     }
-                    var cat = SubCategoryGetOrCreateAsync(category);
+                    var cat = SubCategoryGetOrCreate(category);
                     if (j == hierarchy[i].Count() - 1)
                     {
                         if (item.Id > 0) 
@@ -177,28 +177,27 @@ namespace Store.Domain.Concrete
                                     item.Photos.Add(new Photo { url = img });
                                 }
                             }
-                            it = await context.Items.FirstOrDefaultAsync(x => x.Brand == item.Brand && x.Country == item.Country && x.ItemType == item.ItemType &&
+                            it = context.Items.FirstOrDefault(x => x.Brand == item.Brand && x.Country == item.Country && x.ItemType == item.ItemType &&
                                 x.Name == item.Name && x.Type == item.Type && x.Description == item.Description);
                             if (it != null)
                             {
                                 item = it;
                             }
                         }
-                        if (!(await cat).items.Contains(item))
+                        if (!cat.items.Contains(item))
                         {
-                            (await cat).items.Add(item); //добавляем товар в категорию
+                            cat.items.Add(item); //добавляем товар в категорию
                         }
                     }
-                    current = await cat;
+                    current = cat;
                 }
                 current = null;
             }
-            await SaveChangesAsync();
-
-            await AddPropsAndValuesToItem(properties, item);
+            SaveChanges();
+            AddPropsAndValuesToItem(properties, item);
         }
 
-        public async Task<Property> PropertyGetOrCreate(Property prop)
+        public Property PropertyGetOrCreate(Property prop)
         {
             var property = Properties.FirstOrDefault(x => x.PropName == prop.PropName);
             if (property == null)
@@ -207,18 +206,18 @@ namespace Store.Domain.Concrete
                     Values = new List<PropValue>(), Items= new List<Item>(), IsInFilter = prop.IsInFilter };
 
                 property = context.Properties.Add(property);
-                await context.SaveChangesAsync();
+                context.SaveChanges();
             }
             return property;
         }
 
-        public async Task AddPropsAndValuesToItem(IEnumerable<Property> props, Item item)
+        public void AddPropsAndValuesToItem(IEnumerable<Property> props, Item item)
         {
             foreach (var prop in props)
             {
                 if (prop.Values.Count > 0)
                 {
-                    var pr = await PropertyGetOrCreate(prop);
+                    var pr = PropertyGetOrCreate(prop);
                     foreach (var pv in prop.Values)
                     {
                         var propVal = pr.Values.FirstOrDefault(x => x.Val == pv.Val);
@@ -237,20 +236,9 @@ namespace Store.Domain.Concrete
                             pr.Items.Add(item);
                         }
                     }
-                    await context.SaveChangesAsync();
+                    context.SaveChanges();
                 }
             }
-        }
-
-        public async Task<PropValue> PropValueGetOrCreate(PropValue pv)
-        {
-            var propValue = context.PropValues.FirstOrDefault(x => x.Prop.PropName == pv.Prop.PropName && x.Val == pv.Val);
-            if (propValue == null)
-            {
-                propValue = context.PropValues.Add(pv);
-                await context.SaveChangesAsync();
-            }
-            return propValue;
         }
 
         public Supplier SupplierGetOrCreate(string name)
@@ -297,6 +285,40 @@ namespace Store.Domain.Concrete
                 categ.Parent = context.Categories.FirstOrDefault(i => i.CategoryId == category.ParentID);
                 categ.items = new List<Item>();
                 await SaveChangesAsync();
+            }
+            return categ;
+        }
+
+        public Category SubCategoryGetOrCreate(Category category)
+        {
+            Category categ = null;
+            if (category.CategoryId != 0)
+            {
+                categ = context.Categories.FirstOrDefault(x => x.CategoryId == category.CategoryId);
+            }
+            else if (category.Name != "")
+            {
+                if (category.ParentID > 0)
+                {
+                    categ = Categories.FirstOrDefault(x => (x.Name == category.Name || x.Name.Contains(category.Name + "_"))
+                        && x.ParentID == category.ParentID);
+                    if (categ == null)
+                    {
+                        var categs = context.Categories.Where(x => x.Name.Contains(category.Name) && x.ParentID != category.ParentID);
+                        if (categs.Count() > 0) // если с одним именем больше одного, тогда сделать имя уникальным
+                        {
+                            category.Name = category.Name + "_" + (categs.Count() + 1);
+                        }
+                    }
+                }
+                else categ = context.Categories.FirstOrDefault(x => x.Name == category.Name);
+            }
+            if (categ == null)
+            {
+                categ = context.Categories.Add(category);
+                categ.Parent = context.Categories.FirstOrDefault(i => i.CategoryId == category.ParentID);
+                categ.items = new List<Item>();
+                SaveChanges();
             }
             return categ;
         }

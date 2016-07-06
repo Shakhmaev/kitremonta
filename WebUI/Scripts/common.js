@@ -196,7 +196,10 @@ function js(args) {
 
                     })
                 }
-                initzoom();
+                if (args.zoomWidth != null && args.zoomHeight != null) {
+                    initzoom(args.zoomWidth,args.zoomHeight);
+                }
+                else initzoom();
             }
         });
     }
@@ -279,37 +282,70 @@ window.onscroll = function vverh() {
     };
 }
 
-function initzoom() {
+function initzoom(width,height) {
 
     if ($(window).width() > 656) {
-        var config = {
-            gallery: 'gallery_01',
-            cursor: 'crosshair',
-            galleryActiveClass: 'active',
-            imageCrossfade: true,
-            loadingIcon: false,
-            zoomWindowWidth: 300,
-            zoomWindowHeight: 300,
-            zoomWindowFadeIn: 500, 
-            zoomWindowFadeOut: 500,
-            constrainType: 'width',
-            easing: true,
-            responsive:true
-        };
+        if (width != null && height != null) {
+            var config = {
+                gallery: 'gallery_01',
+                cursor: 'crosshair',
+                galleryActiveClass: 'active',
+                imageCrossfade: true,
+                loadingIcon: false,
+                zoomWindowWidth: width/2,
+                zoomWindowHeight: height/2,
+                zoomWindowFadeIn: 500,
+                zoomWindowFadeOut: 500,
+                constrainType: 'width',
+                easing: true,
+                responsive: true
+            };
+        }
+        else {
+            var config = {
+                gallery: 'gallery_01',
+                cursor: 'crosshair',
+                galleryActiveClass: 'active',
+                imageCrossfade: true,
+                loadingIcon: false,
+                zoomWindowWidth: 300,
+                zoomWindowHeight: 300,
+                zoomWindowFadeIn: 500,
+                zoomWindowFadeOut: 500,
+                constrainType: 'width',
+                easing: true,
+                responsive: true
+            };
+        }
     }
     else
     {
-        var config = {
-            gallery: 'gallery_01',
-            galleryActiveClass: 'active',
-            imageCrossfade: true,
-            loadingIcon: false,
-            zoomType: 'inner',
-            zoomWindowWidth: 200,
-            zoomWindowHeight: 200,
-            constrainType: 'width',
-            responsive: true
-        };
+        if (width != null && height != null) {
+            var config = {
+                gallery: 'gallery_01',
+                galleryActiveClass: 'active',
+                imageCrossfade: true,
+                loadingIcon: false,
+                zoomType: 'inner',
+                zoomWindowWidth: 200,
+                zoomWindowHeight: 200,
+                constrainType: 'width',
+                responsive: true
+            };
+        }
+        else {
+            var config = {
+                gallery: 'gallery_01',
+                galleryActiveClass: 'active',
+                imageCrossfade: true,
+                loadingIcon: false,
+                zoomType: 'inner',
+                zoomWindowWidth: width/2,
+                zoomWindowHeight: height/2,
+                constrainType: 'width',
+                responsive: true
+            };
+        }
     }
     var image = $('#gallery_01 a');
     var zoomImage = $('img#zoom_03');

@@ -91,7 +91,7 @@ namespace Store.WebUI.Infrastructure.Parsers
                         SetPropValue("Color",ToLowerCapitalizeFirstTrim(workSheet.Cells[rowIterator, 13].Value.ToString()),ref item, true);
                         SetPropValue("Weight",ToLowerCapitalizeFirstTrim(workSheet.Cells[rowIterator, 16].Value.ToString()), ref item, false);
 
-                        item.article = workSheet.Cells[rowIterator, 5].Value != null ? item.Brand.Substring(0,2) + "-" + workSheet.Cells[rowIterator, 5].Value.ToString() : item.Brand.Substring(0,2) + "-" + Guid.NewGuid().ToString("N");
+                        item.article = (workSheet.Cells[rowIterator, 5].Value != null && workSheet.Cells[rowIterator, 5].Value.ToString() != "-") ? item.Brand.Substring(0, 2) + "-" + workSheet.Cells[rowIterator, 5].Value.ToString() : item.Brand.Substring(0, 2) + "-" + Guid.NewGuid().ToString("N");
 
 
                         var pru = workSheet.Cells[rowIterator, 8].Value.ToString();
@@ -182,7 +182,7 @@ namespace Store.WebUI.Infrastructure.Parsers
 
                         if (workSheet.Cells[rowIterator, 15].Value != null)
                         {
-                            string[] str = workSheet.Cells[rowIterator, 15].Value.ToString().Split(',').ToArray();
+                            string[] str = workSheet.Cells[rowIterator, 15].Value.ToString().Split(',').Where(x => x != "-").ToArray();
 
                             //var imagesphys = new string[] { };
 
@@ -227,7 +227,8 @@ namespace Store.WebUI.Infrastructure.Parsers
                                 {
                                     miniimg.Save(fullname);
                                 }
-
+                                img.Dispose();
+                                miniimg.Dispose();
                             }
 
                             List<string> images = new List<string>();
@@ -237,9 +238,9 @@ namespace Store.WebUI.Infrastructure.Parsers
                                 images.Add(imagesphys.ElementAt(i).Replace(ImgPath, String.Empty));
                             }
 
-                            repos.SaveOrUpdateItemFromXlsOneAsync(item, hierarchylist, translitnameslist, images);
+                            repos.SaveOrUpdateItemFromXlsOne(item, hierarchylist, translitnameslist, images);
                         }
-                        else repos.SaveOrUpdateItemFromXlsOneAsync(item, hierarchylist, translitnameslist, new List<string>());
+                        else repos.SaveOrUpdateItemFromXlsOne(item, hierarchylist, translitnameslist, new List<string>());
                     }
                     pack.Dispose();
                 }

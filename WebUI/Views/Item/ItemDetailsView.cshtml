@@ -46,7 +46,7 @@
                 <div class="col-sm-5 col-lg-4">
                     <div class="row" id="@Model.Id">
                         <div class="main-img" id="gal">
-                            <img id="zoom_03" class="img-thumbnail" src="@Html.Action("GetImage","Item",new {Model.Id})" />
+                            <img id="zoom_03" class="img-thumbnail" src="@Html.Action("GetImage","Item",new {Model.Id})" data-lity/>
                         </div>
                     </div>
                     <div class="row">
@@ -98,13 +98,16 @@
     <script type="text/javascript" src="~/Content/slick/slick.min.js"></script>
 
     <script type="text/javascript">
+        var img = document.getElementById("zoom_03");
         $(document).ready(function () {
             var args = {
                 id: '@Model.Id',
                 url1: '@Url.Action("GetExtraImages", "ImageView", new { id = Model.Id })',
                 name: JSON.stringify('@Model.Name'),
                 GetImagesUrlWithStamp: "@Url.Action("GetImage", "Item", new { Model.Id})+&amp;timestamp=",
-                urlCart: '@Url.Action("Index","Cart")'
+                urlCart: '@Url.Action("Index","Cart")',
+                zoomWidth: img.width,
+                zoomHeight: img.height
             };
             js(args);
             js.ReloadExtraImagesNoX();
